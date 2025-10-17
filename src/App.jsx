@@ -1,7 +1,8 @@
 import { Routes, Route, Link } from 'react-router-dom';
 import LoginPage from './pages/Login.jsx';
-import FeedPage from './pages/Feed.jsx'
-import ConfiguracoesPage from './pages/Configuracoes.jsx'
+import FeedPage from './pages/Feed.jsx';
+import Cadastro from './pages/Cadastro.jsx';
+import ConfiguracoesPage from './pages/Configuracoes.jsx';
 
 function Home() {
   return (
@@ -23,6 +24,7 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/feed" element={<FeedPage />}/>
       <Route path="/configuracoes" element ={<ConfiguracoesPage/>}/>
+      <Route path='/cadastro' element={<Cadastro />} />
     </Routes>
   );
 }
