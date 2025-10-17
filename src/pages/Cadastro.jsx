@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import LadoLogoPage from "./LadoLogoPage";
+import LadoLogoPage from "../components/LadoLogoPage";
 import { useNavigate } from "react-router-dom";
 
 function Cadastro() {

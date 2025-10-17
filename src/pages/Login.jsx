@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LadoLogoPage from './LadoLogoPage';
+import LadoLogoPage from '../components/LadoLogoPage';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
