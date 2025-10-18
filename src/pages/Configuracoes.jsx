@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BarraPesquisa from '../components/BarraPesquisa';
+import BarraLateral from '../components/BarraLateral';
 
 function ConfiguracoesPage() {
   const navigate = useNavigate();
@@ -11,50 +12,23 @@ function ConfiguracoesPage() {
 
       <div className="h-[calc(100%-56px)]"> {/* altura total menos a barra do topo */}
         {/* barra lateral */}
-        <div className="inline-block align-top w-60 h-full border-r border-gray-200 bg-white p-6">
-          <div className="space-y-6">
-            {/*criar as rotas de navegacao */}
-            <button onClick={() => navigate("/Perfil")} className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer">
-              <span className="text-lg">👤</span>
-              <span className="font-bold ml-2">Meu perfil</span>
-            </button>
-
-            <button onClick={() => navigate("/Notificacoes")} className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer">
-              <span className="text-lg">🔔</span>
-              <span className="font-bold ml-2">Notificações</span>
-            </button>
-
-            <button onClick={() => navigate("/Promocoes")} className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer">
-              <span className="text-lg">🏷️</span>
-              <span className="font-bold ml-2">Promoções</span>
-            </button>
-
-            <button onClick={() => navigate("/Favoritos")} className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer">
-              <span className="text-lg">❤️</span>
-              <span className="font-bold ml-2">Favoritos</span>
-            </button>
-
-            <button onClick={() => navigate("/Configuracoes")} className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer">
-              <span className="text-lg">⚙️</span>
-              <span className="font-bold ml-2">Configurações</span>
-            </button>
-          </div>
-        </div>
+        <BarraLateral />
 
         {/* área central */}
         <div className="inline-block align-top w-[calc(100%-16rem)] h-full p-8 bg-white">
-          <button onClick={() => navigate("/FeedCliente")} className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer ml-2 text-[30px] mb-10">
+          <button onClick={() => navigate("/FeedCliente")} 
+            className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer ml-2 text-[30px] mb-10">
             &lt; <span className="text-[24px] font-bold ml-6">Configurações</span>
           </button>
+
           <button onClick={() => navigate("/RedefinicaoSenha")} 
-            className="w-160 shadow shadow-gray-400 flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer text-[24px] font-semibold mb-10 p-3 rounded-lg align-middle">
-            <span className="text-lg mr-4 ml-2">🔐</span>
-            Redefinição de Senha
+            className="ml-13 w-160 shadow shadow-gray-400 flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer text-[24px] font-semibold mb-10 p-3 rounded-lg align-middle">
+            <span className="text-lg mr-4 ml-2">🔐</span>Redefinição de Senha
           </button>
+
           <button onClick={() => navigate("/ExclusaoConta")} 
-            className="w-160 shadow shadow-gray-400 flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer text-[24px] font-semibold p-3 rounded-lg align-middle">
-            <span className="text-lg mr-4 ml-2">🗑️</span>
-            Exclusão de Conta
+            className="ml-13 w-160 shadow shadow-gray-400 flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer text-[24px] font-semibold p-3 rounded-lg align-middle">
+            <span className="text-lg mr-4 ml-2">🗑️</span>Exclusão de Conta
           </button>
         </div>
       </div>

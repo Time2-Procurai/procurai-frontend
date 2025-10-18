@@ -16,11 +16,10 @@ function BarraPesquisa() {
     }
   }
 
-
   return (
     <div className="w-full bg-[#1A225F] text-white flex items-center px-4 py-4">
       <h1 onClick={LogoFeed} className="text-[28px] font-bold tracking-wide pl-4 cursor-pointer select-none">
-          PROCUR<span className="text-[#FD7702]">AÍ</span>
+        PROCUR<span className="text-[#FD7702]">AÍ</span>
       </h1>
 
       <input

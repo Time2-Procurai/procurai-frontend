@@ -4,6 +4,8 @@ import FeedPageCliente from './pages/FeedCliente.jsx';
 import FeedPageEmpresa from './pages/FeedEmpresa.jsx';
 import Cadastro from './pages/Cadastro.jsx';
 import ConfiguracoesPage from './pages/Configuracoes.jsx';
+import RedefinicaoSenhaPage from './pages/RedefinicaoSenha.jsx';
+import ExclusaoContaPage from './pages/ExclusaoConta.jsx';
 
 function Home() {
   return (
@@ -26,6 +28,8 @@ function App() {
       <Route path="/feedcliente" element={<FeedPageCliente />}/>
       <Route path="/feedempresa" element={<FeedPageEmpresa />}/>
       <Route path="/configuracoes" element ={<ConfiguracoesPage/>}/>
+      <Route path="/redefinicaosenha" element={<RedefinicaoSenhaPage/>}/>
+      <Route path="/exclusaoconta" element={<ExclusaoContaPage/>}/>
       <Route path='/cadastro' element={<Cadastro />} />
     </Routes>
   );
