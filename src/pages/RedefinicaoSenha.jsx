@@ -3,33 +3,41 @@ import { useNavigate } from 'react-router-dom';
 import BarraPesquisa from '../components/BarraPesquisa';
 import BarraLateral from '../components/BarraLateral';
 
-{/* MONTAR A FUNÇÃO PARA CAPTURAR A NOVA SENHA */ }
+{/* Implementar captura da senha */ }
 function RedefinicaoSenhaPage() {
   const [password, setPassword] = useState("");
   const [confirmacao, setConfirmacao] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleRedefinicao = (e) => {
     e.preventDefault();
-    setError("");
+    setError(""); // limpa erros anteriores
 
+    // validação de senha
+    if (password !== confirmacao) {
+      setError("As senhas não coincidem.");
+      return; // impede o cadastro se as senhas forem diferentes
+    } else {
+      // Atualizar senha
+    }
   };
 
   return (
     <div className="h-screen font-sans text-gray-800">
       <BarraPesquisa />
 
-      <div className="h-[calc(100%-56px)]"> {/* altura total menos a barra do topo */}
-        {/* barra lateral */}
+      <div className="h-[calc(100%-56px)]"> {/* Altura total menos a barra do topo */}
         <BarraLateral />
 
-        {/* área central */}
+        {/* Área central */}
         <div className="inline-block align-top w-[calc(100%-16rem)] h-full p-8 bg-white">
           <button onClick={() => navigate("/Configuracoes")} 
             className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer ml-2 text-[30px] mb-10">
             &lt; <span className="text-[24px] font-bold ml-6">Configurações &lt; Redefinição de Senha</span>
           </button>
           
+          {/* Implementar método de Redefinição */}
           <div className="flex flex-col items-center h-full mt-10">
             <div className="ml-13 mb-4">
               <label className="block text-sm font-bold mb-2 text-white md:text-gray-800 text-[20px]" htmlFor="password">
@@ -61,7 +69,7 @@ function RedefinicaoSenhaPage() {
 
               <button type="submit"
                 className="block mt-8 cursor-pointer w-md bg-[#FD7702] md:bg-main text-main md:text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300"
-                onClick="">
+                onClick={handleRedefinicao}>
                 Salvar
               </button>
             </div>

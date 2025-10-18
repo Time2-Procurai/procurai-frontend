@@ -22,9 +22,9 @@ function Cadastro() {
     }
 
     if (tipoCadastro === "usuario") {
-      navigate("/");
+      navigate("/cadastro/cliente");
     } else if (tipoCadastro === "empresa") {
-      navigate("/login");
+      navigate("/cadastro/empresa");
     }
 };
 
@@ -114,7 +114,9 @@ function Cadastro() {
               </a>
             </p>
 
-            <button type="submit" className="cursor-pointer w-full bg-[#FD7702] md:bg-main text-main md:text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300" onClick={handleCadastro}>
+            <button type="submit" 
+              className="cursor-pointer w-full bg-[#FD7702] md:bg-main text-main md:text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300" 
+              onClick={handleCadastro}>
               Criar conta
             </button>
           

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import BarraPesquisa from '../components/BarraPesquisa';
 import BarraLateral from '../components/BarraLateral';
 
-{/* MONTAR A FUNÇÃO PARA EXCLUIR A CONTA */ }
+{/* Implementar captura dos dados para exclusão */ }
 function ExclusaoContaPage() {
   const navigate = useNavigate();
 
@@ -11,17 +11,17 @@ function ExclusaoContaPage() {
     <div className="h-screen font-sans text-gray-800">
       <BarraPesquisa />
 
-      <div className="h-[calc(100%-56px)]"> {/* altura total menos a barra do topo */}
-        {/* barra lateral */}
+      <div className="h-[calc(100%-56px)]"> {/* Altura total menos a barra do topo */}
         <BarraLateral />
 
-        {/* área central */}
+        {/* Área central */}
         <div className="inline-block align-top w-[calc(100%-16rem)] h-full p-8 bg-white">
           <button onClick={() => navigate("/Configuracoes")}
             className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer ml-2 text-[30px] mb-10">
             &lt; <span className="text-[24px] font-bold ml-6">Configurações &lt; Exclusão de Conta</span>
           </button>
 
+          {/* Implementar método de Exclusão */}
           <div className="flex flex-col items-center h-full mt-10">
             <div className="ml-13 mb-4">
               <label className="block text-sm font-bold mb-2 text-white md:text-gray-800 text-[20px]" htmlFor="password">

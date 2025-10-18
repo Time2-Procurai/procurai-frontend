@@ -6,6 +6,9 @@ import Cadastro from './pages/Cadastro.jsx';
 import ConfiguracoesPage from './pages/Configuracoes.jsx';
 import RedefinicaoSenhaPage from './pages/RedefinicaoSenha.jsx';
 import ExclusaoContaPage from './pages/ExclusaoConta.jsx';
+import CadastroCliente from './pages/CadastroCliente.jsx';
+import CadastroEmpresaPage from './pages/CadastroEmpresa.jsx';
+import CadastroEmpresaPage2 from './pages/CadastroEmpresa2.jsx';
 
 function Home() {
   return (
@@ -31,6 +34,9 @@ function App() {
       <Route path="/redefinicaosenha" element={<RedefinicaoSenhaPage/>}/>
       <Route path="/exclusaoconta" element={<ExclusaoContaPage/>}/>
       <Route path='/cadastro' element={<Cadastro />} />
+      <Route path='/cadastro/cliente' element={<CadastroCliente />} />
+      <Route path='/cadastro/empresa' element={<CadastroEmpresaPage />}/>
+      <Route path='/cadastro/empresa/2' element={<CadastroEmpresaPage2 />}/>
     </Routes>
   );
 }
