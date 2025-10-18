@@ -19,7 +19,7 @@ function LoginPage() {
       const fakeToken = 'jwt-token-falso';
       localStorage.setItem('novo-projeto-token', fakeToken);
 
-      navigate('/Feed');
+      navigate('/FeedCliente');
     } else {
       // simulação da msg de erro
       setError('Email ou senha inválidos.');

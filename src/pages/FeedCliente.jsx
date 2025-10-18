@@ -1,23 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import BarraPesquisa from '../components/BarraPesquisa';
 
-function FeedPage() {
+function FeedPageCliente() {
   const navigate = useNavigate();
 
   return (
     <div className="h-screen font-sans text-gray-800">
-      {/* barra superior */}
-      <div className="w-full bg-[#1A225F] text-white flex items-center px-4 py-4">
-        <h1 className="text-[28px] font-bold tracking-wide pl-4">
-          PROCURAÍ
-        </h1>
-
-        <input
-          type="text"
-          placeholder="Busque por empresas, produtos, clientes e categorias"
-          className="w-300 bg-gray-100 text-gray-700 rounded-[20px] px-8 py-2 ml-30"
-        />
-      </div>
+      <BarraPesquisa />
 
       <div className="h-[calc(100%-56px)]"> {/* altura total menos a barra do topo */}
         {/* barra lateral */}
@@ -61,4 +51,4 @@ function FeedPage() {
   );
 }
 
-export default FeedPage;
+export default FeedPageCliente;

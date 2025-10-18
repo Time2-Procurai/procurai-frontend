@@ -1,6 +1,7 @@
 import { Routes, Route, Link } from 'react-router-dom';
 import LoginPage from './pages/Login.jsx';
-import FeedPage from './pages/Feed.jsx';
+import FeedPageCliente from './pages/FeedCliente.jsx';
+import FeedPageEmpresa from './pages/FeedEmpresa.jsx';
 import Cadastro from './pages/Cadastro.jsx';
 import ConfiguracoesPage from './pages/Configuracoes.jsx';
 
@@ -22,7 +23,8 @@ function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/feed" element={<FeedPage />}/>
+      <Route path="/feedcliente" element={<FeedPageCliente />}/>
+      <Route path="/feedempresa" element={<FeedPageEmpresa />}/>
       <Route path="/configuracoes" element ={<ConfiguracoesPage/>}/>
       <Route path='/cadastro' element={<Cadastro />} />
     </Routes>

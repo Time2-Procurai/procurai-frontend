@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BarraPesquisa from '../components/BarraPesquisa';
 
-function ConfiguracoesPage() {
+function FeedPageEmpresa() {
   const navigate = useNavigate();
 
   return (
@@ -29,11 +29,6 @@ function ConfiguracoesPage() {
               <span className="font-bold ml-2">Promoções</span>
             </button>
 
-            <button onClick={() => navigate("/Favoritos")} className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer">
-              <span className="text-lg">❤️</span>
-              <span className="font-bold ml-2">Favoritos</span>
-            </button>
-
             <button onClick={() => navigate("/Configuracoes")} className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer">
               <span className="text-lg">⚙️</span>
               <span className="font-bold ml-2">Configurações</span>
@@ -43,23 +38,13 @@ function ConfiguracoesPage() {
 
         {/* área central */}
         <div className="inline-block align-top w-[calc(100%-16rem)] h-full p-8 bg-white">
-          <button onClick={() => navigate("/FeedCliente")} className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer ml-2 text-[30px] mb-10">
-            &lt; <span className="text-[24px] font-bold ml-6">Configurações</span>
-          </button>
-          <button onClick={() => navigate("/RedefinicaoSenha")} 
-            className="w-160 shadow shadow-gray-400 flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer text-[24px] font-semibold mb-10 p-3 rounded-lg align-middle">
-            <span className="text-lg mr-4 ml-2">🔐</span>
-            Redefinição de Senha
-          </button>
-          <button onClick={() => navigate("/ExclusaoConta")} 
-            className="w-160 shadow shadow-gray-400 flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer text-[24px] font-semibold p-3 rounded-lg align-middle">
-            <span className="text-lg mr-4 ml-2">🗑️</span>
-            Exclusão de Conta
-          </button>
+          <h2 className="text-lg font-semibold mb-20">Dashboard</h2>
+          <h2 className="text-lg font-semibold mb-20">Produtos mais vistos</h2>
+          <h2 className="text-lg font-semibold">Produtos em promoções mais vistos</h2>
         </div>
       </div>
     </div>
   );
 }
 
-export default ConfiguracoesPage;
+export default FeedPageEmpresa;
