@@ -16,10 +16,10 @@ function Cadastro() {
     setError("");
 
     if (tipoCadastro === "usuario") {
-      navigate("/");
+      navigate("/cadastro/cliente");
     } else if (tipoCadastro === "empresa") {
       navigate("/login");
-    }
+    } 
 
   };
   return (

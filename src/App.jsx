@@ -3,6 +3,7 @@ import LoginPage from './pages/Login.jsx';
 import FeedPage from './pages/Feed.jsx';
 import Cadastro from './pages/Cadastro.jsx';
 import ConfiguracoesPage from './pages/Configuracoes.jsx';
+import CadastroCliente from './pages/CadastroCliente.jsx';
 
 function Home() {
   return (
@@ -25,6 +26,7 @@ function App() {
       <Route path="/feed" element={<FeedPage />}/>
       <Route path="/configuracoes" element ={<ConfiguracoesPage/>}/>
       <Route path='/cadastro' element={<Cadastro />} />
+      <Route path='/cadastro/cliente' element={<CadastroCliente />} />
     </Routes>
   );
 }
