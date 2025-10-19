@@ -61,6 +61,8 @@ const CadastroClientePage = () => {
     );
   };
 
+  
+
   // Adicionar funções para lidar com o clique e a seleção do arquivo
   const handleImageContainerClick = () => {
     fileInputRef.current.click();
@@ -100,6 +102,8 @@ const CadastroClientePage = () => {
       setIsLoading(false);
     }
   };
+
+  
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">

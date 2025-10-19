@@ -95,7 +95,7 @@ const CadastroEmpresaPage = () => {
     try {
       const response = await simulateApiCall(submissionData);
       alert(response.message);
-      navigate('/login');
+      navigate('/cadastro/empresa/2');
     } catch (error) {
       alert(error.message);
     } finally {

@@ -63,7 +63,7 @@ function LoginPage() {
             </div>
             
             <h1 className="text-4xl font-bold mb-2 text-white md:text-gray-800">
-              Entrar na sua 
+              Entrar na sua conta
             </h1>
 
             {error && <p className="bg-red-100 text-red-700 text-center p-3 rounded-md mb-4">{error}</p>}
@@ -116,7 +116,6 @@ function LoginPage() {
                 </a>
               </p>
             </form>
-
           </div>
         </div>
       </div>

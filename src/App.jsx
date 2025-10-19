@@ -13,11 +13,11 @@ import CadastroEmpresaPage2 from './pages/CadastroEmpresa2.jsx';
 function Home() {
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center text-center">
-      <h1 className="text-5xl font-bold text-white">Home - Procurai</h1>
+      <h1 className="text-5xl font-bold text-white">PROCUR<span class="text-[#FD7702]">AÍ</span></h1>
       <Link
         to="/login"
         className="mt-6 px-6 py-3 font-bold text-white bg-orange-400 rounded-md hover:bg-orange-500">
-        Ir para o Login
+        Login
       </Link>
     </div>
   );

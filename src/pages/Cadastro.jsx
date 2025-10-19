@@ -11,11 +11,25 @@ function Cadastro() {
 
   const navigate = useNavigate();
 
-  const handleCadastro = (e) => {
+  const handleCadastro = async (e) => {
     e.preventDefault();
     setError(""); // limpa erros anteriores
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // validação de senha
+    if (!password.trim()) {
+      setError("Insira uma senha válida.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      setError("Insira um e-mail válido.");
+      return;
+    }
+
+
     if (password !== confirmacao) {
       setError("As senhas não coincidem.");
       return; // impede o cadastro se as senhas forem diferentes
@@ -73,40 +87,40 @@ function Cadastro() {
               <label className="block text-sm font-bold mb-2 text-white md:text-gray-800 text-[20px]">
                 E-mail
               </label>
-              <input
-                id="email"
+
+              <input id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Digite seu e-mail"
                 className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-main"
+                required
               />
             </div>
 
             <div className="mb-4">
               <label className="block text-sm font-bold mb-2 text-white md:text-gray-800 text-[20px]" htmlFor="password">Senha</label>
-              <input
-                id="senha"
+              <input id="senha"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Digite sua senha"
                 className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-main"
+                required
               />
             </div>
 
             <div>
               <label className="block text-sm font-bold mb-2 text-white md:text-gray-800 text-[20px]" htmlFor="password">Confirmar senha</label>
-              <input 
-                id="confirmacao" 
+              <input id="confirmacao" 
                 type="password" 
                 value={confirmacao} 
                 onChange={(e) => setConfirmacao(e.target.value)} 
                 placeholder="Confirmar senha" 
                 className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-main"
+                required
               />
             </div>
-          </form>
 
             <p className=" text-pink-100 md:text-gray-500 mb-6 mt-3">
               <a href="/" className="text-[#1A225F] md:text-main font-bold hover:underline">
@@ -126,6 +140,7 @@ function Cadastro() {
                 Login
               </a>
             </p>
+          </form>
         </div>
       </div>
     </div>
