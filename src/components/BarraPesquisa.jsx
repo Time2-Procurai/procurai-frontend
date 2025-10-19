@@ -9,6 +9,19 @@ function BarraPesquisa() {
     navigate("/FeedCliente")
   }
 
+  function LogoFeed() {
+    const tipoUsuario = localStorage.getItem("usuario-tipo");
+
+    if (tipoUsuario === "cliente") {
+      navigate("/FeedCliente");
+    } else if (tipoUsuario === "lojista") {
+      navigate("/FeedEmpresa");
+    } else {
+      navigate("/"); // fallback, caso não haja tipo definido
+    }
+  }
+
+
   {/* testando uma funcao para barra de pesquisa */}
   function handleKeyDown(e) {
     if (e.key === "Enter" && query.trim() !== "") {
