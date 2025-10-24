@@ -1,45 +1,64 @@
 import React, { useState } from "react";
 import LadoLogoPage from "../components/LadoLogoPage";
 import { useNavigate } from "react-router-dom";
+import api from "../api/api";
 
 function Cadastro() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmacao, setConfirmacao] = useState("");
   const [error, setError] = useState("");
-  const [tipoCadastro, setTipoCadastro] = useState("usuario");
+  const [tipoCadastro, setTipoCadastro] = useState("cliente");
 
-  const navigate = useNavigate();
+const navigate = useNavigate();
 
-  const handleCadastro = async (e) => {
-    e.preventDefault();
-    setError(""); // limpa erros anteriores
-    await new Promise(resolve => setTimeout(resolve, 1000));
+const handleCadastro = async (e) => {
+  e.preventDefault();
+  setError(""); 
+  
+  if (!password.trim()) {
+    setError("Insira uma senha válida.");
+    return;
+  }
 
-    // validação de senha
-    if (!password.trim()) {
-      setError("Insira uma senha válida.");
-      return;
-    }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    setError("Insira um e-mail válido.");
+    return;
+  }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (password !== confirmacao) {
+    setError("As senhas não coincidem.");
+    return;
+  }
+      
 
-    if (!emailRegex.test(email)) {
-      setError("Insira um e-mail válido.");
-      return;
-    }
-
-
-    if (password !== confirmacao) {
-      setError("As senhas não coincidem.");
-      return; // impede o cadastro se as senhas forem diferentes
-    }
-
-    if (tipoCadastro === "usuario") {
+  try {    
+    const response = await api.post("user/register/tela1/", {
+      email: email,
+      password: password,
+      password_confirm: confirmacao,
+      user_type: tipoCadastro,
+    });
+    console.log("Resposta da API:", response.data);    
+    if (tipoCadastro === "cliente") {
+      console.log('Tipo do cadastro -->',tipoCadastro)
       navigate("/cadastro/cliente");
     } else if (tipoCadastro === "empresa") {
       navigate("/cadastro/empresa");
     }
+
+  } catch (error) {    
+    console.error("Erro ao cadastrar usuário:", error);
+    
+    if (error.response && error.response.data) {        
+        setError("Erro ao cadastrar. Verifique os dados informados.");
+        console.error("Detalhes do erro:", error.response.data);
+    } else {
+        setError("Não foi possível conectar ao servidor. Tente novamente.");
+    }
+  
+  } 
 };
 
   return (
@@ -57,8 +76,8 @@ function Cadastro() {
           <div className="flex gap-4 mb-6">
             <button
               type="button"
-              onClick={() => setTipoCadastro("usuario")}
-              className={`w-full py-3 px-4 rounded-lg font-bold cursor-pointer transition duration-300 ${tipoCadastro === "usuario"
+              onClick={() => setTipoCadastro("cliente")}
+              className={`w-full py-3 px-4 rounded-lg font-bold cursor-pointer transition duration-300 ${tipoCadastro === "cliente"
                 ? "bg-[#FD7702] text-white"
                 : "bg-gray-300 text-gray-700"
               }`}>
