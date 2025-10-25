@@ -8,7 +8,7 @@ const BackArrowIcon = () => (
     viewBox="0 0 24" 
     strokeWidth={1.5} 
     stroke="currentColor" 
-    className="cursor-pointer w-6 h-6"
+    className="font-bold cursor-pointer w-6 h-6"
     >
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
   </svg>
@@ -28,7 +28,7 @@ const simulateApiCall = (formData) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       if (Math.random() > 0.2) {
-        resolve({ success: true, message: 'Perfil criado com sucesso! Você será redirecionado.' });
+        resolve({ success: true, message: 'Dados validados com sucesso! Você será redirecionado para a segunda etapa.' });
       } else {
         reject({ success: false, message: 'Erro: O nome de usuário já existe. Tente outro.' });
       }
@@ -38,7 +38,7 @@ const simulateApiCall = (formData) => {
 
 const CadastroEmpresaPage = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ companyName: '', fullName: '', cpf: '', cnpj: '', phone: '', hour: '' });
+  const [formData, setFormData] = useState({ companyName: '', fullName: '', cpf: '', cnpj: '', phone: ''});
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -85,8 +85,7 @@ const CadastroEmpresaPage = () => {
     submissionData.append('cpnj', formData.cnpj);
     submissionData.append('description', formData.description);
     submissionData.append('phone', formData.phone);
-    submissionData.append('categories', JSON.stringify(selectedCategories));
-    submissionData.append('hour', formData.hour);
+    submissionData.append('categories', JSON.stringify(selectedCategories));;
 
     if (profileImageFile) {
       submissionData.append('profileImage', profileImageFile);
@@ -105,7 +104,7 @@ const CadastroEmpresaPage = () => {
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="bg-white font-sans w-full max-w-2xl mx-auto p-6 sm:p-8">
+      <div className="bg-white w-full max-w-2xl mx-auto p-6 sm:p-8">
         <div className="relative flex justify-center items-center mb-8">
           <button
             onClick={() => navigate('/cadastro')}
@@ -157,7 +156,7 @@ const CadastroEmpresaPage = () => {
               onChange={handleChange} 
               placeholder="Nome da empresa" 
               required 
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
             />
           </div>
 
@@ -172,8 +171,9 @@ const CadastroEmpresaPage = () => {
               value={formData.fullName} 
               onChange={handleChange} 
               placeholder="Nome completo do usuário" 
+              pattern="[\p{L}\s]+"
               required 
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
             />
           </div>
 
@@ -187,9 +187,10 @@ const CadastroEmpresaPage = () => {
               name="cpf" 
               value={formData.cpf} 
               onChange={handleChange} 
-              placeholder="000.000.000-00" 
+              placeholder="00000000000"
+              pattern="\d{11}" 
               required 
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
             />
           </div>
 
@@ -204,7 +205,8 @@ const CadastroEmpresaPage = () => {
               value={formData.cnpj} 
               onChange={handleChange} 
               placeholder="Digite o CNPJ da sua empresa (Opcional)" 
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+              pattern="\d{14}"
+              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
             />
           </div>
 
@@ -218,7 +220,7 @@ const CadastroEmpresaPage = () => {
                 <button key={category} 
                 type="button" 
                 onClick={() => handleCategoryClick(category)} 
-                className={`cursor-pointer px-4 py-2 rounded-full font-medium text-sm transition-colors duration-200 
+                className={`shadow-sm cursor-pointer px-4 py-2 rounded-full font-medium text-sm transition-colors duration-200 
                 ${selectedCategories.includes(category) ? 'bg-orange-500 text-white border border-orange-500' : 'bg-white text-gray-800 border border-gray-300 hover:bg-gray-100'}`}>
                   {category}
                 </button>
@@ -238,7 +240,7 @@ const CadastroEmpresaPage = () => {
               onChange={handleChange} 
               placeholder="Dê uma descrição do seu negócio" 
               required 
-              className="w-full px-4 py-2 pb-16 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+              className="shadow-sm w-full px-4 py-2 pb-16 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
             />
           </div>
 
@@ -252,32 +254,16 @@ const CadastroEmpresaPage = () => {
               name="phone" 
               value={formData.phone} 
               onChange={handleChange} 
-              placeholder="81 XXXXX-XXXX" 
+              placeholder="00 00000-0000"
+              pattern="\d"
               required 
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
-            />
-          </div>
-
-          <div className="mb-4">
-            <label htmlFor="hour" className="block text-sm font-bold mb-2 text-gray-800 text-[20px]">
-              Horário de Funcionamento
-            </label>
-
-            <input type="hour"
-              id="hour"
-              name="hour"
-              value={formData.hour}
-              onChange={handleChange}
-              placeholder="00:00 - 00:00"
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
             />
           </div>
 
           <button type="submit" 
             disabled={isLoading} 
-            onClick={() => navigate("/cadastro/empresa/2")}
-            className="cursor-pointer w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-300 disabled:bg-orange-300 disabled:cursor-not-allowed"
+            className="shadow-lg cursor-pointer w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-300 disabled:bg-orange-300 disabled:cursor-not-allowed"
           >
             Avançar
           </button>

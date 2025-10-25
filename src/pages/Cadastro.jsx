@@ -43,7 +43,7 @@ function Cadastro() {
 };
 
   return (
-    <div className="min-h-screen flex font-sans text-gray-800 bg-[#1A225F]" >
+    <div className="min-h-screen flex text-gray-800 bg-[#1A225F]" >
       <div className="w-1/2 h-screen center mt-26 ml-1" >
         <LadoLogoPage />
       </div>
@@ -58,7 +58,7 @@ function Cadastro() {
             <button
               type="button"
               onClick={() => setTipoCadastro("usuario")}
-              className={`w-full py-3 px-4 rounded-lg font-bold cursor-pointer transition duration-300 ${tipoCadastro === "usuario"
+              className={`shadow-lg w-full py-3 px-4 rounded-lg font-bold cursor-pointer transition duration-300 ${tipoCadastro === "usuario"
                 ? "bg-[#FD7702] text-white"
                 : "bg-gray-300 text-gray-700"
               }`}>
@@ -68,7 +68,7 @@ function Cadastro() {
             <button
               type="button"
               onClick={() => setTipoCadastro("empresa")}
-              className={`w-full py-3 px-4 rounded-lg font-bold cursor-pointer transition duration-300 ${tipoCadastro === "empresa"
+              className={`shadow-lg w-full py-3 px-4 rounded-lg font-bold cursor-pointer transition duration-300 ${tipoCadastro === "empresa"
                 ? "bg-[#FD7702] text-white"
                 : "bg-gray-300 text-gray-700"
               }`}>
@@ -93,7 +93,7 @@ function Cadastro() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Digite seu e-mail"
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-main"
+                className="shadow-sm w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-main"
                 required
               />
             </div>
@@ -105,7 +105,7 @@ function Cadastro() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Digite sua senha"
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-main"
+                className="shadow-sm w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-main"
                 required
               />
             </div>
@@ -117,7 +117,7 @@ function Cadastro() {
                 value={confirmacao} 
                 onChange={(e) => setConfirmacao(e.target.value)} 
                 placeholder="Confirmar senha" 
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-main"
+                className="shadow-sm w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-main"
                 required
               />
             </div>
@@ -129,7 +129,7 @@ function Cadastro() {
             </p>
 
             <button type="submit" 
-              className="cursor-pointer w-full bg-[#FD7702] md:bg-main text-main md:text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300" 
+              className="shadow-lg cursor-pointer w-full bg-[#FD7702] md:bg-main text-main md:text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300" 
               onClick={handleCadastro}>
               Criar conta
             </button>

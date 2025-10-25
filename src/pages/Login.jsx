@@ -43,7 +43,7 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen font-sans text-gray-800 bg-[#1A225F]">
+    <div className="min-h-screen text-gray-800 bg-[#1A225F]">
       <div className="grid grid-cols-1 md:grid-cols-2 min-h-screen">
         <LadoLogoPage />
         {/* formulário */}
@@ -79,7 +79,7 @@ function LoginPage() {
                   value={email} 
                   onChange={(e) => setEmail(e.target.value)} 
                   placeholder="Digite seu e-mail" 
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-main" 
+                  className="shadow-sm w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-main" 
                   required 
                 />
               </div>
@@ -94,18 +94,18 @@ function LoginPage() {
                   value={password} 
                   onChange={(e) => setPassword(e.target.value)} 
                   placeholder="Digite sua senha" 
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-main" 
+                  className="shadow-sm w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-main" 
                   required 
                 />
               </div>
 
               <button type="submit" 
-              className="w-full border-1 mb-4 md:bg-main text-main font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300 cursor-pointer">
+                className="shadow-lg w-full border-1 mb-4 md:bg-main text-main font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300 cursor-pointer">
                 Faça Login com o Google
               </button>
 
               <button type="submit" 
-              className="w-full bg-[#FD7702] md:bg-main text-main md:text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300 cursor-pointer">
+                className="shadow-lg w-full bg-[#FD7702] md:bg-main text-main md:text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300 cursor-pointer">
                 Entrar
               </button>
 
