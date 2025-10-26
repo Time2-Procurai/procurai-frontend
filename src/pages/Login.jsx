@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'; // <-- CORREÇÃO: Removido o 'use'
 import { useNavigate } from 'react-router-dom';
 import LadoLogoPage from '../components/LadoLogoPage';
+
+import api from '../api/api';
+import { jwtDecode } from 'jwt-decode';
+
 
 function LoginPage() {
   const [email, setEmail] = useState('');
@@ -12,34 +16,42 @@ function LoginPage() {
     event.preventDefault();
     setError('');
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      
+      const response = await api.post('token/', {
+        email: email,
+        password: password,
+      });
 
-    const usuarios = [
-      { email: 'cliente@email.com', senha: '123456', tipo: 'cliente' },
-      { email: 'lojista@email.com', senha: '123456', tipo: 'lojista' },
-    ];
+      
+      const { access, refresh } = response.data;
+      
+      
+      const decoded = jwtDecode(access);
+      const userRole = decoded.role;
 
-    const usuarioEncontrado = usuarios.find(
-      (u) => u.email === email && u.senha === password
-    );
+      
+      localStorage.setItem('accessToken', access);
+      localStorage.setItem('refreshToken', refresh);
+      localStorage.setItem('userRole', userRole);
+      
+      console.log("Login com sucesso! Role:", userRole);
 
-    if (usuarioEncontrado) {
-      // Gera token fictício
-      const fakeToken = 'jwt-token-falso';
-      localStorage.setItem('novo-projeto-token', fakeToken);
-      localStorage.setItem('usuario-tipo', usuarioEncontrado.tipo);
-
-      // Redireciona com base no tipo
-      if (usuarioEncontrado.tipo === 'cliente') {
+      
+      if (userRole === 'cliente') {
         navigate('/FeedCliente');
-      } else {
+      } else if (userRole === 'lojista') {
         navigate('/FeedEmpresa');
+      } else {
+        navigate('/');
       }
 
-      } else {
-        // simulação da msg de erro
-        setError('Email ou senha inválidos.');
-      }
+    } catch (err) { 
+      console.error('Falha no login:', err);
+      setError('Email ou senha inválidos.');
+    }
+
+ 
   };
 
   return (
@@ -50,17 +62,7 @@ function LoginPage() {
         <div className="flex flex-col justify-center items-center md:bg-white p-8 md:p-12">
           <div className="w-full max-w-sm">
 
-            {/* telas menores caso vcs decidam colocar dps (ainda ta com as coisas do meu projeto, se quiser alterem) */}
-            <div className="md:hidden text-center mb-52 text-white">
-              <h2 className="font-display text-6xl relative inline-block">
-                RecoSIS
-              </h2>
-
-              <p className="text-pink-100 mt-4 text-sm">
-                Aumente o <strong className="font-bold text-white">volume</strong> 
-                e se prepare para as recomendações que temos para você!
-              </p>
-            </div>
+            {/* ... (o resto do seu JSX) ... */}
             
             <h1 className="text-4xl font-bold mb-2 text-white md:text-gray-800">
               Entrar na sua conta
@@ -68,6 +70,7 @@ function LoginPage() {
 
             {error && <p className="bg-red-100 text-red-700 text-center p-3 rounded-md mb-4">{error}</p>}
 
+            {/* Este formulário chama o handleLogin corrigido */}
             <form onSubmit={handleLogin}>
               <div className="mb-4">
                 <label className="block text-sm font-bold mb-2 text-white md:text-gray-800 text-[20px]" htmlFor="email">
@@ -99,11 +102,13 @@ function LoginPage() {
                 />
               </div>
 
-              <button type="submit" 
+              {/* OBSERVAÇÃO: Mudei o type para 'button' para não submeter o form */}
+              <button type="button" 
               className="w-full border-1 mb-4 md:bg-main text-main font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300 cursor-pointer">
                 Faça Login com o Google
               </button>
 
+              {/* Este é o botão que submete o formulário */}
               <button type="submit" 
               className="w-full bg-[#FD7702] md:bg-main text-main md:text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300 cursor-pointer">
                 Entrar
