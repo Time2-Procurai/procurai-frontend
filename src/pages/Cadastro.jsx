@@ -40,7 +40,9 @@ const handleCadastro = async (e) => {
       password_confirm: confirmacao,
       user_type: tipoCadastro,
     });
-    console.log("Resposta da API:", response.data);    
+    console.log("Resposta da API:", response.data.user_id);
+    const id = response.data.user_id; 
+    sessionStorage.setItem("user_id", id);   
     if (tipoCadastro === "cliente") {
       console.log('Tipo do cadastro -->',tipoCadastro)
       navigate("/cadastro/cliente");

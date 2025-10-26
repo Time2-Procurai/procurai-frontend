@@ -1,13 +1,15 @@
-import React, { useState, useRef } from 'react'; // Importar o useRef
+import React, { useState, useRef, useEffect } from 'react'; // Adicionei useEffect
 import { useNavigate } from 'react-router-dom';
 
-// Ícone de seta
+
+import api from '../api/api';
+
 const BackArrowIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" 
-    fill="none" 
-    viewBox="0 0 24" 
-    strokeWidth={1.5} 
-    stroke="currentColor" 
+  <svg xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
     className="cursor-pointer w-6 h-6"
   >
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -19,34 +21,29 @@ const interestsOptions = ['Tecnologia', 'Esportes', 'Construção', 'Saúde', 'B
   'Livros', 'Brinquedos', 'Alimentos e Bebidas'
 ];
 
-// Função que simula uma chamada de API (agora modificada para FormData)
-const simulateApiCall = (formData) => {
-  // Em um app real, o objeto FormData seria enviado. Aqui, apenas logamos os dados.
-  for (let [key, value] of formData.entries()) {
-    console.log(`Enviando para a API: ${key}`, value);
-  }
-
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (Math.random() > 0.2) {
-        resolve({ success: true, message: 'Perfil criado com sucesso! Você será redirecionado.' });
-      } else {
-        reject({ success: false, message: 'Erro: O nome de usuário já existe. Tente outro.' });
-      }
-    }, 1500);
-  });
-};
 
 const CadastroClientePage = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ fullName: '', username: '', cpf: '', phone: '' });
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Adicionar estados para a imagem e uma ref para o input
+  const [error, setError] = useState("");
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [profileImagePreview, setProfileImagePreview] = useState(null);
   const fileInputRef = useRef(null);
+  const [userId, setUserId] = useState(null); 
+
+  
+  useEffect(() => {
+    const storedUserId = sessionStorage.getItem("user_id");
+    if (storedUserId) {
+      setUserId(storedUserId);
+    } else {
+      console.error("ID do utilizador não encontrado na sessão.");
+      setError("Erro: ID do utilizador não encontrado. Por favor, volte ao passo anterior.");
+       
+    }
+  }, []); 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,10 +57,7 @@ const CadastroClientePage = () => {
         : [...prevInterests, interest]
     );
   };
-
-  
-
-  // Adicionar funções para lidar com o clique e a seleção do arquivo
+    
   const handleImageContainerClick = () => {
     fileInputRef.current.click();
   };
@@ -76,38 +70,74 @@ const CadastroClientePage = () => {
     }
   };
 
+  
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Isto é crucial para formulários
     setIsLoading(true);
+    setError("");
 
-    // Usar FormData para poder incluir o arquivo da imagem
+    
+    if (!userId) {
+      setError("Erro: ID do utilizador não encontrado. Por favor, tente novamente.");
+      setIsLoading(false);
+      return;
+    }
+
+   
     const submissionData = new FormData();
-    submissionData.append('fullName', formData.fullName);
+    
+    
+    submissionData.append('full_name', formData.fullName);
     submissionData.append('username', formData.username);
     submissionData.append('cpf', formData.cpf);
     submissionData.append('phone', formData.phone);
+    
+    
     submissionData.append('interests', JSON.stringify(selectedInterests));
 
     if (profileImageFile) {
-      submissionData.append('profileImage', profileImageFile);
+      
+      submissionData.append('profile_picture', profileImageFile);
     }
 
     try {
-      const response = await simulateApiCall(submissionData);
-      alert(response.message);
-      navigate('/login');
+      console.log("Dados a serem enviados:", submissionData);
+      const response = await api.post(
+        `user/register/tela2/cliente/${userId}/`,
+        submissionData, // Envia o FormData
+        
+      );
+
+      console.log("Resposta da API:", response.data);
+      
+      
+      sessionStorage.removeItem("user_id");
+      navigate('/cadastro/empresa/2');
+
     } catch (error) {
-      alert(error.message);
+      console.error("Erro ao cadastrar cliente:", error);
+      let errorMessage = 'Erro ao finalizar o cadastro. Tente novamente.';
+
+      if (error.response && error.response.data) {
+        const errors = error.response.data;
+        // Tenta extrair o primeiro erro
+        const firstErrorKey = Object.keys(errors)[0];
+        if (firstErrorKey && Array.isArray(errors[firstErrorKey])) {
+          errorMessage = `${firstErrorKey}: ${errors[firstErrorKey][0]}`;
+        }
+      }
+      setError(errorMessage);
+      alert(errorMessage);
+
     } finally {
       setIsLoading(false);
     }
   };
-
   
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="bg-white font-sans w-full max-w-2xl mx-auto p-6 sm:p-8">
+      <div className="bg-white w-full max-w-2xl mx-auto p-6 sm:p-8">
         <div className="relative flex justify-center items-center mb-8">
           <button
             onClick={() => navigate('/cadastro')}
@@ -156,8 +186,9 @@ const CadastroClientePage = () => {
               value={formData.fullName} 
               onChange={handleChange} 
               placeholder="Nome completo" 
+              pattern="[\p{L}\s]+"
               required 
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
             />
           </div>
 
@@ -173,7 +204,7 @@ const CadastroClientePage = () => {
               onChange={handleChange} 
               placeholder="Digite um nome de usuário" 
               required 
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
             />
           </div>
 
@@ -187,9 +218,10 @@ const CadastroClientePage = () => {
               name="cpf" 
               value={formData.cpf} 
               onChange={handleChange} 
-              placeholder="000.000.000-00" 
+              placeholder="00000000000" 
+              pattern="\d{11}"
               required 
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+              className="invalid:border-red-500 invalid:focus:ring-red-500 shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
             />
           </div>
 
@@ -203,9 +235,10 @@ const CadastroClientePage = () => {
               name="phone" 
               value={formData.phone} 
               onChange={handleChange} 
-              placeholder="81 XXXXX-XXXX" 
-              required 
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+              placeholder="00000000000"
+              pattern="\d{11}"
+              
+              className="invalid:border-red-500 invalid:focus:ring-red-500 shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
             />
           </div>
 
@@ -219,7 +252,7 @@ const CadastroClientePage = () => {
                 <button key={interest} 
                   type="button" 
                   onClick={() => handleInterestClick(interest)} 
-                  className={`cursor-pointer px-4 py-2 rounded-full font-medium text-sm transition-colors duration-200 
+                  className={`shadow-sm cursor-pointer px-4 py-2 rounded-full font-medium text-sm transition-colors duration-200 
                   ${selectedInterests.includes(interest) ? 'bg-orange-500 text-white border border-orange-500' : 'bg-white text-gray-800 border border-gray-300 hover:bg-gray-100'}`}>
                   {interest}
                 </button>
@@ -230,7 +263,7 @@ const CadastroClientePage = () => {
 
           <button type="submit" 
             disabled={isLoading} 
-            className="cursor-pointer w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-300 disabled:bg-orange-300 disabled:cursor-not-allowed">
+            className="shadow-lg cursor-pointer w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-300 disabled:bg-orange-300 disabled:cursor-not-allowed">
             {isLoading ? 'Criando perfil...' : 'Criar perfil'}
           </button>
         </form>

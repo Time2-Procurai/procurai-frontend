@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react'; // Importar o useRef
 import { useNavigate } from 'react-router-dom';
+import api from '../api/api'; 
 
 // Ícone de seta
 const BackArrowIcon = () => (
@@ -42,6 +43,30 @@ const CadastroEmpresaPage2 = () => {
     setFormData(prevData => ({ ...prevData, [name]: value }));
   };
 
+  const cadastroEmpresaPage2 = async (e) => {
+    //e.preventDefault();
+    setIsLoading(true);
+    const userId = sessionStorage.getItem("user_id");
+
+    try {
+      const response = await api.patch(`/user/register/tela3/lojista/${userId}/`, {
+        cep: formData.cep,
+        street: formData.address,
+        number: formData.number,
+        city: formData.city,
+        neighborhood: formData.street,
+        complement: formData.cplm,
+      });
+      console.log("Resposta da API:", response.data);
+      alert('Cadastro realizado com sucesso!');
+      navigate('/login');
+    } catch (error) {
+      alert('Erro ao cadastrar: ' + error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -56,9 +81,10 @@ const CadastroEmpresaPage2 = () => {
     submissionData.append('cplm', formData.cplm);
 
     try {
-      const response = await simulateApiCall(submissionData);
-      alert(response.message);
-      navigate('/login');
+      //const response = await simulateApiCall(submissionData);
+      //alert(response.message);
+      //navigate('/login');
+      cadastroEmpresaPage2();
     } catch (error) {
       alert(error.message);
     } finally {
@@ -178,7 +204,7 @@ const CadastroEmpresaPage2 = () => {
 
           <button type="submit" 
             disabled={isLoading} 
-            onClick={() => navigate("/login")}
+            onClick={handleSubmit}
             className="cursor-pointer w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-300 disabled:bg-orange-300 disabled:cursor-not-allowed"
           >
             Criar perfil
