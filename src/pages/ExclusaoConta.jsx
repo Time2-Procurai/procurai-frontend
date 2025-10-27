@@ -8,7 +8,7 @@ function ExclusaoContaPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="h-screen font-sans text-gray-800">
+    <div className="h-screen text-gray-800">
       <BarraPesquisa />
 
       <div className="h-[calc(100%-56px)]"> {/* Altura total menos a barra do topo */}
