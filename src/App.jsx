@@ -9,6 +9,8 @@ import ExclusaoContaPage from './pages/ExclusaoConta.jsx';
 import CadastroCliente from './pages/CadastroCliente.jsx';
 import CadastroEmpresaPage from './pages/CadastroEmpresa.jsx';
 import CadastroEmpresaPage2 from './pages/CadastroEmpresa2.jsx';
+import PerfilCliente from './pages/PerfilCliente.jsx';
+
 
 function Home() {
   return (
@@ -37,6 +39,7 @@ function App() {
       <Route path='/cadastro/cliente' element={<CadastroCliente />} />
       <Route path='/cadastro/empresa' element={<CadastroEmpresaPage />}/>
       <Route path='/cadastro/empresa/2' element={<CadastroEmpresaPage2 />}/>
+      <Route path='/PerfilCliente' element={<PerfilCliente/>}/>
     </Routes>
   );
 }
