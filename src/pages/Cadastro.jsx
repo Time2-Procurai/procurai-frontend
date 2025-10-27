@@ -8,7 +8,7 @@ function Cadastro() {
   const [password, setPassword] = useState("");
   const [confirmacao, setConfirmacao] = useState("");
   const [error, setError] = useState("");
-   const [tipoCadastro, setTipoCadastro] = useState("cliente");
+  const [tipoCadastro, setTipoCadastro] = useState("cliente");
 
 const navigate = useNavigate();
 
