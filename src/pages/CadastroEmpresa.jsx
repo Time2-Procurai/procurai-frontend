@@ -1,66 +1,76 @@
-import React, { useState, useRef } from 'react'; // Importar o useRef
+import React, { useState, useRef, useEffect } from 'react'; 
 import { useNavigate } from 'react-router-dom';
+import api from '../api/api';
 
 // Ícone de seta
 const BackArrowIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" 
-    fill="none" 
-    viewBox="0 0 24" 
-    strokeWidth={1.5} 
-    stroke="currentColor" 
-    className="font-bold cursor-pointer w-6 h-6"
-    >
+  <svg xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className="cursor-pointer w-6 h-6"
+  >
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
   </svg>
 );
 
-const categoriesOptions = ['Tecnologia', 'Esportes', 'Construção', 'Saúde', 'Beleza', 'Culinária', 'Decoração', 'Papelaria',
-  'Livros', 'Brinquedos', 'Alimentos e Bebidas'
+
+const categoriesOptions = [
+  { key: 'ROUP', name: 'Roupas e Acessórios' },
+  { key: 'ELET', name: 'Eletrônicos' },
+  { key: 'COSM', name: 'Cosméticos' },
+  { key: 'REST', name: 'Restaurantes' },
+  { key: 'Construção', name: 'Construção' },
+  { key: 'Saúde', name: 'Saúde' }
 ];
 
-// Função que simula uma chamada de API (agora modificada para FormData)
-const simulateApiCall = (formData) => {
-  // Em um app real, o objeto FormData seria enviado. Aqui, apenas logamos os dados.
-  for (let [key, value] of formData.entries()) {
-    console.log(`Enviando para a API: ${key}`, value);
-  }
-
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (Math.random() > 0.2) {
-        resolve({ success: true, message: 'Dados validados com sucesso! Você será redirecionado para a segunda etapa.' });
-      } else {
-        reject({ success: false, message: 'Erro: O nome de usuário já existe. Tente outro.' });
-      }
-    }, 1500);
-  });
-};
-
 const CadastroEmpresaPage = () => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({ companyName: '', fullName: '', cpf: '', cnpj: '', phone: ''});
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();  
+  const [formData, setFormData] = useState({
+    companyName: '',
+    fullName: '', // Para o User
+    cpf: '',        // Para o User
+    cnpj: '',
+    phone: '',
+    hour: '',
+    description: '' 
+  });
+  
+  const [selectedCategory, setSelectedCategory] = useState(''); 
 
-  // Adicionar estados para a imagem e uma ref para o input
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(""); 
+  const [userId, setUserId] = useState(null); // Estado para o ID
+
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [profileImagePreview, setProfileImagePreview] = useState(null);
   const fileInputRef = useRef(null);
+
+  // Carrega o ID do utilizador quando a página abre
+  useEffect(() => {
+    const storedUserId = sessionStorage.getItem("user_id");
+    if (storedUserId) {
+      setUserId(storedUserId);
+    } else {
+      console.error("ID do utilizador não encontrado na sessão.");
+      setError("Erro: ID do utilizador não encontrado. Por favor, volte ao passo anterior.");
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prevData => ({ ...prevData, [name]: value }));
   };
 
-  const handleCategoryClick = (category) => {
-    setSelectedCategories(prevCategories =>
-      prevCategories.includes(category)
-        ? prevCategories.filter(item => item !== category)
-        : [...prevCategories, category]
+
+  const handleCategoryClick = (categoryKey) => {
+    setSelectedCategory(prevCategory =>      
+      prevCategory === categoryKey ? '' : categoryKey
     );
   };
 
-  // Adicionar funções para lidar com o clique e a seleção do arquivo
+  // Funções para a imagem
   const handleImageContainerClick = () => {
     fileInputRef.current.click();
   };
@@ -73,30 +83,64 @@ const CadastroEmpresaPage = () => {
     }
   };
 
+  // --- FUNÇÃO DE SUBMISSÃO UNIFICADA ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
 
-    // Usar FormData para poder incluir o arquivo da imagem
-    const submissionData = new FormData();
-    submissionData.append('companyName', formData.companyName);
-    submissionData.append('fullName', formData.fullName);
-    submissionData.append('cpf', formData.cpf);
-    submissionData.append('cpnj', formData.cnpj);
-    submissionData.append('description', formData.description);
-    submissionData.append('phone', formData.phone);
-    submissionData.append('categories', JSON.stringify(selectedCategories));;
-
-    if (profileImageFile) {
-      submissionData.append('profileImage', profileImageFile);
+    if (!userId) {
+      setError("Erro: ID do utilizador não encontrado. Tente novamente.");
+      setIsLoading(false);
+      return;
     }
 
+    
+    const submissionData = new FormData();
+
+   
+    submissionData.append('company_name', formData.companyName);
+    submissionData.append('full_name', formData.fullName); // Campo para o User
+    submissionData.append('cpf', formData.cpf);         // Campo para o User
+    submissionData.append('cnpj', formData.cnpj);
+    submissionData.append('description', formData.description);
+    submissionData.append('phone', formData.phone); 
+    submissionData.append('operating_hours', formData.hour);
+
+   
+    if (selectedCategory) {
+      submissionData.append('company_category', selectedCategory);
+    } else {
+      
+      setError("Por favor, selecione uma categoria para a empresa.");
+      setIsLoading(false);
+      return;
+    }
+
+    
+    if (profileImageFile) {
+      submissionData.append('profile_picture', profileImageFile);
+    }
+    
+
     try {
-      const response = await simulateApiCall(submissionData);
-      alert(response.message);
+      // 5. Enviar o FormData
+      const response = await api.post(
+        `user/register/tela2/lojista/${userId}/`,
+        submissionData
+        
+      );
+
+      console.log("Resposta da API:", response.data);
+      alert("Perfil criado com sucesso!");
+
+      
       navigate('/cadastro/empresa/2');
+
     } catch (error) {
-      alert(error.message);
+      console.error("Erro ao cadastrar empresa:", error.response?.data || error.message);
+      setError("Erro ao cadastrar. Verifique os dados informados.");
+      alert("Erro ao cadastrar. Verifique os dados informados.");
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +148,7 @@ const CadastroEmpresaPage = () => {
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="bg-white w-full max-w-2xl mx-auto p-6 sm:p-8">
+      <div className="bg-white font-sans w-full max-w-2xl mx-auto p-6 sm:p-8">
         <div className="relative flex justify-center items-center mb-8">
           <button
             onClick={() => navigate('/cadastro')}
@@ -117,7 +161,14 @@ const CadastroEmpresaPage = () => {
           </h1>
         </div>
 
-        {/* Tornar o bloco da foto clicável e exibir o preview */}
+        {/* Mensagem de Erro */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md relative mb-4" role="alert">
+            <span className="block sm:inline">{error}</span>
+          </div>
+        )}
+
+        {/* Bloco da Foto */}
         <div
           className="flex flex-col items-center mb-8 cursor-pointer"
           onClick={handleImageContainerClick}
@@ -126,15 +177,15 @@ const CadastroEmpresaPage = () => {
             <img
               src={profileImagePreview}
               alt="Prévia do perfil"
-              className="w-42 h-42 rounded-full object-cover"
+              className="w-32 h-32 rounded-full object-cover" // Ajustei o tamanho
             />
           ) : (
-            <div className="w-28 h-28 bg-gray-200 rounded-full mb-3"></div>
+            <div className="w-32 h-32 bg-gray-200 rounded-full mb-3"></div> // Ajustei o tamanho
           )}
           <span className="block text-sm font-bold mt-2 text-gray-800 text-[20px]">Adicione uma foto de perfil</span>
         </div>
 
-        {/* Adicionar o input de arquivo escondido */}
+        {/* Input de ficheiro escondido */}
         <input
           type="file"
           ref={fileInputRef}
@@ -143,129 +194,138 @@ const CadastroEmpresaPage = () => {
           accept="image/png, image/jpeg, image/jpg"
         />
 
+        {/* Formulário */}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="companyName" className="block text-sm font-bold mb-2 text-gray-800 text-[20px]">
               Nome da sua empresa
             </label>
-
-            <input type="text" 
-              id="companyName" 
-              name="companyName" 
-              value={formData.companyName} 
-              onChange={handleChange} 
-              placeholder="Nome da empresa" 
-              required 
-              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+            <input type="text"
+              id="companyName"
+              name="companyName"
+              value={formData.companyName}
+              onChange={handleChange}
+              placeholder="Nome da empresa"
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
           <div className="mb-4">
             <label htmlFor="fullName" className="block text-sm font-bold mb-2 text-gray-800 text-[20px]">
-              Nome completo
+              Nome completo (Responsável)
             </label>
-
-            <input type="text" 
-              id="fullName" 
-              name="fullName" 
-              value={formData.fullName} 
-              onChange={handleChange} 
-              placeholder="Nome completo do usuário" 
-              pattern="[\p{L}\s]+"
-              required 
-              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+            <input type="text"
+              id="fullName"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleChange}
+              placeholder="Nome completo do responsável"
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
           <div className="mb-4">
             <label htmlFor="cpf" className="block text-sm font-bold mb-2 text-gray-800 text-[20px]">
-              CPF
+              CPF (Responsável)
             </label>
-
-            <input type="text" 
-              id="cpf" 
-              name="cpf" 
-              value={formData.cpf} 
-              onChange={handleChange} 
-              placeholder="00000000000"
-              pattern="\d{11}" 
-              required 
-              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+            <input type="text"
+              id="cpf"
+              name="cpf"
+              value={formData.cpf}
+              onChange={handleChange}
+              placeholder="000.000.000-00"
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
-          {/* NÃO OBRIGATÓRIO */}
           <div className="mb-4">
             <label htmlFor="cnpj" className="block text-sm font-bold mb-2 text-gray-800 text-[20px]">
-              CNPJ
+              CNPJ (Opcional)
             </label>
-            <input type="text" 
-              id="cnpj" 
-              name="cnpj" 
-              value={formData.cnpj} 
-              onChange={handleChange} 
-              placeholder="Digite o CNPJ da sua empresa (Opcional)" 
-              pattern="\d{14}"
-              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+            <input type="text"
+              id="cnpj"
+              name="cnpj"
+              value={formData.cnpj}
+              onChange={handleChange}
+              placeholder="Digite o CNPJ da sua empresa (Opcional)"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
-          </div>
-
-          <div className="mb-6">
-            <label className="block text-sm font-bold mb-2 text-gray-800 text-[20px]">
-              Suas categorias
-            </label>
-
-            <div className="flex flex-wrap justify-center gap-2">
-              {categoriesOptions.map((category) => (
-                <button key={category} 
-                type="button" 
-                onClick={() => handleCategoryClick(category)} 
-                className={`shadow-sm cursor-pointer px-4 py-2 rounded-full font-medium text-sm transition-colors duration-200 
-                ${selectedCategories.includes(category) ? 'bg-orange-500 text-white border border-orange-500' : 'bg-white text-gray-800 border border-gray-300 hover:bg-gray-100'}`}>
-                  {category}
-                </button>
-              ))}
-            </div>
           </div>
 
           <div className="mb-4">
             <label htmlFor="description" className="block text-sm font-bold mb-2 text-gray-800 text-[20px]">
               Descrição da empresa
             </label>
-
-            <input type="description" 
-              id="description" 
-              name="description" 
-              value={formData.description} 
-              onChange={handleChange} 
-              placeholder="Dê uma descrição do seu negócio" 
-              required 
-              className="shadow-sm w-full px-4 py-2 pb-16 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+            <textarea // Mudei para <textarea> para melhor digitação
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="Dê uma descrição do seu negócio"
+              required
+              rows={4} // Altura do campo
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
           <div className="mb-4">
             <label htmlFor="phone" className="block text-sm font-bold mb-2 text-gray-800 text-[20px]">
-              Telefone
+              Telefone (Comercial)
             </label>
-
-            <input type="tel" 
-              id="phone" 
-              name="phone" 
-              value={formData.phone} 
-              onChange={handleChange} 
-              placeholder="00 00000-0000"
-              pattern="\d"
-              required 
-              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+            <input type="tel"
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="81 XXXXX-XXXX"
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
-          <button type="submit" 
-            disabled={isLoading} 
-            className="shadow-lg cursor-pointer w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-300 disabled:bg-orange-300 disabled:cursor-not-allowed"
+          <div className="mb-4">
+            <label htmlFor="hour" className="block text-sm font-bold mb-2 text-gray-800 text-[20px]">
+              Horário de Funcionamento
+            </label>
+            <input type="text" // Mudei de 'hour' para 'text'
+              id="hour"
+              name="hour"
+              value={formData.hour}
+              onChange={handleChange}
+              placeholder="Ex: Seg a Sex, 08:00 - 18:00"
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+          </div>
+
+          <div className="mb-6">
+            <label className="block text-sm font-bold mb-2 text-gray-800 text-[20px]">
+              Categoria da Empresa
+            </label>
+            <div className="flex flex-wrap justify-center gap-2">
+
+              {/* --- MUDANÇA IMPORTANTE ---
+                  Atualizei o map para usar os objetos (key/name) */}
+              {categoriesOptions.map((category) => (
+                <button key={category.key}
+                  type="button"
+                  onClick={() => handleCategoryClick(category.key)} // Passa a CHAVE (ex: 'ELET')
+                  className={`cursor-pointer px-4 py-2 rounded-full font-medium text-sm transition-colors duration-200 
+                  ${selectedCategory === category.key ? 'bg-orange-500 text-white border border-orange-500' : 'bg-white text-gray-800 border border-gray-300 hover:bg-gray-100'}`}>
+                  {category.name} {/* Mostra o NOME (ex: 'Eletrônicos') */}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button type="submit"
+            disabled={isLoading}
+            className="cursor-pointer w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-300 disabled:bg-orange-300 disabled:cursor-not-allowed"
           >
-            Avançar
+            {isLoading ? 'A avançar...' : 'Avançar'}
           </button>
         </form>
       </div>
@@ -274,3 +334,4 @@ const CadastroEmpresaPage = () => {
 };
 
 export default CadastroEmpresaPage;
+

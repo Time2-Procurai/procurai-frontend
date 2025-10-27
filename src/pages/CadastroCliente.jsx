@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react'; // Importar o useRef
+import React, { useState, useRef, useEffect } from 'react'; // Importar o useRef
 import { useNavigate } from 'react-router-dom';
+import api from '../api/api';
 
 // Ícone de seta
 const BackArrowIcon = () => (
@@ -20,7 +21,7 @@ const interestsOptions = ['Tecnologia', 'Esportes', 'Construção', 'Saúde', 'B
 ];
 
 // Função que simula uma chamada de API (agora modificada para FormData)
-const simulateApiCall = (formData) => {
+/*const simulateApiCall = (formData) => {
   // Em um app real, o objeto FormData seria enviado. Aqui, apenas logamos os dados.
   for (let [key, value] of formData.entries()) {
     console.log(`Enviando para a API: ${key}`, value);
@@ -35,18 +36,32 @@ const simulateApiCall = (formData) => {
       }
     }, 1500);
   });
-};
+};*/
 
 const CadastroClientePage = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ fullName: '', username: '', cpf: '', phone: '' });
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error,setError] = useState("");
 
   // Adicionar estados para a imagem e uma ref para o input
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [profileImagePreview, setProfileImagePreview] = useState(null);
   const fileInputRef = useRef(null);
+  const [userId, setUserId] = useState(null); 
+
+  
+  useEffect(() => {
+    const storedUserId = sessionStorage.getItem("user_id");
+    if (storedUserId) {
+      setUserId(storedUserId);
+    } else {
+      console.error("ID do utilizador não encontrado na sessão.");
+      setError("Erro: ID do utilizador não encontrado. Por favor, volte ao passo anterior.");
+       
+    }
+  }, []); 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -80,6 +95,12 @@ const CadastroClientePage = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    if (!userId) {
+      setError("Erro: ID do utilizador não encontrado. Por favor, tente novamente.");
+      setIsLoading(false);
+      return;
+    }
+
     // Usar FormData para poder incluir o arquivo da imagem
     const submissionData = new FormData();
     submissionData.append('fullName', formData.fullName);
@@ -89,15 +110,38 @@ const CadastroClientePage = () => {
     submissionData.append('interests', JSON.stringify(selectedInterests));
 
     if (profileImageFile) {
-      submissionData.append('profileImage', profileImageFile);
+      submissionData.append('profile_picture', profileImageFile);
     }
 
     try {
-      const response = await simulateApiCall(submissionData);
-      alert(response.message);
-      navigate('/login');
+      console.log("Dados a serem enviados:", submissionData);
+      const response = await api.post(
+        `user/register/tela2/cliente/${userId}/`,
+        submissionData, // Envia o FormData
+        
+      );
+
+      console.log("Resposta da API:", response.data);
+      
+      
+      sessionStorage.removeItem("user_id");
+      navigate('/cadastro/empresa/2');
+
     } catch (error) {
-      alert(error.message);
+      console.error("Erro ao cadastrar cliente:", error);
+      let errorMessage = 'Erro ao finalizar o cadastro. Tente novamente.';
+
+      if (error.response && error.response.data) {
+        const errors = error.response.data;
+        // Tenta extrair o primeiro erro
+        const firstErrorKey = Object.keys(errors)[0];
+        if (firstErrorKey && Array.isArray(errors[firstErrorKey])) {
+          errorMessage = `${firstErrorKey}: ${errors[firstErrorKey][0]}`;
+        }
+      }
+      setError(errorMessage);
+      alert(errorMessage);
+
     } finally {
       setIsLoading(false);
     }

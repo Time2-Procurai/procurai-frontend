@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react'; // Importar o useRef
 import { useNavigate } from 'react-router-dom';
+import api from '../api/api'; 
 
 // Ícone de seta
 const BackArrowIcon = () => (
@@ -8,7 +9,7 @@ const BackArrowIcon = () => (
     viewBox="0 0 24" 
     strokeWidth={1.5} 
     stroke="currentColor" 
-    className="font-bold cursor-pointer w-6 h-6"
+    className="cursor-pointer w-6 h-6"
     >
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
   </svg>
@@ -42,6 +43,30 @@ const CadastroEmpresaPage2 = () => {
     setFormData(prevData => ({ ...prevData, [name]: value }));
   };
 
+ const cadastroEmpresaPage2 = async (e) => {
+    //e.preventDefault();
+    setIsLoading(true);
+    const userId = sessionStorage.getItem("user_id");
+
+    try {
+      const response = await api.patch(`/user/register/tela3/lojista/${userId}/`, {
+        cep: formData.cep,
+        street: formData.address,
+        number: formData.number,
+        city: formData.city,
+        neighborhood: formData.street,
+        complement: formData.cplm,
+      });
+      console.log("Resposta da API:", response.data);
+      alert('Cadastro realizado com sucesso!');
+      navigate('/login');
+    } catch (error) {
+      alert('Erro ao cadastrar: ' + error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -56,9 +81,10 @@ const CadastroEmpresaPage2 = () => {
     submissionData.append('cplm', formData.cplm);
 
     try {
-      const response = await simulateApiCall(submissionData);
-      alert(response.message);
-      navigate('/login');
+      //const response = await simulateApiCall(submissionData);
+      //alert(response.message);
+      //navigate('/login');
+      cadastroEmpresaPage2();
     } catch (error) {
       alert(error.message);
     } finally {
@@ -68,7 +94,7 @@ const CadastroEmpresaPage2 = () => {
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="bg-white w-full max-w-2xl mx-auto p-6 sm:p-8">
+      <div className="bg-white font-sans w-full max-w-2xl mx-auto p-6 sm:p-8">
         <div className="relative flex justify-center items-center mb-8">
           <button
             onClick={() => navigate('/cadastro/empresa')}
@@ -92,10 +118,9 @@ const CadastroEmpresaPage2 = () => {
               name="cep" 
               value={formData.cep} 
               onChange={handleChange} 
-              placeholder="00000000" 
-              pattern="\d{8}"
+              placeholder="CEP" 
               required 
-              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
             />
           </div>
 
@@ -109,10 +134,9 @@ const CadastroEmpresaPage2 = () => {
               name="address" 
               value={formData.address} 
               onChange={handleChange} 
-              pattern="[\p{L}\s]+"
               placeholder="Rua, Travessa, Av." 
               required 
-              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
             />
           </div>
 
@@ -127,9 +151,8 @@ const CadastroEmpresaPage2 = () => {
               value={formData.number} 
               onChange={handleChange} 
               placeholder="Número" 
-              pattern="\d"
               required 
-              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
             />
           </div>
 
@@ -143,9 +166,8 @@ const CadastroEmpresaPage2 = () => {
               value={formData.city} 
               onChange={handleChange} 
               placeholder="Cidade"
-              pattern="[\p{L}\s]+"
               required 
-              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
             />
           </div>
 
@@ -160,9 +182,8 @@ const CadastroEmpresaPage2 = () => {
               value={formData.street} 
               onChange={handleChange} 
               placeholder="Bairro" 
-              pattern="[\p{L}\s]+"
               required 
-              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
             />
           </div>
 
@@ -177,13 +198,14 @@ const CadastroEmpresaPage2 = () => {
               value={formData.cplm}
               onChange={handleChange}
               placeholder="Complemento (Opcional)"
-              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
           <button type="submit" 
             disabled={isLoading} 
-            className="shadow-lg cursor-pointer w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-300 disabled:bg-orange-300 disabled:cursor-not-allowed"
+            onClick={handleSubmit}
+            className="cursor-pointer w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-300 disabled:bg-orange-300 disabled:cursor-not-allowed"
           >
             Criar perfil
           </button>
