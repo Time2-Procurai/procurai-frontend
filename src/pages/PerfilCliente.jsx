@@ -9,7 +9,7 @@ function PerfilCliente() {
   const navigate = useNavigate();
 
   return (
-    <div className="h-screen font-sans text-gray-800 bg-gray-50">
+    <div className="h-screen text-gray-800 bg-gray-50">
       {/* Barra superior */}
       <BarraPesquisa />
 
@@ -36,8 +36,7 @@ function PerfilCliente() {
             {/* Botão editar */}
             <button
               onClick={() => navigate("/EditarPerfil")}
-              className="absolute right-6 top-6 border border-[#FD7702] text-[#FD7702] rounded-full px-4 py-1 text-sm hover:bg-[#FD7702] hover:text-white transition"
-            >
+              className="hover:cursor-pointer absolute top-6 ring-2 ring-[#FD7702] right-6 rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-md">
               Editar perfil
             </button>
           </div>

@@ -82,7 +82,7 @@ function LoginPage() {
                   value={email} 
                   onChange={(e) => setEmail(e.target.value)} 
                   placeholder="Digite seu e-mail" 
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-main" 
+                  className="shadow-sm w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-main" 
                   required 
                 />
               </div>
@@ -97,20 +97,20 @@ function LoginPage() {
                   value={password} 
                   onChange={(e) => setPassword(e.target.value)} 
                   placeholder="Digite sua senha" 
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-main" 
+                  className="shadow-sm w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-main" 
                   required 
                 />
               </div>
 
               {/* OBSERVAÇÃO: Mudei o type para 'button' para não submeter o form */}
               <button type="button" 
-              className="w-full border-1 mb-4 md:bg-main text-main font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300 cursor-pointer">
+                className="shadow-lg w-full border-1 mb-4 md:bg-main text-main font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300 cursor-pointer">
                 Faça Login com o Google
               </button>
 
               {/* Este é o botão que submete o formulário */}
               <button type="submit" 
-              className="w-full bg-[#FD7702] md:bg-main text-main md:text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300 cursor-pointer">
+                className="shadow-lg w-full bg-[#FD7702] md:bg-main text-main md:text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300 cursor-pointer">
                 Entrar
               </button>
 
