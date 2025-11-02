@@ -12,6 +12,7 @@ import CadastroEmpresaPage2 from './pages/CadastroEmpresa2.jsx';
 import PerfilEmpresa from './pages/PerfilEmpresa.jsx';
 import PerfilCliente from './pages/PerfilCliente.jsx';
 import CatalogoEmpresa from './pages/CatalogoEmpresa.jsx';
+import AdicionarProduto from './pages/AdicionarProduto.jsx';
 
 function Home() {
   return (
@@ -43,6 +44,7 @@ function App() {
       <Route path='/perfil/empresa' element={<PerfilEmpresa />}/>      
       <Route path='/perfil/cliente' element={<PerfilCliente />}/>
       <Route path='/produtos' element={<CatalogoEmpresa />}/>
+      <Route path='/produtos/adicionar' element ={<AdicionarProduto />}/>
     </Routes>
   );
 }

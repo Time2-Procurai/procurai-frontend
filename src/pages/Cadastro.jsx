@@ -79,7 +79,7 @@ const handleCadastro = async (e) => {
             <button
               type="button"
               onClick={() => setTipoCadastro("cliente")}
-              className={`shadow-lg w-full py-3 px-4 rounded-lg font-bold cursor-pointer transition duration-300 ${tipoCadastro === "cliente"
+              className={`shadow-lg w-full py-3 px-4 rounded-lg font-bold cursor-pointer hover:opacity-90 transition duration-300 ${tipoCadastro === "cliente"
                 ? "bg-[#FD7702] text-white"
                 : "bg-gray-300 text-gray-700"
               }`}>
@@ -89,7 +89,7 @@ const handleCadastro = async (e) => {
             <button
               type="button"
               onClick={() => setTipoCadastro("empresa")}
-              className={`shadow-lg w-full py-3 px-4 rounded-lg font-bold cursor-pointer transition duration-300 ${tipoCadastro === "empresa"
+              className={`shadow-lg w-full py-3 px-4 rounded-lg font-bold cursor-pointer hover:opacity-90 transition duration-300 ${tipoCadastro === "empresa"
                 ? "bg-[#FD7702] text-white"
                 : "bg-gray-300 text-gray-700"
               }`}>
