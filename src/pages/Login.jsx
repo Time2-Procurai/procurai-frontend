@@ -62,7 +62,7 @@ function LoginPage() {
         <div className="flex flex-col justify-center items-center md:bg-white p-8 md:p-12">
           <div className="w-full max-w-sm">
 
-            {/* ... (o resto do seu JSX) ... */}
+            
             
             <h1 className="text-4xl font-bold mb-2 text-white md:text-gray-800">
               Entrar na sua conta
@@ -70,7 +70,7 @@ function LoginPage() {
 
             {error && <p className="bg-red-100 text-red-700 text-center p-3 rounded-md mb-4">{error}</p>}
 
-            {/* Este formulário chama o handleLogin corrigido */}
+            
             <form onSubmit={handleLogin}>
               <div className="mb-4">
                 <label className="block text-sm font-bold mb-2 text-white md:text-gray-800 text-[20px]" htmlFor="email">

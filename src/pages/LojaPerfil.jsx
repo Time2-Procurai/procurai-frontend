@@ -74,7 +74,9 @@ function LojaPerfil() {
               </button>
 
               {/*editar perfil*/}
-              <button className="absolute top-4 ring-2 ring-[#FD7702] right-4 rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-md transition hover:bg-gray-50">
+              <button 
+              onClick={() => navigate("/EditarPerfilLoja")}
+              className="bg-white absolute right-6 top-6 border border-[#FD7702] text-[#FD7702] rounded-full px-4 py-1 text-sm hover:bg-[#FD7702] hover:text-white transition">
                 Editar perfil
               </button>
 

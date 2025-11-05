@@ -11,6 +11,9 @@ import CadastroEmpresaPage from './pages/CadastroEmpresa.jsx';
 import CadastroEmpresaPage2 from './pages/CadastroEmpresa2.jsx';
 import LojaPerfil from './pages/LojaPerfil.jsx';
 import PerfilCliente from './pages/PerfilCliente.jsx';
+import EditarPerfilLoja from './pages/EditarPerfilLoja.jsx';
+import EditarPerfilCliente from './pages/EditarPerfilCliente.jsx';
+
 
 function Home() {
   return (
@@ -41,6 +44,8 @@ function App() {
       <Route path='/cadastro/empresa/2' element={<CadastroEmpresaPage2 />}/>
       <Route path='/perfil/loja' element={<LojaPerfil />}/>      
       <Route path='/PerfilCliente' element={<PerfilCliente/>}/>
+      <Route path ='/EditarPerfilLoja' element={<EditarPerfilLoja/>}/>
+      <Route path='/EditarPerfilCliente' element={<EditarPerfilCliente/>}/>
     </Routes>
   );
 }
