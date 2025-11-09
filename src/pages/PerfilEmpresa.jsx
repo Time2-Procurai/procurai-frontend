@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import BarraPesquisa from '../components/BarraPesquisa';
 import BarraLateral from '../components/BarraLateral';
+import AvaliacaoPopup from "../components/AvaliacaoPopup";
 // instalem a biblioteca de icons lucide-react
 // npm install lucide-react
 import { ChevronLeft, Star, Store, Map } from 'lucide-react';
 
 function PerfilEmpresa() {
   const navigate = useNavigate();
+  const tipoUsuario = localStorage.getItem('usuario-tipo');
+  const [popupAberto, setPopupAberto] = useState(false);
 
   // dados dinâmicos
   const [lojaData, setLojaData] = useState({
@@ -74,11 +77,28 @@ function PerfilEmpresa() {
               </button>
 
               {/*editar perfil*/}
-              <button 
-              onClick={() => navigate("/EditarPerfilLoja")}
-              className="hover:cursor-pointer absolute top-4 ring-2 ring-[#FD7702] right-4 rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-md transition hover:bg-gray-50">
-                Editar perfil
-              </button>
+              {tipoUsuario === 'empresa' ? (
+                <button
+                  onClick={() => navigate("/EditarPerfilLoja")}
+                  className="hover:cursor-pointer absolute top-4 ring-2 ring-[#FD7702] right-4 rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-md transition hover:bg-gray-50"
+                >
+                  Editar perfil
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setPopupAberto(true)}
+                      className="hover:cursor-pointer absolute top-4 ring-2 ring-[#FD7702] right-4 rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-md transition hover:bg-gray-50"
+                  >
+                    Avaliar loja
+                  </button>
+
+                  <AvaliacaoPopup
+                    aberto={popupAberto}
+                    onFechar={() => setPopupAberto(false)}
+                  />
+                </>
+              )}
 
               {/*placeholder dinâmico do icon*/}
               <div className="absolute left-1/2 top-full -translate-x-1/2 -translate-y-1/2">

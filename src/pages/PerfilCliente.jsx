@@ -35,7 +35,7 @@ function PerfilCliente() {
 
             {/* Botão editar */}
             <button
-              onClick={() => navigate("/EditarPerfil")}
+              onClick={() => navigate("/EditarPerfilCliente")}
               className="hover:cursor-pointer absolute top-6 ring-2 ring-[#FD7702] right-6 rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-md">
               Editar perfil
             </button>
