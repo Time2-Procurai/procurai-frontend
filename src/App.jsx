@@ -13,6 +13,8 @@ import PerfilEmpresa from './pages/PerfilEmpresa.jsx';
 import PerfilCliente from './pages/PerfilCliente.jsx';
 import CatalogoEmpresa from './pages/CatalogoEmpresa.jsx';
 import AdicionarProduto from './pages/AdicionarProduto.jsx';
+import EditarPerfilLoja from './pages/EditarPerfilLoja.jsx';
+import EditarPerfilCliente from './pages/EditarPerfilCliente.jsx';
 
 function Home() {
   return (
@@ -45,6 +47,8 @@ function App() {
       <Route path='/perfil/cliente' element={<PerfilCliente />}/>
       <Route path='/produtos' element={<CatalogoEmpresa />}/>
       <Route path='/produtos/adicionar' element ={<AdicionarProduto />}/>
+      <Route path ='/EditarPerfilLoja' element={<EditarPerfilLoja/>}/>
+      <Route path='/EditarPerfilCliente' element={<EditarPerfilCliente/>}/>
     </Routes>
   );
 }
