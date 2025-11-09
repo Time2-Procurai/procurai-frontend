@@ -6,10 +6,6 @@ function BarraPesquisa() {
   const [query, setQuery] = useState("");
 
   function LogoFeed() {
-    navigate("/FeedCliente")
-  }
-
-  function LogoFeed() {
     const tipoUsuario = localStorage.getItem("usuario-tipo");
 
     if (tipoUsuario === "cliente") {
