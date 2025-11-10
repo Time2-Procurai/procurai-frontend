@@ -6,8 +6,20 @@ import BarraLateral from '../components/BarraLateral';
 function ConfiguracoesPage() {
   const navigate = useNavigate();
 
+  // Recupera o tipo de usuário salvo no login
+  const userRole = localStorage.getItem("userRole");
+
+  // Função para voltar para o feed correto
+  const handleVoltar = () => {
+    if (userRole === "cliente") {
+      navigate("/FeedCliente");
+    } else {
+      navigate("/FeedEmpresa"); 
+    }
+  };
+
   return (
-    <div className="h-screen font-sans text-gray-800">
+    <div className="h-screen text-gray-800">
       <BarraPesquisa />
 
       <div className="h-[calc(100%-56px)]"> {/* Altura total menos a barra do topo */}
@@ -15,7 +27,7 @@ function ConfiguracoesPage() {
 
         {/* Área central */}
         <div className="inline-block align-top w-[calc(100%-16rem)] h-full p-8 bg-white">
-          <button onClick={() => navigate("/FeedCliente")} 
+          <button onClick={handleVoltar} 
             className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer ml-2 text-[30px] mb-10">
             &lt; <span className="text-[24px] font-bold ml-6">Configurações</span>
           </button>
@@ -31,7 +43,10 @@ function ConfiguracoesPage() {
           </button>
           
           {/* Implementar método de Logout */}
-          <button onClick={() => navigate("/Login")}
+          <button onClick={() => {
+            localStorage.clear();
+            navigate("/Login");
+          }}
             className="ml-13 w-160 shadow shadow-gray-400 flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer text-[24px] font-semibold p-3 rounded-lg align-middle">
             <span className="text-lg mr-4 ml-2">&#x21A9;</span>Sair
           </button>
