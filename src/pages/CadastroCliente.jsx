@@ -250,7 +250,7 @@ const CadastroClientePage = () => {
               value={formData.phone} 
               onChange={handleChange} 
               placeholder="00 00000-0000"
-              pattern="\d"
+              pattern="\d{11}"
               required 
               className="invalid:border-red-500 invalid:focus:ring-red-500 shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
             />
