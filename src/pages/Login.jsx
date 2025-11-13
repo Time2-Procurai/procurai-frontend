@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; // <-- CORREÇÃO: Removido o 'use'
+import React, { useState } from 'react'; 
 import { useNavigate } from 'react-router-dom';
 import LadoLogoPage from '../components/LadoLogoPage';
 
@@ -18,7 +18,7 @@ function LoginPage() {
 
     try {
       
-     const response = await api.post('/user/token/', {
+      const response = await api.post('user/token/',{
         email: email,
         password: password,
       });
