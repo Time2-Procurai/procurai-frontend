@@ -54,7 +54,7 @@ function ExclusaoContaPage() {
 
         {/* Área central */}
         <div className="inline-block align-top w-[calc(100%-16rem)] h-full p-8 bg-white">
-          <button onClick={() => navigate("/Configuracoes")}
+          <button onClick={() => navigate("/Configuracoes/" + localStorage.getItem('userId'))}
             className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer ml-2 text-[30px] mb-10">
             &lt; <span className="text-[24px] font-bold ml-6">Configurações &lt; Exclusão de Conta</span>
           </button>
@@ -78,7 +78,7 @@ function ExclusaoContaPage() {
                 <button 
                   type="button" 
                   className="block mt-8 cursor-pointer w-md border-1 md:bg-main text-main md:text font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300"
-                  onClick={() => navigate("/Configuracoes")}>
+                  onClick={() => navigate("/Configuracoes/" + localStorage.getItem('userId'))}>
                   Cancelar
                 </button>
                 <button 

@@ -58,7 +58,7 @@ function CatalogoEmpresa() {
           {/* cabeçalho */}
           <div className="flex items-center justify-start mb-6">
             <button
-              onClick={() => navigate('/perfil/empresa')}
+              onClick={() => navigate('/perfil/empresa/' + localStorage.getItem('userId'))}
               className="hover:cursor-pointer text-black p-2 pr-4 transition hover:opacity-80"
             >
               <ChevronLeft size={28} />
@@ -71,13 +71,13 @@ function CatalogoEmpresa() {
           {/* botões */}
           <div className="justify-center flex gap-40 mb-8">
             <button
-              onClick={() => navigate('/produtos/adicionar')}
+              onClick={() => navigate('/produtos/adicionar/' + localStorage.getItem('userId'))}
               className="shadow-md border-2 border-[#FD7702] font-medium py-3 px-8 rounded-sm hover:bg-[#FD7702] hover:text-white hover:cursor-pointer transition-colors"
             >
               Adicionar novo produto
             </button>
             <button
-              onClick={() => navigate('/Estatisticas')}
+              onClick={() => navigate('/Estatisticas/' + localStorage.getItem('userId'))}
               className="shadow-md border-2 border-[#FD7702] font-medium py-3 px-8 rounded-sm hover:bg-[#FD7702] hover:text-white hover:cursor-pointer transition-colors"
             >
               Acessar minhas estatísticas

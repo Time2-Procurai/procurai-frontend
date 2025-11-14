@@ -53,7 +53,7 @@ function AdicionarProduto() {
       <main className="flex-1 overflow-y-auto px-10 py-8">
         <div className="flex items-center justify-start mb-6">
           <button
-            onClick={() => navigate('/perfil/empresa')}
+            onClick={() => navigate('/perfil/empresa/' + localStorage.getItem('userId'))}
             className="hover:cursor-pointer text-black p-2 pr-4 transition hover:opacity-80"
           >
             <ChevronLeft size={28} />

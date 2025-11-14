@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'; // Importar o useRef
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/api';
 
@@ -20,32 +20,14 @@ const interestsOptions = ['Tecnologia', 'Esportes', 'Construção', 'Saúde', 'B
   'Livros', 'Brinquedos', 'Alimentos e Bebidas'
 ];
 
-// Função que simula uma chamada de API (agora modificada para FormData)
-/*const simulateApiCall = (formData) => {
-  // Em um app real, o objeto FormData seria enviado. Aqui, apenas logamos os dados.
-  for (let [key, value] of formData.entries()) {
-    console.log(`Enviando para a API: ${key}`, value);
-  }
-
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (Math.random() > 0.2) {
-        resolve({ success: true, message: 'Perfil criado com sucesso! Você será redirecionado.' });
-      } else {
-        reject({ success: false, message: 'Erro: O nome de usuário já existe. Tente outro.' });
-      }
-    }, 1500);
-  });
-};*/
-
 const CadastroClientePage = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ fullName: '', username: '', cpf: '', phone: '' });
+  // O nome do campo aqui é 'full_Name' (com 'N' maiúsculo)
+  const [formData, setFormData] = useState({ full_Name: '', username: '', cpf: '', phone: '' });
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error,setError] = useState("");
 
-  // Adicionar estados para a imagem e uma ref para o input
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [profileImagePreview, setProfileImagePreview] = useState(null);
   const fileInputRef = useRef(null);
@@ -59,7 +41,7 @@ const CadastroClientePage = () => {
     } else {
       console.error("ID do utilizador não encontrado na sessão.");
       setError("Erro: ID do utilizador não encontrado. Por favor, volte ao passo anterior.");
-       
+        
     }
   }, []); 
 
@@ -77,8 +59,6 @@ const CadastroClientePage = () => {
   };
 
   
-
-  // Adicionar funções para lidar com o clique e a seleção do arquivo
   const handleImageContainerClick = () => {
     fileInputRef.current.click();
   };
@@ -101,10 +81,11 @@ const CadastroClientePage = () => {
       return;
     }
 
-    // Usar FormData para poder incluir o arquivo da imagem
     const submissionData = new FormData();
-    submissionData.append('fullName', formData.fullName);
-    submissionData.append('username', formData.username);
+    // O nome do campo aqui ('full_name') é o que a API espera
+    // O valor (formData.full_Name) vem do estado
+    submissionData.append('full_name', formData.full_Name); 
+    //submissionData.append('username', formData.username);
     submissionData.append('cpf', formData.cpf);
     submissionData.append('phone', formData.phone);
     submissionData.append('interests', JSON.stringify(selectedInterests));
@@ -115,17 +96,20 @@ const CadastroClientePage = () => {
 
     try {
       console.log("Dados a serem enviados:", submissionData);
+      for (let [key, value] of submissionData.entries()) {
+        console.log(`${key}:`, value);
+      }
+
       const response = await api.post(
         `user/register/tela2/cliente/${userId}/`,
-        submissionData, // Envia o FormData
-        
+        submissionData, 
       );
 
       console.log("Resposta da API:", response.data);
       
       
       sessionStorage.removeItem("user_id");
-      navigate('/cadastro/empresa/2');
+      navigate('/login');
 
     } catch (error) {
       console.error("Erro ao cadastrar cliente:", error);
@@ -133,10 +117,17 @@ const CadastroClientePage = () => {
 
       if (error.response && error.response.data) {
         const errors = error.response.data;
-        // Tenta extrair o primeiro erro
-        const firstErrorKey = Object.keys(errors)[0];
-        if (firstErrorKey && Array.isArray(errors[firstErrorKey])) {
-          errorMessage = `${firstErrorKey}: ${errors[firstErrorKey][0]}`;
+        console.log("Erros da API:", errors);
+        
+        // Verifica se o erro é no full_name
+        if (errors.full_name) {
+            errorMessage = `Nome completo: ${errors.full_name[0]}`;
+        } else {
+            // Tenta extrair o primeiro erro genérico
+            const firstErrorKey = Object.keys(errors)[0];
+            if (firstErrorKey && Array.isArray(errors[firstErrorKey])) {
+              errorMessage = `${firstErrorKey}: ${errors[firstErrorKey][0]}`;
+            }
         }
       }
       setError(errorMessage);
@@ -146,8 +137,6 @@ const CadastroClientePage = () => {
       setIsLoading(false);
     }
   };
-
-  
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
@@ -162,7 +151,6 @@ const CadastroClientePage = () => {
           <h1 className="text-2xl font-bold">Crie o seu perfil!</h1>
         </div>
 
-        {/* Tornar o bloco da foto clicável e exibir o preview */}
         <div
           className="flex flex-col items-center mb-8 cursor-pointer"
           onClick={handleImageContainerClick}
@@ -179,7 +167,6 @@ const CadastroClientePage = () => {
           <span className="block text-sm font-bold mt-2 text-gray-800 text-[20px]">Adicione uma foto de perfil</span>
         </div>
 
-        {/* Adicionar o input de arquivo escondido */}
         <input
           type="file"
           ref={fileInputRef}
@@ -194,10 +181,13 @@ const CadastroClientePage = () => {
               Nome completo
             </label>
 
+            {/* --- CORREÇÃO AQUI --- */}
+            {/* O 'name' e o 'value' agora usam 'full_Name' (com 'N' maiúsculo) */}
+            {/* para bater com o nome definido no 'useState' */}
             <input type="text" 
               id="fullName" 
-              name="fullName" 
-              value={formData.fullName} 
+              name="full_Name" 
+              value={formData.full_Name} 
               onChange={handleChange} 
               placeholder="Nome completo" 
               pattern="[\p{L}\s]+"
