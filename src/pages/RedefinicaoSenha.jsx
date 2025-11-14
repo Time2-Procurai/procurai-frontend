@@ -32,7 +32,7 @@ function RedefinicaoSenhaPage() {
 
         {/* Área central */}
         <div className="inline-block align-top w-[calc(100%-16rem)] h-full p-8 bg-white">
-          <button onClick={() => navigate("/Configuracoes")} 
+          <button onClick={() => navigate("/Configuracoes/" + localStorage.getItem('userId'))} 
             className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer ml-2 text-[30px] mb-10">
             &lt; <span className="text-[24px] font-bold ml-6">Configurações &lt; Redefinição de Senha</span>
           </button>
