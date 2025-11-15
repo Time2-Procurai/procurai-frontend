@@ -82,6 +82,7 @@ function AdicionarProduto() {
     submissionData.append("category_name", categoria);
     submissionData.append("is_service", isServico);
     submissionData.append("is_negotiable", isNegotiable);
+    //submissionData.append("owner_id", localStorage.getItem('userId')); // Assumindo que o userId da loja está no localStorage
     
     // ATENÇÃO: Adicionando a primeira imagem.
     // O backend precisa esperar um campo chamado "product_image".

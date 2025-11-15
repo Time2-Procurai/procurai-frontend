@@ -15,6 +15,9 @@ import CatalogoEmpresa from './pages/CatalogoEmpresa.jsx';
 import AdicionarProduto from './pages/AdicionarProduto.jsx';
 import EditarPerfilLoja from './pages/EditarPerfilLoja.jsx';
 import EditarPerfilCliente from './pages/EditarPerfilCliente.jsx';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import TelaProduto from './pages/TelaProduto.jsx';
 
 function Home() {
   return (
@@ -31,6 +34,8 @@ function Home() {
 
 function App() {
   return (
+
+   <AuthProvider> 
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<LoginPage />} />
@@ -43,6 +48,7 @@ function App() {
       <Route path='/cadastro/cliente' element={<CadastroCliente />} />
       <Route path='/cadastro/empresa' element={<CadastroEmpresaPage />}/>
       <Route path='/cadastro/empresa/2' element={<CadastroEmpresaPage2 />}/>
+      <Route path='/produto/:produtoId' element={<TelaProduto/>}/>
       
       {/* --- CORREÇÃO AQUI --- */}
       {/* Agora a rota aceita um ID dinâmico (ex: /perfil/empresa/5) */}
@@ -55,8 +61,10 @@ function App() {
       <Route path='/produtos/:userId' element={<CatalogoEmpresa />}/>
       <Route path='/produtos/adicionar/' element ={<AdicionarProduto />}/>
       <Route path ='/EditarPerfilLoja/:userId' element={<EditarPerfilLoja/>}/>
-      <Route path='/EditarPerfilCliente/:userId' element={<EditarPerfilCliente/>}/>
+      <Route path='/EditarPerfilCliente/' element={<EditarPerfilCliente/>}/>
     </Routes>
+
+  </AuthProvider>
   );
 }
 

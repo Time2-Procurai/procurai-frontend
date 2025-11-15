@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-// --- 1. Importar useParams ---
 import { useNavigate, Link, useParams } from 'react-router-dom'; 
 import BarraPesquisa from '../components/BarraPesquisa';
 import BarraLateral from '../components/BarraLateral';
@@ -10,10 +9,7 @@ import { ChevronLeft, Star, Store, Map } from 'lucide-react';
 function PerfilEmpresa() {
   const navigate = useNavigate();
 
-  // --- 2. Pegar o ID da URL (ID do perfil sendo visitado) ---
   const { userId: profileIdFromUrl } = useParams(); 
-
-  // --- 3. Pegar dados do Visitante (usuário logado) ---
   const visitanteTipo = localStorage.getItem('userRole');
   const visitanteId = localStorage.getItem('userId');
 
@@ -30,7 +26,6 @@ function PerfilEmpresa() {
       }
 
       try {
-        // --- 5. Usar o ID da URL para buscar ---
         const response = await api.get(`/user/listar/usuarios/${profileIdFromUrl}/`);
         console.log("Dados da loja obtidos:", response.data);
 
@@ -42,7 +37,7 @@ function PerfilEmpresa() {
         setLojaData({
           nome: response.data.full_name,
           categoria: response.data.company_category || "Categoria não definida",
-          rating: "4,9", 
+          rating: "4,9", // TODO: Tornar este campo dinâmico
           status: "Aberto", 
           descricao: response.data.description || "Sem descrição disponível.",
           horario: response.data.operating_hours || "Horário não informado.",
@@ -60,11 +55,9 @@ function PerfilEmpresa() {
     fetchDadosLoja();
   }, [profileIdFromUrl]); 
 
-  // Classes de estilo
   const abaAtivaClass = "whitespace-nowrap border-b-2 border-orange-500 py-4 px-1 text-base font-semibold text-orange-500";
   const abaInativaClass = "whitespace-nowrap border-b-2 border-transparent py-4 px-1 text-base font-semibold text-gray-500 hover:text-gray-700";
 
-  // Tela de Carregamento
   if (!lojaData) {
     return (
       <div className="h-screen text-gray-800 flex flex-col min-w-[1024px]">
@@ -79,10 +72,8 @@ function PerfilEmpresa() {
     );
   }
 
-  // --- 6. Variável para checar se o visitante é o dono ---
   const isOwner = visitanteId === profileIdFromUrl;
 
-  // Renderização principal
   return (
     <div className="h-screen text-gray-800 flex flex-col min-w-[1024px]">
       <BarraPesquisa />
@@ -110,15 +101,19 @@ function PerfilEmpresa() {
                 <ChevronLeft size={28} />
               </button>
 
-              {/* --- 7. Lógica do Botão "Editar" vs "Avaliar" --- */}
+              {/* --- LÓGICA DO BOTÃO "EDITAR" VS "AVALIAR" (CORRIGIDA) --- */}
+              
               {isOwner && visitanteTipo === 'empresa' ? (
+                // 1. Se for o dono E for uma empresa, mostra "Editar perfil"
                 <button
-                  onClick={() => navigate(`/EditarPerfilLoja/${localStorage.getItem('userId')}`)}
+                  // A rota é estática, o componente 'EditarPerfilLoja' pega o ID do localStorage
+                  onClick={() => navigate(`/EditarPerfilLoja/${localStorage.getItem("userId")}`)} 
                   className="hover:cursor-pointer absolute top-4 ring-2 ring-[#FD7702] right-4 rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-md transition hover:bg-gray-50"
                 >
                   Editar perfil
                 </button>
-              ) : (
+              ) : visitanteTipo === 'cliente' ? (
+                // 2. Se for um 'cliente', mostra "Avaliar loja"
                 <>
                   <button
                     onClick={() => setPopupAberto(true)}
@@ -127,12 +122,20 @@ function PerfilEmpresa() {
                     Avaliar loja
                   </button>
 
+                  {/* --- CORREÇÃO AQUI --- */}
                   <AvaliacaoPopup
                     aberto={popupAberto}
+                    // Passa o ID da loja que está sendo vista
+                    storeId={profileIdFromUrl} 
                     onFechar={() => setPopupAberto(false)}
                   />
                 </>
+              ) : (
+                // 3. Se for outra 'empresa' ou anônimo, não mostra nada
+                null
               )}
+              {/* --- FIM DA LÓGICA DO BOTÃO --- */}
+
 
               {/* Foto de Perfil */}
               <div className="absolute left-1/2 top-full -translate-x-1/2 -translate-y-1/2">
@@ -178,7 +181,6 @@ function PerfilEmpresa() {
                 >
                   Informações
                 </button>
-                {/* --- 8. Links das abas usam o ID da URL --- */}
                 <Link
                   to={`/comunidade/${profileIdFromUrl}`}
                   className={abaInativaClass}
@@ -195,7 +197,7 @@ function PerfilEmpresa() {
               </nav>
             </div>
 
-            {/* --- 9. Conteúdo da Aba Informações (NÃO ABREVIADO) --- */}
+            {/* Conteúdo da Aba Informações */}
             {abaAtiva === 'Informações' && (
               <div className="p-4">
                 <div className="rounded-xl border border-gray-200 p-5 shadow-sm">
