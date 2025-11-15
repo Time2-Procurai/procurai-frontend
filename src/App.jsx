@@ -53,7 +53,7 @@ function App() {
       <Route path='/perfil/cliente/:userId' element={<PerfilCliente />}/>
       
       <Route path='/produtos/:userId' element={<CatalogoEmpresa />}/>
-      <Route path='/produtos/adicionar/:userId' element ={<AdicionarProduto />}/>
+      <Route path='/produtos/adicionar/' element ={<AdicionarProduto />}/>
       <Route path ='/EditarPerfilLoja/:userId' element={<EditarPerfilLoja/>}/>
       <Route path='/EditarPerfilCliente/:userId' element={<EditarPerfilCliente/>}/>
     </Routes>

@@ -21,7 +21,7 @@ function PerfilEmpresa() {
   const [abaAtiva, setAbaAtiva] = useState('Informações');
   const [lojaData, setLojaData] = useState(null);
 
-  // --- 4. useEffect agora depende do ID da URL ---
+  
   useEffect(() => {
     const fetchDadosLoja = async () => {
       if (!profileIdFromUrl) {
@@ -113,7 +113,7 @@ function PerfilEmpresa() {
               {/* --- 7. Lógica do Botão "Editar" vs "Avaliar" --- */}
               {isOwner && visitanteTipo === 'empresa' ? (
                 <button
-                  onClick={() => navigate("/EditarPerfilLoja")}
+                  onClick={() => navigate(`/EditarPerfilLoja/${localStorage.getItem('userId')}`)}
                   className="hover:cursor-pointer absolute top-4 ring-2 ring-[#FD7702] right-4 rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-md transition hover:bg-gray-50"
                 >
                   Editar perfil
