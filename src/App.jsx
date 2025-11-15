@@ -1,4 +1,6 @@
 import { Routes, Route, Link } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/Login.jsx';
 import FeedPageCliente from './pages/FeedCliente.jsx';
 import FeedPageEmpresa from './pages/FeedEmpresa.jsx';
@@ -15,42 +17,53 @@ import CatalogoEmpresa from './pages/CatalogoEmpresa.jsx';
 import AdicionarProduto from './pages/AdicionarProduto.jsx';
 import EditarPerfilLoja from './pages/EditarPerfilLoja.jsx';
 import EditarPerfilCliente from './pages/EditarPerfilCliente.jsx';
+import TelaProduto from './pages/TelaProduto.jsx';
 
 function Home() {
-  return (
-    <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center text-center">
-      <h1 className="text-5xl font-bold text-white">PROCUR<span class="text-[#FD7702]">AÍ</span></h1>
-      <Link
-        to="/login"
-        className="mt-6 px-6 py-3 font-bold text-white bg-orange-400 rounded-md hover:bg-orange-500">
-        Login
-      </Link>
-    </div>
-  );
+  return (
+    <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center text-center">
+      <h1 className="text-5xl font-bold text-white">PROCUR<span className="text-[#FD7702]">AÍ</span></h1>
+      <Link
+        to="/login"
+        className="mt-6 px-6 py-3 font-bold text-white bg-orange-400 rounded-md hover:bg-orange-500">
+        Login
+      </Link>
+    </div>
+  );
 }
 
 function App() {
-  return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/feedcliente" element={<FeedPageCliente />}/>
-      <Route path="/feedempresa" element={<FeedPageEmpresa />}/>
-      <Route path="/configuracoes" element ={<ConfiguracoesPage/>}/>
-      <Route path="/redefinicaosenha" element={<RedefinicaoSenhaPage/>}/>
-      <Route path="/exclusaoconta" element={<ExclusaoContaPage/>}/>
-      <Route path='/cadastro' element={<Cadastro />} />
-      <Route path='/cadastro/cliente' element={<CadastroCliente />} />
-      <Route path='/cadastro/empresa' element={<CadastroEmpresaPage />}/>
-      <Route path='/cadastro/empresa/2' element={<CadastroEmpresaPage2 />}/>
-      <Route path='/perfil/empresa' element={<PerfilEmpresa />}/>      
-      <Route path='/perfil/cliente' element={<PerfilCliente />}/>
-      <Route path='/produtos' element={<CatalogoEmpresa />}/>
-      <Route path='/produtos/adicionar' element ={<AdicionarProduto />}/>
-      <Route path ='/EditarPerfilLoja' element={<EditarPerfilLoja/>}/>
-      <Route path='/EditarPerfilCliente' element={<EditarPerfilCliente/>}/>
-    </Routes>
-  );
+  return (
+    <AuthProvider>
+      <Routes>
+        {/*rotas publicas*/}
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path='/cadastro' element={<Cadastro />} />
+        <Route path='/cadastro/cliente' element={<CadastroCliente />} />
+        <Route path='/cadastro/empresa' element={<CadastroEmpresaPage />}/>
+        <Route path='/cadastro/empresa/2' element={<CadastroEmpresaPage2 />}/>
+        <Route path='/produto/:produtoId' element={<TelaProduto/>}/>
+        <Route path="/redefinicaosenha" element={<RedefinicaoSenhaPage/>}/>
+
+        
+        {/*rotas protegidas*/}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/feedcliente" element={<FeedPageCliente />}/>
+          <Route path="/feedempresa" element={<FeedPageEmpresa />}/>
+          <Route path="/configuracoes" element ={<ConfiguracoesPage/>}/>
+          <Route path="/exclusaoconta" element={<ExclusaoContaPage/>}/>
+          <Route path='/perfil/empresa' element={<PerfilEmpresa />}/>      
+          <Route path='/perfil/cliente' element={<PerfilCliente />}/>
+          <Route path='/produtos' element={<CatalogoEmpresa />}/>
+          <Route path='/produtos/adicionar' element ={<AdicionarProduto />}/>
+          <Route path ='/EditarPerfilLoja' element={<EditarPerfilLoja/>}/>
+          <Route path='/EditarPerfilCliente' element={<EditarPerfilCliente/>}/>
+        </Route>
+
+      </Routes>
+    </AuthProvider>
+  );
 }
 
 export default App;
