@@ -103,7 +103,7 @@ function PerfilEmpresa() {
 
               {/* --- LÓGICA DO BOTÃO "EDITAR" VS "AVALIAR" (CORRIGIDA) --- */}
               
-              {isOwner && visitanteTipo === 'empresa' ? (
+              {isOwner && visitanteTipo === 'lojista' ? (
                 // 1. Se for o dono E for uma empresa, mostra "Editar perfil"
                 <button
                   // A rota é estática, o componente 'EditarPerfilLoja' pega o ID do localStorage
