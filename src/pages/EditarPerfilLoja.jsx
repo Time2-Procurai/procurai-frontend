@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import BarraPesquisa from "../components/BarraPesquisa";
 import BarraLateral from "../components/BarraLateral";
 import UploadFoto from "../components/UploadFoto";
+import api from "../api/api";
 
 function EditarPerfilLoja() {
   const navigate = useNavigate();
@@ -23,17 +24,111 @@ function EditarPerfilLoja() {
     complemento: "",
   });
 
+  // Foto de perfil da loja
+  const [profileImageFile, setprofileImageFile] = useState(null);
+  const [profileImagePreview, setprofileImagePreview] = useState(null);
+
   // Função genérica para lidar com mudanças nos inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
     setDados({ ...dados, [name]: value });
   };
 
+  // Upload da foto de perfil
+  const handleFotoPerfil = (file) => {
+    setProfileImageFile(file);
+    setProfileImagePreview(URL.createObjectURL(file));
+  };
+
+  // Estados de Controle
+  const [isFetching, setIsFetching] = useState(true); // Para o carregamento inicial
+  const [isLoading, setIsLoading] = useState(false);   // Para o envio (submit)
+  const [error, setError] = useState(null);
+
+  // useEffect: Buscar dados atuais da loja
+  useEffect(() => {
+    const fetchCurrentData = async () => {
+      setIsFetching(true);
+      try {
+        // O backend (UserProfileView) usa o token para saber quem é o usuário
+        const response = await api.get("/user/profile/");
+        const { user, profile } = response.data;
+        console.log("Dados obtidos da loja:", response.data);
+
+        setDados({
+          nomeLoja: profile?.company_name || "",
+          tipoLoja: profile?.company_type || "",
+          categoria: profile?.company_category || "",
+          descricao: profile?.description || "",
+          telefone: user?.phone || "",
+          horario: profile?.operating_hours || "",
+          cep: profile?.cep || "",
+          endereco: profile?.street || "",
+          numero: profile?.number || "",
+          cidade: profile?.city || "",
+          bairro: profile?.neighborhood || "",
+          complemento: profile?.complement || "",
+        });
+
+        // Define a foto de perfil *existente*
+        if (profile?.profile_picture) {
+          setProfileImagePreview(profile.profile_picture);
+        }
+      } catch (err) {
+        console.error("Erro ao buscar dados do perfil:", err);
+        setError("Não foi possível carregar seus dados.");
+      } finally {
+        setIsFetching(false);
+      }
+    };
+    fetchCurrentData();
+  }, []);
+
   // (Futuramente) enviar dados para o backend
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Dados enviados:", dados);
-    alert("Perfil atualizado com sucesso!");
+    setIsLoading(true);
+    setError(null);
+
+    const submissionData = new FormData();
+
+    if (dados.nomeLoja) submissionData.append("company_name", dados.nomeLoja);
+    if (dados.tipoLoja) submissionData.append("company_type", dados.tipoLoja);
+    if (dados.categoria) submissionData.append("company_category", dados.categoria);
+    if (dados.descricao) submissionData.append("description", dados.descricao);
+    if (dados.horario) submissionData.append("operating_hours", dados.horario);
+
+    if (dados.cep) submissionData.append("cep", dados.cep);
+    if (dados.endereco) submissionData.append("street", dados.endereco);
+    if (dados.numero) submissionData.append("number", dados.numero);
+    if (dados.cidade) submissionData.append("city", dados.cidade);
+    if (dados.bairro) submissionData.append("neighborhood", dados.bairro);
+    if (dados.complemento) submissionData.append("complement", dados.complemento);
+
+    if (profileImageFile) {
+      submissionData.append("profile_picture", profileImageFile);
+    }
+
+    try {
+
+      await api.patch(
+        `/user/profile/`,
+        submissionData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+
+      alert("Perfil atualizado com sucesso!");
+      navigate(-1);
+
+    } catch (error) {
+      console.error("Erro ao atualizar o perfil da loja:", error);
+      alert("Erro ao atualizar o perfil. Tente novamente.");
+
+    } finally {
+      setIsLoading(false);
+    }
+
   };
 
   return (
@@ -51,7 +146,13 @@ function EditarPerfilLoja() {
 
           {/* Área de upload da capa + foto */}
           <div className="relative w-full max-w-4xl mb-8">
-            <div className="w-full h-40 bg-gray-200 rounded-xl mb-4"></div>
+            <div className="w-full h-40 bg-gray-200 rounded-xl mb-4">
+              {profileImageFile ? (
+                <img src={profileImagePreview} className="w-full h-full object-cover" />
+              ) : (
+                <p className="text-center text-gray-500 mt-16">Foto da Loja</p>
+              )}
+            </div>
             <div className="absolute -bottom-8 left-8">
               <UploadFoto />
             </div>

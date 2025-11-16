@@ -35,17 +35,17 @@ function PerfilEmpresa() {
           .join(', '); 
 
         setLojaData({
-          nome: response.data.full_name,
+          nome: response.data.company_name,
           categoria: response.data.company_category || "Categoria não definida",
           rating: "4,9", // TODO: Tornar este campo dinâmico
-          status: "Aberto", 
+          status: "Aberto",
           descricao: response.data.description || "Sem descrição disponível.",
           horario: response.data.operating_hours || "Horário não informado.",
           contato: response.data.phone || "Sem telefone.",
           endereco: enderecoCompleto || "Endereço não informado.",
           bannerUrl: response.data.cover_picture,
           profileUrl: response.data.profile_picture,
-          mapUrl: null 
+          mapUrl: null,
         });
       } catch (e) {
         console.error("Erro ao obter dados do usuário:", e);
