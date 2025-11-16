@@ -18,6 +18,7 @@ import EditarPerfilCliente from './pages/EditarPerfilCliente.jsx';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import TelaProduto from './pages/TelaProduto.jsx';
+import ResultadosBusca from './pages/ResultadosBusca.jsx';
 
 function Home() {
   return (
@@ -62,6 +63,7 @@ function App() {
       <Route path='/produtos/adicionar/' element ={<AdicionarProduto />}/>
       <Route path ='/EditarPerfilLoja/:userId' element={<EditarPerfilLoja/>}/>
       <Route path='/EditarPerfilCliente/' element={<EditarPerfilCliente/>}/>
+      <Route path="/search/" element={<ResultadosBusca />} />
     </Routes>
 
   </AuthProvider>
