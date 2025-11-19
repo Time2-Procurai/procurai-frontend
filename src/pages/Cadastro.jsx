@@ -10,58 +10,57 @@ function Cadastro() {
   const [error, setError] = useState("");
   const [tipoCadastro, setTipoCadastro] = useState("cliente");
 
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
-const handleCadastro = async (e) => {
-  e.preventDefault();
-  setError(""); 
-  
-  if (!password.trim()) {
-    setError("Insira uma senha válida.");
-    return;
-  }
+  const handleCadastro = async (e) => {
+    e.preventDefault();
+    setError("");
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    setError("Insira um e-mail válido.");
-    return;
-  }
-
-  if (password !== confirmacao) {
-    setError("As senhas não coincidem.");
-    return;
-  }
-      
-
-  try {    
-    const response = await api.post("user/register/tela1/", {
-      email: email,
-      password: password,
-      password_confirm: confirmacao,
-      user_type: tipoCadastro,
-    });
-    console.log("Resposta da API:", response.data);   
-    const id = response.data.user_id; 
-    sessionStorage.setItem("user_id", id) 
-    if (tipoCadastro === "cliente") {
-      console.log('Tipo do cadastro -->',tipoCadastro)
-      navigate("/cadastro/cliente");
-    } else if (tipoCadastro === "empresa") {
-      navigate("/cadastro/empresa");
+    if (!password.trim()) {
+      setError("Insira uma senha válida.");
+      return;
     }
 
-  } catch (error) {    
-    console.error("Erro ao cadastrar usuário:", error);
-    
-    if (error.response && error.response.data) {        
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Insira um e-mail válido.");
+      return;
+    }
+
+    if (password !== confirmacao) {
+      setError("As senhas não coincidem.");
+      return;
+    }
+
+    try {
+      const response = await api.post("user/register/tela1/", {
+        email: email,
+        password: password,
+        password_confirm: confirmacao,
+        user_type: tipoCadastro,
+      });
+      console.log("Resposta da API:", response.data);
+      const id = response.data.user_id;
+      sessionStorage.setItem("user_id", id)
+      if (tipoCadastro === "cliente") {
+        console.log('Tipo do cadastro -->', tipoCadastro)
+        navigate("/cadastro/cliente");
+      } else if (tipoCadastro === "empresa") {
+        navigate("/cadastro/empresa");
+      }
+
+    } catch (error) {
+      console.error("Erro ao cadastrar usuário:", error);
+
+      if (error.response && error.response.data) {
         setError("Erro ao cadastrar. Verifique os dados informados.");
         console.error("Detalhes do erro:", error.response.data);
-    } else {
+      } else {
         setError("Não foi possível conectar ao servidor. Tente novamente.");
+      }
+
     }
-  
-  } 
-};
+  };
 
   return (
     <div className="min-h-screen flex text-gray-800 bg-[#1A225F]" >
@@ -82,7 +81,7 @@ const handleCadastro = async (e) => {
               className={`shadow-lg w-full py-3 px-4 rounded-lg font-bold cursor-pointer hover:opacity-90 transition duration-300 ${tipoCadastro === "cliente"
                 ? "bg-[#FD7702] text-white"
                 : "bg-gray-300 text-gray-700"
-              }`}>
+                }`}>
               Cliente
             </button>
 
@@ -92,7 +91,7 @@ const handleCadastro = async (e) => {
               className={`shadow-lg w-full py-3 px-4 rounded-lg font-bold cursor-pointer hover:opacity-90 transition duration-300 ${tipoCadastro === "empresa"
                 ? "bg-[#FD7702] text-white"
                 : "bg-gray-300 text-gray-700"
-              }`}>
+                }`}>
               Empresa
             </button>
           </div>
@@ -131,30 +130,25 @@ const handleCadastro = async (e) => {
               />
             </div>
 
-            <div>
+            <div className="mb-8">
               <label className="block text-sm font-bold mb-2 text-white md:text-gray-800 text-[20px]" htmlFor="password">Confirmar senha</label>
-              <input id="confirmacao" 
-                type="password" 
-                value={confirmacao} 
-                onChange={(e) => setConfirmacao(e.target.value)} 
-                placeholder="Confirmar senha" 
+              <input id="confirmacao"
+                type="password"
+                value={confirmacao}
+                onChange={(e) => setConfirmacao(e.target.value)}
+                placeholder="Confirmar senha"
                 className="shadow-sm w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-main"
                 required
               />
             </div>
 
-            <p className=" text-pink-100 md:text-gray-500 mb-6 mt-3">
-              <a href="/" className="text-[#1A225F] md:text-main font-bold hover:underline">
-                Esqueceu a senha?
-              </a>
-            </p>
 
-            <button type="submit" 
-              className="shadow-lg cursor-pointer w-full bg-[#FD7702] md:bg-main text-main md:text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300" 
+            <button type="submit"
+              className="shadow-lg cursor-pointer w-full bg-[#FD7702] md:bg-main text-main md:text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300"
               onClick={handleCadastro}>
               Criar conta
             </button>
-          
+
             <p className=" text-pink-100 md:text-gray-500 mb-8 mt-7">
               Já tem uma conta?{' '}
               <a href="/login" className="text-[#1A225F] md:text-main font-bold hover:underline">

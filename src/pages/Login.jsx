@@ -110,6 +110,12 @@ function LoginPage() {
                 />
               </div>
 
+              <p className=" text-pink-100 md:text-gray-500 mb-6 mt-3">
+              <a href="/redefinirSenha" className="text-[#1A225F] md:text-main font-bold hover:underline">
+                Esqueceu a senha?
+              </a>
+            </p>
+
               {/* OBSERVAÇÃO: Mudei o type para 'button' para não submeter o form */}
               <button type="button" 
                 className="shadow-lg w-full border-1 mb-4 md:bg-main text-main font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300 cursor-pointer">
