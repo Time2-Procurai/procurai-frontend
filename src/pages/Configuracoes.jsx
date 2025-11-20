@@ -12,9 +12,9 @@ function ConfiguracoesPage() {
   // Função para voltar para o feed correto
   const handleVoltar = () => {
     if (userRole === "cliente") {
-      navigate("/FeedCliente");
+      navigate("/FeedCliente/" + localStorage.getItem('userId'));
     } else {
-      navigate("/FeedEmpresa"); 
+      navigate("/FeedEmpresa/" + localStorage.getItem('userId'));
     }
   };
 
@@ -27,21 +27,21 @@ function ConfiguracoesPage() {
 
         {/* Área central */}
         <div className="inline-block align-top w-[calc(100%-16rem)] h-full p-8 bg-white">
-          <button onClick={handleVoltar} 
+          <button onClick={handleVoltar}
             className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer ml-2 text-[30px] mb-10">
             &lt; <span className="text-[24px] font-bold ml-6">Configurações</span>
           </button>
 
-          <button onClick={() => navigate("/RedefinicaoSenha")} 
+          <button onClick={() => navigate("/RedefinicaoSenha/" + localStorage.getItem('userId'))}
             className="ml-13 w-160 shadow shadow-gray-400 flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer text-[24px] font-semibold mb-10 p-3 rounded-lg align-middle">
             <span className="text-lg mr-4 ml-2">🔐</span>Redefinição de Senha
           </button>
 
-          <button onClick={() => navigate("/ExclusaoConta")} 
+          <button onClick={() => navigate("/ExclusaoConta/" + localStorage.getItem('userId'))}
             className="ml-13 mb-10 w-160 shadow shadow-gray-400 flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer text-[24px] font-semibold p-3 rounded-lg align-middle">
             <span className="text-lg mr-4 ml-2">🗑️</span>Exclusão de Conta
           </button>
-          
+
           {/* Implementar método de Logout */}
           <button onClick={() => {
             localStorage.clear();

@@ -1,14 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react'; // Importar o useRef
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/api';
 
 // Ícone de seta
 const BackArrowIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" 
-    fill="none" 
-    viewBox="0 0 24" 
-    strokeWidth={1.5} 
-    stroke="currentColor" 
+  <svg xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
     className="font-bold cursor-pointer w-6 h-6"
   >
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -16,42 +16,24 @@ const BackArrowIcon = () => (
 );
 
 // Lista de interesses
-const interestsOptions = ['Tecnologia', 'Esportes', 'Construção', 'Saúde', 'Beleza', 'Culinária', 'Decoração', 'Papelaria',
-  'Livros', 'Brinquedos', 'Alimentos e Bebidas'
+const interestsOptions = ['Alimentos e Bebidas', 'Beleza', 'Brinquedos', 'Construção', 'Culinária', 'Decoração', 'Esportes', 
+  'Livros', 'Papelaria', 'Saúde', 'Tecnologia'
 ];
-
-// Função que simula uma chamada de API (agora modificada para FormData)
-/*const simulateApiCall = (formData) => {
-  // Em um app real, o objeto FormData seria enviado. Aqui, apenas logamos os dados.
-  for (let [key, value] of formData.entries()) {
-    console.log(`Enviando para a API: ${key}`, value);
-  }
-
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (Math.random() > 0.2) {
-        resolve({ success: true, message: 'Perfil criado com sucesso! Você será redirecionado.' });
-      } else {
-        reject({ success: false, message: 'Erro: O nome de usuário já existe. Tente outro.' });
-      }
-    }, 1500);
-  });
-};*/
 
 const CadastroClientePage = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ fullName: '', username: '', cpf: '', phone: '' });
+  // O nome do campo aqui é 'full_Name' (com 'N' maiúsculo)
+  const [formData, setFormData] = useState({ full_Name: '', username: '', cpf: '', phone: '' });
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error,setError] = useState("");
+  const [error, setError] = useState("");
 
-  // Adicionar estados para a imagem e uma ref para o input
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [profileImagePreview, setProfileImagePreview] = useState(null);
   const fileInputRef = useRef(null);
-  const [userId, setUserId] = useState(null); 
+  const [userId, setUserId] = useState(null);
 
-  
+
   useEffect(() => {
     const storedUserId = sessionStorage.getItem("user_id");
     if (storedUserId) {
@@ -59,9 +41,9 @@ const CadastroClientePage = () => {
     } else {
       console.error("ID do utilizador não encontrado na sessão.");
       setError("Erro: ID do utilizador não encontrado. Por favor, volte ao passo anterior.");
-       
+
     }
-  }, []); 
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -76,9 +58,7 @@ const CadastroClientePage = () => {
     );
   };
 
-  
 
-  // Adicionar funções para lidar com o clique e a seleção do arquivo
   const handleImageContainerClick = () => {
     fileInputRef.current.click();
   };
@@ -101,10 +81,11 @@ const CadastroClientePage = () => {
       return;
     }
 
-    // Usar FormData para poder incluir o arquivo da imagem
     const submissionData = new FormData();
-    submissionData.append('fullName', formData.fullName);
-    submissionData.append('username', formData.username);
+    // O nome do campo aqui ('full_name') é o que a API espera
+    // O valor (formData.full_Name) vem do estado
+    submissionData.append('full_name', formData.full_Name);
+    //submissionData.append('username', formData.username);
     submissionData.append('cpf', formData.cpf);
     submissionData.append('phone', formData.phone);
     submissionData.append('interests', JSON.stringify(selectedInterests));
@@ -115,17 +96,20 @@ const CadastroClientePage = () => {
 
     try {
       console.log("Dados a serem enviados:", submissionData);
+      for (let [key, value] of submissionData.entries()) {
+        console.log(`${key}:`, value);
+      }
+
       const response = await api.post(
         `user/register/tela2/cliente/${userId}/`,
-        submissionData, // Envia o FormData
-        
+        submissionData,
       );
 
       console.log("Resposta da API:", response.data);
-      
-      
+
+
       sessionStorage.removeItem("user_id");
-      navigate('/cadastro/empresa/2');
+      navigate('/login');
 
     } catch (error) {
       console.error("Erro ao cadastrar cliente:", error);
@@ -133,10 +117,17 @@ const CadastroClientePage = () => {
 
       if (error.response && error.response.data) {
         const errors = error.response.data;
-        // Tenta extrair o primeiro erro
-        const firstErrorKey = Object.keys(errors)[0];
-        if (firstErrorKey && Array.isArray(errors[firstErrorKey])) {
-          errorMessage = `${firstErrorKey}: ${errors[firstErrorKey][0]}`;
+        console.log("Erros da API:", errors);
+
+        // Verifica se o erro é no full_name
+        if (errors.full_name) {
+          errorMessage = `Nome completo: ${errors.full_name[0]}`;
+        } else {
+          // Tenta extrair o primeiro erro genérico
+          const firstErrorKey = Object.keys(errors)[0];
+          if (firstErrorKey && Array.isArray(errors[firstErrorKey])) {
+            errorMessage = `${firstErrorKey}: ${errors[firstErrorKey][0]}`;
+          }
         }
       }
       setError(errorMessage);
@@ -146,8 +137,6 @@ const CadastroClientePage = () => {
       setIsLoading(false);
     }
   };
-
-  
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
@@ -162,7 +151,6 @@ const CadastroClientePage = () => {
           <h1 className="text-2xl font-bold">Crie o seu perfil!</h1>
         </div>
 
-        {/* Tornar o bloco da foto clicável e exibir o preview */}
         <div
           className="flex flex-col items-center mb-8 cursor-pointer"
           onClick={handleImageContainerClick}
@@ -171,15 +159,14 @@ const CadastroClientePage = () => {
             <img
               src={profileImagePreview}
               alt="Prévia do perfil"
-              className="w-42 h-42 rounded-full object-cover"
+              className="w-36 h-36 rounded-full mb-3 object-cover"
             />
           ) : (
-            <div className="w-28 h-28 bg-gray-200 rounded-full mb-3"></div>
+            <div className="w-36 h-36 bg-gray-200 rounded-full mb-3"></div>
           )}
           <span className="block text-sm font-bold mt-2 text-gray-800 text-[20px]">Adicione uma foto de perfil</span>
         </div>
 
-        {/* Adicionar o input de arquivo escondido */}
         <input
           type="file"
           ref={fileInputRef}
@@ -194,15 +181,18 @@ const CadastroClientePage = () => {
               Nome completo
             </label>
 
-            <input type="text" 
-              id="fullName" 
-              name="fullName" 
-              value={formData.fullName} 
-              onChange={handleChange} 
-              placeholder="Nome completo" 
+            {/* --- CORREÇÃO AQUI --- */}
+            {/* O 'name' e o 'value' agora usam 'full_Name' (com 'N' maiúsculo) */}
+            {/* para bater com o nome definido no 'useState' */}
+            <input type="text"
+              id="fullName"
+              name="full_Name"
+              value={formData.full_Name}
+              onChange={handleChange}
+              placeholder="Digite o seu nome completo"
               pattern="[\p{L}\s]+"
-              required 
-              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+              required
+              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
@@ -211,14 +201,14 @@ const CadastroClientePage = () => {
               Nome de usuário
             </label>
 
-            <input type="text" 
-              id="username" 
-              name="username" 
-              value={formData.username} 
-              onChange={handleChange} 
-              placeholder="Digite um nome de usuário" 
-              required 
-              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+            <input type="text"
+              id="username"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              placeholder="Digite um nome de usuário"
+              required
+              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
@@ -227,15 +217,15 @@ const CadastroClientePage = () => {
               CPF
             </label>
 
-            <input type="text" 
-              id="cpf" 
-              name="cpf" 
-              value={formData.cpf} 
-              onChange={handleChange} 
-              placeholder="00000000000" 
+            <input type="text"
+              id="cpf"
+              name="cpf"
+              value={formData.cpf}
+              onChange={handleChange}
+              placeholder="000.000.000-00"
               pattern="\d{11}"
-              required 
-              className="invalid:border-red-500 invalid:focus:ring-red-500 shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+              required
+              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
@@ -244,15 +234,15 @@ const CadastroClientePage = () => {
               Telefone
             </label>
 
-            <input type="tel" 
-              id="phone" 
-              name="phone" 
-              value={formData.phone} 
-              onChange={handleChange} 
-              placeholder="00 00000-0000"
-              pattern="\d"
-              required 
-              className="invalid:border-red-500 invalid:focus:ring-red-500 shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+            <input type="tel"
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="81 00000-0000"
+              pattern="\d{11}"
+              required
+              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
@@ -263,9 +253,9 @@ const CadastroClientePage = () => {
 
             <div className="flex flex-wrap justify-center gap-2">
               {interestsOptions.map((interest) => (
-                <button key={interest} 
-                  type="button" 
-                  onClick={() => handleInterestClick(interest)} 
+                <button key={interest}
+                  type="button"
+                  onClick={() => handleInterestClick(interest)}
                   className={`shadow-sm cursor-pointer px-4 py-2 rounded-full font-medium text-sm transition-colors duration-200 
                   ${selectedInterests.includes(interest) ? 'bg-orange-500 text-white border border-orange-500' : 'bg-white text-gray-800 border border-gray-300 hover:bg-gray-100'}`}>
                   {interest}
@@ -275,9 +265,9 @@ const CadastroClientePage = () => {
             </div>
           </div>
 
-          <button type="submit" 
-            disabled={isLoading} 
-            className="shadow-lg cursor-pointer w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-300 disabled:bg-orange-300 disabled:cursor-not-allowed">
+          <button type="submit"
+            disabled={isLoading}
+            className="shadow-lg cursor-pointer w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-400 transition-colors duration-300 disabled:bg-orange-300 disabled:cursor-not-allowed">
             {isLoading ? 'Criando perfil...' : 'Criar perfil'}
           </button>
         </form>

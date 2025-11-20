@@ -1,53 +1,76 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import BarraPesquisa from '../components/BarraPesquisa';
 import BarraLateral from '../components/BarraLateral';
-import { ChevronLeft, Store } from 'lucide-react';
-
-// imagens de exemplo (fallback)
-import imgParafusadeira from '../assets/parafusadeira.jpg';
-import imgFuradeira from '../assets/furadeira.png';
-import imgCaixaFerramenta from '../assets/caixaferramenta.jpg';
+import { ChevronLeft, Store, MoreVertical } from 'lucide-react';
+import api from '../api/api';
 
 function CatalogoEmpresa() {
   const navigate = useNavigate();
 
-  // estado inicial vazio
   const [produtos, setProdutos] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // carrega produtos do localStorage assim que o componente é montado
+  const { userId: storeId } = useParams();
+  const visitanteId = localStorage.getItem('userId');
+  const isOwner = storeId === visitanteId;
+
   useEffect(() => {
-    const produtosSalvos = JSON.parse(localStorage.getItem('produtos')) || [];
-
-    // caso não haja produtos, exibe os exemplos iniciais
-    if (produtosSalvos.length === 0) {
-      setProdutos([
-        {
-          id: 1,
-          nome: "Parafusadeira DEWALT LT3",
-          preco: 180.9,
-          desconto: 20,
-          imagem: imgParafusadeira,
-        },
-        {
-          id: 2,
-          nome: "Furadeira DEWALT 500W",
-          preco: 230.5,
-          desconto: 10,
-          imagem: imgFuradeira,
-        },
-        {
-          id: 3,
-          nome: "Caixa de ferramentas Vonder",
-          preco: 89.9,
-          desconto: 0,
-          imagem: imgCaixaFerramenta,
-        },
-      ]);
-    } else {
-      setProdutos(produtosSalvos);
+    if (!storeId) {
+      setError("ID da loja não encontrado na URL.");
+      setIsLoading(false);
+      return;
     }
-  }, []);
+    const fetchProdutos = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await api.get(`products/store/${storeId}/`);
+        setProdutos(response.data);
+      } catch (err) {
+        console.error("Erro ao buscar produtos:", err);
+        setError("Não foi possível carregar os produtos.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProdutos();
+  }, [storeId]);
+
+  const handleProductMenuClick = (e, produtoId) => {
+    e.stopPropagation();
+    console.log(`Menu clicado para o produto ID: ${produtoId}`);
+    alert(`Opções para o produto ${produtoId}:\n- Editar\n- Excluir`);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="h-screen text-gray-800 flex flex-col min-w-[1024px]">
+        <BarraPesquisa />
+        <div className="flex flex-1 overflow-hidden">
+          <BarraLateral />
+          <main className="flex-1 overflow-y-auto p-6 bg-white flex justify-center items-center">
+            <p className="text-xl text-gray-500 animate-pulse">Carregando produtos...</p>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-screen text-gray-800 flex flex-col min-w-[1024px]">
+        <BarraPesquisa />
+        <div className="flex flex-1 overflow-hidden">
+          <BarraLateral />
+          <main className="flex-1 overflow-y-auto p-6 bg-white flex justify-center items-center">
+            <p className="text-xl text-red-500">{error}</p>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen text-gray-800 flex flex-col min-w-[1024px]">
@@ -55,10 +78,9 @@ function CatalogoEmpresa() {
       <div className="flex flex-1 overflow-hidden">
         <BarraLateral />
         <main className="flex-1 overflow-y-auto p-6 bg-white">
-          {/* cabeçalho */}
           <div className="flex items-center justify-start mb-6">
             <button
-              onClick={() => navigate('/perfil/empresa')}
+              onClick={() => navigate(`/perfil/empresa/${storeId}`)}
               className="hover:cursor-pointer text-black p-2 pr-4 transition hover:opacity-80"
             >
               <ChevronLeft size={28} />
@@ -68,45 +90,67 @@ function CatalogoEmpresa() {
             </h1>
           </div>
 
-          {/* botões */}
-          <div className="justify-center flex gap-40 mb-8">
-            <button
-              onClick={() => navigate('/produtos/adicionar')}
-              className="shadow-md border-2 border-[#FD7702] font-medium py-3 px-8 rounded-sm hover:bg-[#FD7702] hover:text-white hover:cursor-pointer transition-colors"
-            >
-              Adicionar novo produto
-            </button>
-            <button
-              onClick={() => navigate('/Estatisticas')}
-              className="shadow-md border-2 border-[#FD7702] font-medium py-3 px-8 rounded-sm hover:bg-[#FD7702] hover:text-white hover:cursor-pointer transition-colors"
-            >
-              Acessar minhas estatísticas
-            </button>
-          </div>
+          {isOwner && (
+            <div className="justify-center flex gap-40 mb-8">
+              <button
+                onClick={() => navigate('/produtos/adicionar')}
+                className="shadow-md border-2 border-[#FD7702] font-medium py-3 px-8 rounded-sm hover:bg-[#FD7702] hover:text-white hover:cursor-pointer transition-colors"
+              >
+                Adicionar novo produto
+              </button>
+              <button
+                onClick={() => navigate(`/estatisticas/${storeId}`)}
+                className="shadow-md border-2 border-[#FD7702] font-medium py-3 px-8 rounded-sm hover:bg-[#FD7702] hover:text-white hover:cursor-pointer transition-colors"
+              >
+                Acessar minhas estatísticas
+              </button>
+            </div>
+          )}
 
-          {/* grid de produtos */}
           {produtos.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {produtos.map((produto, index) => (
+              {produtos.map((produto) => (
                 <div
-                  key={produto.id || index}
-                  className="hover:cursor-pointer shadow-md rounded-lg overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow"
+                  key={produto.id}
+                  className="hover:cursor-pointer shadow-md rounded-lg overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow relative"
+                  onClick={() => navigate(`/produto/${produto.id}`)}
                 >
-                  <img
-                    src={produto.imagem}
-                    alt={produto.nome}
-                    className="py-4 w-full h-48 object-contain justify-center"
-                  />
+
+                  {isOwner && (
+                    <div className="absolute top-2 right-2 z-10">
+                      <button
+                        onClick={(e) => handleProductMenuClick(e, produto.id)}
+                        className="p-1 rounded-full bg-white/80 text-gray-700 hover:bg-gray-100 transition shadow-md"
+                      >
+                        <MoreVertical size={20} />
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="w-full h-48 flex justify-center items-center bg-gray-50 py-4">
+                    {produto.product_image ? (
+                      <img
+                        src={produto.product_image}
+                        alt={produto.name}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <Store size={48} className="text-gray-400" />
+                    )}
+                  </div>
+
                   <div className="p-4">
-                    <h2 className="text-sm font-medium text-gray-800 mb-1">
-                      {produto.nome}
+                    <h2 className="text-sm font-medium text-gray-800 mb-1 truncate">
+                      {produto.name}
                     </h2>
+                    {/* --- CORREÇÃO AQUI --- */}
                     <p className="text-gray-700 font-semibold">
-                      R$ {produto.preco.toFixed(2).replace('.', ',')}
+                      R$ {parseFloat(produto.price).toFixed(2).replace('.', ',')}
                     </p>
-                    {produto.desconto > 0 && (
-                      <p className="text-[#FD7702] font-semibold text-sm mt-1">
-                        {produto.desconto}% OFF
+                    {/* --- FIM DA CORREÇÃO --- */}
+                    {produto.is_negotiable && (
+                      <p className="text-green-600 font-semibold text-sm mt-1">
+                        Preço negociável
                       </p>
                     )}
                   </div>
@@ -117,9 +161,11 @@ function CatalogoEmpresa() {
             <div className="flex flex-col items-center justify-center py-20 text-gray-500">
               <Store size={48} className="mb-4 text-gray-600" />
               <p className="text-lg font-medium">Nenhum produto adicionado no catálogo</p>
-              <p className="text-md mt-1">
-                Clique em <span className="text-[#FD7702] font-semibold">Adicionar novo produto</span> para começar.
-              </p>
+              {isOwner && (
+                <p className="text-md mt-1">
+                  Clique em <span className="text-[#FD7702] font-semibold">Adicionar novo produto</span> para começar.
+                </p>
+              )}
             </div>
           )}
         </main>
