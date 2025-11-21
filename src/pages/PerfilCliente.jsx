@@ -118,17 +118,17 @@ function PerfilCliente() {
         {/* TODO: No futuro, esta seção também deve ser carregada via API */}
         <div className="mt-6 space-y-6">
           <Comentario
-            usuario="luizmatheus"
-            data="04/09/25"
-            estrelas={5}
+            usuario={userData.username}
+            data="02/09/25"
+            estrelas={4}
             titulo="Excelente ferramenta!"
-            texto="SenSalSilOlNal"
+            texto="Bom custo-benefício!"
           />
           <Comentario
-            usuario="luizmatheus"
+            usuario={userData.username}
             data="04/09/25"
-            estrelas={4}
-            texto="Comprei essa parafusadeira na promoção e foi um ótimo investimento! O preço estava excelente e a entrega chegou bem rápido. A ferramenta é potente, leve e super fácil de usar. O atendimento da Zezinho Construções também foi impecável, responderam tudo com muita paciência. Recomendo de olhos fechados!"
+            estrelas={5}
+            texto="Comprei essa parafusadeira na promoção e foi um ótimo investimento! O preço estava excelente e a entrega chegou bem rápido. A ferramenta é potente, leve e super fácil de usar. O atendimento da Zézinho Construções também foi impecável, responderam tudo com muita paciência. Recomendo de olhos fechados!"
           />
         </div>
       </div>

@@ -303,7 +303,7 @@ const CadastroEmpresaPage = () => {
 
           <div className="mb-6">
             <label className="block text-sm font-bold mb-2 text-gray-800 text-[20px]">
-              Categoria da empresa
+              Categorias da empresa
             </label>
             <div className="flex flex-wrap justify-center gap-2">
 

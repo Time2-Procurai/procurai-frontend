@@ -138,7 +138,7 @@ function EditarPerfilCliente() {
           {/* --- 8. Seta "Voltar" --- */}
           <button
             onClick={() => navigate(-1)} // -1 = Voltar
-            className="absolute top-6 left-6 text-gray-600 hover:text-gray-900 transition-colors"
+            className="absolute top-6 left-6 text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
           >
             <ChevronLeft size={28} />
           </button>
@@ -156,7 +156,7 @@ function EditarPerfilCliente() {
                   {profileImagePreview ? (
                     <img
                       src={profileImagePreview}
-                      alt="Foto de perfil"
+                      alt=""
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -165,7 +165,7 @@ function EditarPerfilCliente() {
                   )}
                 </div>
               </div>
-              <span className="text-gray-600 text-sm mt-2">Alterar foto</span>
+              <span className="text-gray-800 text-md mt-2 font-bold">Alterar foto de perfil </span>
             </div>
 
             {/* Input de arquivo escondido */}
@@ -224,7 +224,7 @@ function EditarPerfilCliente() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-[#FD7702] text-white font-bold py-3 rounded-lg hover:opacity-90 transition disabled:bg-orange-300"
+                  className="w-full bg-[#FD7702] text-white font-bold py-3 rounded-lg hover:opacity-90 transition disabled:bg-orange-300 cursor-pointer"
                 >
                   {isLoading ? "Salvando..." : "Salvar"}
                 </button>

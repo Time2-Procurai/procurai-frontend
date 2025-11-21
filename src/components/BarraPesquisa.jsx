@@ -6,19 +6,19 @@ function BarraPesquisa() {
   const [query, setQuery] = useState("");
 
   function LogoFeed() {
-    const tipoUsuario = localStorage.getItem("usuario-tipo");
+    const tipoUsuario = localStorage.getItem('userRole');
 
     if (tipoUsuario === "cliente") {
-      navigate("/FeedCliente");
+      navigate("/FeedCliente/" + localStorage.getItem('userId'));
     } else if (tipoUsuario === "lojista") {
-      navigate("/FeedEmpresa");
+      navigate("/FeedEmpresa/" + localStorage.getItem('userId'));
     } else {
       navigate("/"); // fallback, caso não haja tipo definido
     }
   }
 
 
-  {/* testando uma funcao para barra de pesquisa */}
+  {/* testando uma funcao para barra de pesquisa */ }
   function handleKeyDown(e) {
     if (e.key === "Enter" && query.trim() !== "") {
       navigate(`/search?query=${encodeURIComponent(query)}`);
@@ -37,7 +37,7 @@ function BarraPesquisa() {
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Busque por empresas, produtos, clientes e categorias"
-        className="w-300 bg-gray-100 text-gray-700 rounded-[20px] px-8 py-2 ml-30"
+        className="w-300 bg-gray-100 text-gray-700 rounded-[20px] px-8 py-2 ml-18"
       />
     </div>
   )

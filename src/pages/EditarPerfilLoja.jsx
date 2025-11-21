@@ -4,6 +4,7 @@ import BarraPesquisa from "../components/BarraPesquisa";
 import BarraLateral from "../components/BarraLateral";
 import UploadFoto from "../components/UploadFoto";
 import api from "../api/api";
+import { ChevronLeft, Star, Store, Map } from 'lucide-react';
 
 function EditarPerfilLoja() {
   const navigate = useNavigate();
@@ -140,17 +141,26 @@ function EditarPerfilLoja() {
         {/* Menu lateral */}
         <BarraLateral />
 
+
         {/* Conteúdo principal */}
-        <div className="flex flex-col flex-1 items-center py-8 overflow-y-auto">
-          <h1 className="text-2xl font-semibold mb-6">Editar Perfil da Loja</h1>
+        <div className="relative flex flex-col flex-1 items-center py-8 overflow-y-auto">
+          {/* Botão de voltar*/}
+          <button
+            onClick={() => navigate(-1)}
+            className="absolute top-6 left-6 text-black p-2 hover:opacity-80 rounded-full cursor-pointer z-20"
+          >
+            <ChevronLeft size={28} />
+          </button>
+
+          <h1 className="text-2xl font-semibold">Editar Perfil da Loja</h1>
 
           {/* Área de upload da capa + foto */}
           <div className="relative w-full max-w-4xl mb-8">
-            <div className="w-full h-40 bg-gray-200 rounded-xl mb-4">
+            <div className="w-full h-40 bg-gray-200 rounded-xl mb-4 mt-8">
               {profileImageFile ? (
                 <img src={profileImagePreview} className="w-full h-full object-cover" />
               ) : (
-                <p className="text-center text-gray-500 mt-16">Foto da Loja</p>
+                <p className="text-center text-gray-500 py-16">Foto da Loja</p>
               )}
             </div>
             <div className="absolute -bottom-8 left-8">

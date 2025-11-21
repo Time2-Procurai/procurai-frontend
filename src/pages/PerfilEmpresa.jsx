@@ -100,7 +100,7 @@ function PerfilEmpresa() {
               >
                 <ChevronLeft size={28} />
               </button>
-
+              
               {/* --- LÓGICA DO BOTÃO "EDITAR" VS "AVALIAR" (CORRIGIDA) --- */}
 
               {isOwner && visitanteTipo === 'lojista' ? (

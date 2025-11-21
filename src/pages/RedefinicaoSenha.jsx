@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import BarraPesquisa from '../components/BarraPesquisa';
 import BarraLateral from '../components/BarraLateral';
 import api from '../api/api';
+import { ChevronLeft } from 'lucide-react';
 
 function RedefinicaoSenhaPage() {
   const [password, setPassword] = useState("");
@@ -53,17 +54,24 @@ function RedefinicaoSenhaPage() {
   };
 
   return (
-    <div className="h-screen font-sans text-gray-800">
+    <div className="h-screen text-gray-800">
       <BarraPesquisa />
       <div className="h-[calc(100%-56px)]">
         <BarraLateral />
 
         {/* Área central */}
         <div className="inline-block align-top w-[calc(100%-16rem)] h-full p-8 bg-white">
-          <button onClick={() => navigate("/Configuracoes/" + localStorage.getItem('userId'))}
-            className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer ml-2 text-[30px] mb-10">
-            &lt; <span className="text-[24px] font-bold ml-6">Configurações &lt; Redefinição de Senha</span>
-          </button>
+          <div className="flex items-center justify-start mb-6">
+            <button
+              onClick={() => navigate("/Configuracoes/" + localStorage.getItem('userId'))}
+              className="hover:cursor-pointer text-black p-2 pr-4 transition hover:opacity-80"
+            >
+              <ChevronLeft size={28} />
+            </button>
+            <h1 className="text-[26px] font-semibold text-gray-800">
+              Configurações
+            </h1>
+          </div>
 
           <div className="flex flex-col items-center h-full mt-10">
             <div className="ml-13 mb-4">

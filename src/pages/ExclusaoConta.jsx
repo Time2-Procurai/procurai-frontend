@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import BarraPesquisa from '../components/BarraPesquisa';
 import BarraLateral from '../components/BarraLateral';
 import api from '../api/api.js';
+import { ChevronLeft } from 'lucide-react';
 
 function ExclusaoContaPage() {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
+  const [showPopup, setShowPopup] = useState(false);
 
   // Crie uma função de 'logout' para limpar os dados após a exclusão
   const handleLogout = () => {
@@ -22,11 +24,6 @@ function ExclusaoContaPage() {
   const handleConfirmDelete = async () => {
     setError(null); // Limpa erros antigos
 
-    // 6. (Opcional) Uma confirmação final para o usuário
-    if (!window.confirm("Você tem certeza que deseja excluir sua conta? Esta ação é irreversível.")) {
-      return; // O usuário clicou em "Cancelar"
-    }
-
     try {
       // Chame o endpoint de 'DELETE'.
       // O 'api.js' (interceptor) vai anexar o token de login automaticamente.
@@ -39,9 +36,10 @@ function ExclusaoContaPage() {
       handleLogout();
 
     } catch (err) {
-
       console.error("Erro ao excluir conta:", err);
       setError("Não foi possível excluir sua conta. Tente novamente mais tarde.");
+    } finally {
+    setShowPopup(false);
     }
   };
 
@@ -54,10 +52,17 @@ function ExclusaoContaPage() {
 
         {/* Área central */}
         <div className="inline-block align-top w-[calc(100%-16rem)] h-full p-8 bg-white">
-          <button onClick={() => navigate("/Configuracoes/" + localStorage.getItem('userId'))}
-            className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer ml-2 text-[30px] mb-10">
-            &lt; <span className="text-[24px] font-bold ml-6">Configurações &lt; Exclusão de Conta</span>
-          </button>
+          <div className="flex items-center justify-start mb-6">
+            <button
+              onClick={() => navigate("/Configuracoes/" + localStorage.getItem('userId'))}
+              className="hover:cursor-pointer text-black p-2 pr-4 transition hover:opacity-80"
+            >
+              <ChevronLeft size={28} />
+            </button>
+            <h1 className="text-[26px] font-semibold text-gray-800">
+              Configurações
+            </h1>
+          </div>
 
           {/* Implementar método de Exclusão */}
           <div className="flex flex-col items-center h-full mt-10">
@@ -84,10 +89,41 @@ function ExclusaoContaPage() {
                 <button
                   type="button"
                   className="block mt-8 cursor-pointer w-md bg-[#FD7702] md:bg-main text-main md:text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300"
-                  onClick={handleConfirmDelete} r
+                  onClick={() => setShowPopup(true)}
                 >
                   Confirmar
                 </button>
+
+                {showPopup && (
+                  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-2xl w-full max-w-sm shadow-xl">
+                      <h2 className="text-xl font-semibold text-center mb-4">
+                        Confirmar exclusão?
+                      </h2>
+
+                      <p className="text-center mb-6">
+                        Tem certeza que deseja excluir sua conta? <br />
+                        <strong>Esta ação é irreversível.</strong>
+                      </p>
+
+                      <div className="flex justify-between gap-4">
+                        <button
+                          className="w-full py-2 rounded-lg font-semibold bg-gray-200 hover:bg-gray-300 transition"
+                          onClick={() => setShowPopup(false)}
+                        >
+                          Cancelar
+                        </button>
+
+                        <button
+                          className="w-full py-2 rounded-lg font-semibold bg-orange-500 text-white hover:bg-orange-400 transition"
+                          onClick={handleConfirmDelete} r
+                        >
+                          Excluir
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

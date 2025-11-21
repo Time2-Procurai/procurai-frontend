@@ -20,10 +20,19 @@ const interestsOptions = ['Alimentos e Bebidas', 'Beleza', 'Brinquedos', 'Constr
   'Livros', 'Papelaria', 'Saúde', 'Tecnologia'
 ];
 
+// Regras de validação
+const regexMap = {
+  full_Name: /^[\p{L}]{3,}(?:[\p{L}\s]{2,})?$/u, // mínimo 3 letras, só letras + espaços (não só espaço)
+  username: /^[A-Za-z0-9]{4,}$/, // sem espaços, mínimo 4 chars
+  cpf: /^\d{11}$/, // 11 números
+  phone: /^81\d{9}$/, // deve começar com 81 e ter 11 números
+};
+
 const CadastroClientePage = () => {
   const navigate = useNavigate();
   // O nome do campo aqui é 'full_Name' (com 'N' maiúsculo)
   const [formData, setFormData] = useState({ full_Name: '', username: '', cpf: '', phone: '' });
+  const [invalidFields, setInvalidFields] = useState({});
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -33,7 +42,6 @@ const CadastroClientePage = () => {
   const fileInputRef = useRef(null);
   const [userId, setUserId] = useState(null);
 
-
   useEffect(() => {
     const storedUserId = sessionStorage.getItem("user_id");
     if (storedUserId) {
@@ -41,12 +49,21 @@ const CadastroClientePage = () => {
     } else {
       console.error("ID do utilizador não encontrado na sessão.");
       setError("Erro: ID do utilizador não encontrado. Por favor, volte ao passo anterior.");
-
     }
   }, []);
 
+  const markField = (name, isValid) => {
+    setInvalidFields(prev => ({ ...prev, [name]: !isValid }));
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+    const regex = regexMap[name];
+
+    const isValid = regex ? regex.test(value) : true;
+
+    markField(name, isValid);
+
     setFormData(prevData => ({ ...prevData, [name]: value }));
   };
 
@@ -73,7 +90,9 @@ const CadastroClientePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+
+    // bloqueia envio se houver algum campo inválido
+    if (Object.values(invalidFields).includes(true)) return;
 
     if (!userId) {
       setError("Erro: ID do utilizador não encontrado. Por favor, tente novamente.");
@@ -85,7 +104,7 @@ const CadastroClientePage = () => {
     // O nome do campo aqui ('full_name') é o que a API espera
     // O valor (formData.full_Name) vem do estado
     submissionData.append('full_name', formData.full_Name);
-    //submissionData.append('username', formData.username);
+    submissionData.append('username', formData.username);
     submissionData.append('cpf', formData.cpf);
     submissionData.append('phone', formData.phone);
     submissionData.append('interests', JSON.stringify(selectedInterests));
@@ -137,6 +156,10 @@ const CadastroClientePage = () => {
       setIsLoading(false);
     }
   };
+
+  const inputClasses = (field) =>
+    `shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none
+     ${invalidFields[field] ? "ring-2 ring-red-500 border-red-500" : "focus:ring-2 focus:ring-orange-500"}`;
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
@@ -190,9 +213,9 @@ const CadastroClientePage = () => {
               value={formData.full_Name}
               onChange={handleChange}
               placeholder="Digite o seu nome completo"
-              pattern="[\p{L}\s]+"
+              // pattern="[\p{L}\s]+"
               required
-              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className={inputClasses("full_Name")}
             />
           </div>
 
@@ -208,7 +231,7 @@ const CadastroClientePage = () => {
               onChange={handleChange}
               placeholder="Digite um nome de usuário"
               required
-              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className={inputClasses("username")}
             />
           </div>
 
@@ -225,7 +248,7 @@ const CadastroClientePage = () => {
               placeholder="000.000.000-00"
               pattern="\d{11}"
               required
-              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className={inputClasses("cpf")}
             />
           </div>
 
@@ -242,7 +265,7 @@ const CadastroClientePage = () => {
               placeholder="81 00000-0000"
               pattern="\d{11}"
               required
-              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className={inputClasses("phone")}
             />
           </div>
 

@@ -98,12 +98,6 @@ function CatalogoEmpresa() {
               >
                 Adicionar novo produto
               </button>
-              <button
-                onClick={() => navigate(`/estatisticas/${storeId}`)}
-                className="shadow-md border-2 border-[#FD7702] font-medium py-3 px-8 rounded-sm hover:bg-[#FD7702] hover:text-white hover:cursor-pointer transition-colors"
-              >
-                Acessar minhas estatísticas
-              </button>
             </div>
           )}
 
