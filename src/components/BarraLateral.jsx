@@ -16,7 +16,7 @@ function BarraLateral() {
     <>
       {/* --- POPUP DE CONFIRMAÇÃO --- */}
       {showLogoutPopup && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-sm">
           <div className="bg-white p-6 rounded-xl shadow-xl w-80 text-center">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">
               Deseja mesmo sair?

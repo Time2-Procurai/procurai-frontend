@@ -86,7 +86,7 @@ function ResultadosBusca() {
                         <Store size={48} className="text-gray-400" />
                       </div>
                     )}
-                    <h3 className="font-semibold text-gray-800">{empresa.full_name}</h3>
+                    <h3 className="font-semibold text-gray-800">{empresa.company_name}</h3>
                     <p className="text-sm text-gray-500">{empresa.company_category || "Sem categoria"}</p>
                     <button
                       className="mt-4 border-2 border-[#FD7702] text-[#FD7702] font-medium py-1.5 px-6 rounded-full hover:cursor-pointer hover:bg-[#FD7702] hover:text-white transition-colors"
