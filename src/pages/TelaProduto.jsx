@@ -192,7 +192,7 @@ export default function TelaProduto() {
               {isOwner && (
                 <button
                   onClick={handleOpenOptions}
-                  className="p-2 rounded-full hover:bg-gray-100 text-gray-700"
+                  className="cursor-pointer p-2 rounded-full hover:bg-gray-100 text-gray-700"
                 >
                   <MoreVertical size={24} />
                 </button>

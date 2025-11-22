@@ -176,7 +176,17 @@ function PerfilEmpresa() {
 
               {/* Botão de voltar */}
               <button
-                onClick={() => navigate(-1)}
+                onClick={() => {
+                  const role = localStorage.getItem('userRole');
+                  const id = localStorage.getItem('userId');
+
+                  if (role === 'lojista') {
+                    navigate(`/FeedEmpresa/${id}`);
+                  } else {
+                    // Assume que se não for lojista, é cliente
+                    navigate(`/FeedCliente/${id}`);
+                  }
+                }}
                 className="hover:cursor-pointer absolute top-4 left-4 text-black p-2 transition hover:opacity-80 bg-white/50 rounded-full"
               >
                 <ChevronLeft size={28} />
