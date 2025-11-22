@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import BarraPesquisa from '../components/BarraPesquisa';
 import BarraLateral from '../components/BarraLateral';
-import { ChevronLeft, Store, MoreVertical } from 'lucide-react'; 
+import { ChevronLeft, Store, MoreVertical } from 'lucide-react';
 import api from '../api/api';
 
 function CatalogoEmpresa() {
@@ -12,7 +12,7 @@ function CatalogoEmpresa() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const { userId: storeId } = useParams(); 
+  const { userId: storeId } = useParams();
   const visitanteId = localStorage.getItem('userId');
   const isOwner = storeId === visitanteId;
 
@@ -39,7 +39,7 @@ function CatalogoEmpresa() {
   }, [storeId]);
 
   const handleProductMenuClick = (e, produtoId) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     console.log(`Menu clicado para o produto ID: ${produtoId}`);
     alert(`Opções para o produto ${produtoId}:\n- Editar\n- Excluir`);
   };
@@ -98,12 +98,6 @@ function CatalogoEmpresa() {
               >
                 Adicionar novo produto
               </button>
-              <button
-                onClick={() => navigate(`/estatisticas/${storeId}`)}
-                className="shadow-md border-2 border-[#FD7702] font-medium py-3 px-8 rounded-sm hover:bg-[#FD7702] hover:text-white hover:cursor-pointer transition-colors"
-              >
-                Acessar minhas estatísticas
-              </button>
             </div>
           )}
 
@@ -115,7 +109,7 @@ function CatalogoEmpresa() {
                   className="hover:cursor-pointer shadow-md rounded-lg overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow relative"
                   onClick={() => navigate(`/produto/${produto.id}`)}
                 >
-                  
+
                   {isOwner && (
                     <div className="absolute top-2 right-2 z-10">
                       <button
@@ -138,7 +132,7 @@ function CatalogoEmpresa() {
                       <Store size={48} className="text-gray-400" />
                     )}
                   </div>
-                  
+
                   <div className="p-4">
                     <h2 className="text-sm font-medium text-gray-800 mb-1 truncate">
                       {produto.name}
@@ -146,7 +140,7 @@ function CatalogoEmpresa() {
                     {/* --- CORREÇÃO AQUI --- */}
                     <p className="text-gray-700 font-semibold">
                       R$ {parseFloat(produto.price).toFixed(2).replace('.', ',')}
-                    </p> 
+                    </p>
                     {/* --- FIM DA CORREÇÃO --- */}
                     {produto.is_negotiable && (
                       <p className="text-green-600 font-semibold text-sm mt-1">

@@ -4,11 +4,11 @@ import api from '../api/api';
 
 // Ícone de seta
 const BackArrowIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" 
-    fill="none" 
-    viewBox="0 0 24" 
-    strokeWidth={1.5} 
-    stroke="currentColor" 
+  <svg xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
     className="font-bold cursor-pointer w-6 h-6"
   >
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -16,24 +16,32 @@ const BackArrowIcon = () => (
 );
 
 // Lista de interesses
-const interestsOptions = ['Tecnologia', 'Esportes', 'Construção', 'Saúde', 'Beleza', 'Culinária', 'Decoração', 'Papelaria',
-  'Livros', 'Brinquedos', 'Alimentos e Bebidas'
+const interestsOptions = ['Alimentos e Bebidas', 'Beleza', 'Brinquedos', 'Construção', 'Culinária', 'Decoração', 'Esportes', 
+  'Livros', 'Papelaria', 'Saúde', 'Tecnologia'
 ];
+
+// Regras de validação
+const regexMap = {
+  full_Name: /^[\p{L}]{3,}(?:[\p{L}\s]{2,})?$/u, // mínimo 3 letras, só letras + espaços (não só espaço)
+  username: /^[A-Za-z0-9]{4,}$/, // sem espaços, mínimo 4 chars
+  cpf: /^\d{11}$/, // 11 números
+  phone: /^81\d{9}$/, // deve começar com 81 e ter 11 números
+};
 
 const CadastroClientePage = () => {
   const navigate = useNavigate();
   // O nome do campo aqui é 'full_Name' (com 'N' maiúsculo)
   const [formData, setFormData] = useState({ full_Name: '', username: '', cpf: '', phone: '' });
+  const [invalidFields, setInvalidFields] = useState({});
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error,setError] = useState("");
+  const [error, setError] = useState("");
 
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [profileImagePreview, setProfileImagePreview] = useState(null);
   const fileInputRef = useRef(null);
-  const [userId, setUserId] = useState(null); 
+  const [userId, setUserId] = useState(null);
 
-  
   useEffect(() => {
     const storedUserId = sessionStorage.getItem("user_id");
     if (storedUserId) {
@@ -41,12 +49,21 @@ const CadastroClientePage = () => {
     } else {
       console.error("ID do utilizador não encontrado na sessão.");
       setError("Erro: ID do utilizador não encontrado. Por favor, volte ao passo anterior.");
-        
     }
-  }, []); 
+  }, []);
+
+  const markField = (name, isValid) => {
+    setInvalidFields(prev => ({ ...prev, [name]: !isValid }));
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    const regex = regexMap[name];
+
+    const isValid = regex ? regex.test(value) : true;
+
+    markField(name, isValid);
+
     setFormData(prevData => ({ ...prevData, [name]: value }));
   };
 
@@ -58,7 +75,7 @@ const CadastroClientePage = () => {
     );
   };
 
-  
+
   const handleImageContainerClick = () => {
     fileInputRef.current.click();
   };
@@ -73,7 +90,9 @@ const CadastroClientePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+
+    // bloqueia envio se houver algum campo inválido
+    if (Object.values(invalidFields).includes(true)) return;
 
     if (!userId) {
       setError("Erro: ID do utilizador não encontrado. Por favor, tente novamente.");
@@ -84,8 +103,8 @@ const CadastroClientePage = () => {
     const submissionData = new FormData();
     // O nome do campo aqui ('full_name') é o que a API espera
     // O valor (formData.full_Name) vem do estado
-    submissionData.append('full_name', formData.full_Name); 
-    //submissionData.append('username', formData.username);
+    submissionData.append('full_name', formData.full_Name);
+    submissionData.append('username', formData.username);
     submissionData.append('cpf', formData.cpf);
     submissionData.append('phone', formData.phone);
     submissionData.append('interests', JSON.stringify(selectedInterests));
@@ -102,12 +121,12 @@ const CadastroClientePage = () => {
 
       const response = await api.post(
         `user/register/tela2/cliente/${userId}/`,
-        submissionData, 
+        submissionData,
       );
 
       console.log("Resposta da API:", response.data);
-      
-      
+
+
       sessionStorage.removeItem("user_id");
       navigate('/login');
 
@@ -118,25 +137,37 @@ const CadastroClientePage = () => {
       if (error.response && error.response.data) {
         const errors = error.response.data;
         console.log("Erros da API:", errors);
-        
+
         // Verifica se o erro é no full_name
         if (errors.full_name) {
-            errorMessage = `Nome completo: ${errors.full_name[0]}`;
+          errorMessage = `Nome completo: ${errors.full_name[0]}`;
+        } else if (errors.cpf) {
+          const msg = errors.cpf[0];
+
+          if (msg.toLowerCase().includes("already exists")) {
+            errorMessage = "CPF: Este CPF já está cadastrado.";
+          } else {
+            errorMessage = `CPF: ${msg}`;
+          }
         } else {
-            // Tenta extrair o primeiro erro genérico
-            const firstErrorKey = Object.keys(errors)[0];
-            if (firstErrorKey && Array.isArray(errors[firstErrorKey])) {
-              errorMessage = `${firstErrorKey}: ${errors[firstErrorKey][0]}`;
-            }
+          // Tenta extrair o primeiro erro genérico
+          const firstErrorKey = Object.keys(errors)[0];
+          if (firstErrorKey && Array.isArray(errors[firstErrorKey])) {
+            errorMessage = `${firstErrorKey}: ${errors[firstErrorKey][0]}`;
+          }
         }
       }
       setError(errorMessage);
-      alert(errorMessage);
+      //alert(errorMessage);
 
     } finally {
       setIsLoading(false);
     }
   };
+
+  const inputClasses = (field) =>
+    `shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none
+     ${invalidFields[field] ? "ring-2 ring-red-500 border-red-500" : "focus:ring-2 focus:ring-orange-500"}`;
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
@@ -159,10 +190,10 @@ const CadastroClientePage = () => {
             <img
               src={profileImagePreview}
               alt="Prévia do perfil"
-              className="w-42 h-42 rounded-full object-cover"
+              className="w-36 h-36 rounded-full mb-3 object-cover"
             />
           ) : (
-            <div className="w-28 h-28 bg-gray-200 rounded-full mb-3"></div>
+            <div className="w-36 h-36 bg-gray-200 rounded-full mb-3"></div>
           )}
           <span className="block text-sm font-bold mt-2 text-gray-800 text-[20px]">Adicione uma foto de perfil</span>
         </div>
@@ -175,6 +206,13 @@ const CadastroClientePage = () => {
           accept="image/png, image/jpeg, image/jpg"
         />
 
+        {error && (
+          <p className="bg-red-100 text-red-700 text-center p-3 rounded-md mb-4 whitespace-pre-line">
+            {error}
+          </p>
+        )}
+
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="fullName" className="block text-sm font-bold mb-2 text-gray-800 text-[20px]">
@@ -184,15 +222,15 @@ const CadastroClientePage = () => {
             {/* --- CORREÇÃO AQUI --- */}
             {/* O 'name' e o 'value' agora usam 'full_Name' (com 'N' maiúsculo) */}
             {/* para bater com o nome definido no 'useState' */}
-            <input type="text" 
-              id="fullName" 
-              name="full_Name" 
-              value={formData.full_Name} 
-              onChange={handleChange} 
-              placeholder="Nome completo" 
-              pattern="[\p{L}\s]+"
-              required 
-              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+            <input type="text"
+              id="fullName"
+              name="full_Name"
+              value={formData.full_Name}
+              onChange={handleChange}
+              placeholder="Digite o seu nome completo"
+              // pattern="[\p{L}\s]+"
+              required
+              className={inputClasses("full_Name")}
             />
           </div>
 
@@ -201,14 +239,14 @@ const CadastroClientePage = () => {
               Nome de usuário
             </label>
 
-            <input type="text" 
-              id="username" 
-              name="username" 
-              value={formData.username} 
-              onChange={handleChange} 
-              placeholder="Digite um nome de usuário" 
-              required 
-              className="shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+            <input type="text"
+              id="username"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              placeholder="Digite um nome de usuário"
+              required
+              className={inputClasses("username")}
             />
           </div>
 
@@ -217,15 +255,15 @@ const CadastroClientePage = () => {
               CPF
             </label>
 
-            <input type="text" 
-              id="cpf" 
-              name="cpf" 
-              value={formData.cpf} 
-              onChange={handleChange} 
-              placeholder="00000000000" 
+            <input type="text"
+              id="cpf"
+              name="cpf"
+              value={formData.cpf}
+              onChange={handleChange}
+              placeholder="000.000.000-00"
               pattern="\d{11}"
-              required 
-              className="invalid:border-red-500 invalid:focus:ring-red-500 shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+              required
+              className={inputClasses("cpf")}
             />
           </div>
 
@@ -234,15 +272,15 @@ const CadastroClientePage = () => {
               Telefone
             </label>
 
-            <input type="tel" 
-              id="phone" 
-              name="phone" 
-              value={formData.phone} 
-              onChange={handleChange} 
-              placeholder="00 00000-0000"
+            <input type="tel"
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="81 00000-0000"
               pattern="\d{11}"
-              required 
-              className="invalid:border-red-500 invalid:focus:ring-red-500 shadow-sm w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+              required
+              className={inputClasses("phone")}
             />
           </div>
 
@@ -253,9 +291,9 @@ const CadastroClientePage = () => {
 
             <div className="flex flex-wrap justify-center gap-2">
               {interestsOptions.map((interest) => (
-                <button key={interest} 
-                  type="button" 
-                  onClick={() => handleInterestClick(interest)} 
+                <button key={interest}
+                  type="button"
+                  onClick={() => handleInterestClick(interest)}
                   className={`shadow-sm cursor-pointer px-4 py-2 rounded-full font-medium text-sm transition-colors duration-200 
                   ${selectedInterests.includes(interest) ? 'bg-orange-500 text-white border border-orange-500' : 'bg-white text-gray-800 border border-gray-300 hover:bg-gray-100'}`}>
                   {interest}
@@ -265,9 +303,9 @@ const CadastroClientePage = () => {
             </div>
           </div>
 
-          <button type="submit" 
-            disabled={isLoading} 
-            className="shadow-lg cursor-pointer w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-300 disabled:bg-orange-300 disabled:cursor-not-allowed">
+          <button type="submit"
+            disabled={isLoading}
+            className="shadow-lg cursor-pointer w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-400 transition-colors duration-300 disabled:bg-orange-300 disabled:cursor-not-allowed">
             {isLoading ? 'Criando perfil...' : 'Criar perfil'}
           </button>
         </form>

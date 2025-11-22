@@ -6,7 +6,7 @@ import api from '../api/api';
 function RedefinirSenhaConfirmacao() {
   const { uid, token } = useParams(); // Pega da URL
   const navigate = useNavigate();
-  
+
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -34,7 +34,7 @@ function RedefinirSenhaConfirmacao() {
       });
 
       setMessage("Senha alterada com sucesso! Redirecionando para o login...");
-      
+
       setTimeout(() => {
         navigate('/login');
       }, 3000);
@@ -51,7 +51,7 @@ function RedefinirSenhaConfirmacao() {
     <div className="min-h-screen font-sans text-gray-800 bg-[#1A225F]">
       <div className="grid grid-cols-1 md:grid-cols-2 min-h-screen">
         <LadoLogoPage />
-        
+
         <div className="flex flex-col justify-center items-center md:bg-white p-8 md:p-12">
           <div className="w-full max-w-sm">
             <h1 className="text-3xl font-bold mb-6 text-white md:text-gray-800">
@@ -65,8 +65,8 @@ function RedefinirSenhaConfirmacao() {
               <form onSubmit={handleSubmit}>
                 <div className="mb-4">
                   <label className="block text-sm font-bold mb-2 text-white md:text-gray-800">Nova Senha</label>
-                  <input 
-                    type="password" 
+                  <input
+                    type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full px-4 py-3 border rounded-lg"
@@ -76,8 +76,8 @@ function RedefinirSenhaConfirmacao() {
                 </div>
                 <div className="mb-6">
                   <label className="block text-sm font-bold mb-2 text-white md:text-gray-800">Confirmar Senha</label>
-                  <input 
-                    type="password" 
+                  <input
+                    type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="w-full px-4 py-3 border rounded-lg"
@@ -86,8 +86,8 @@ function RedefinirSenhaConfirmacao() {
                   />
                 </div>
 
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={loading}
                   className="w-full bg-[#FD7702] text-white font-bold py-3 rounded-lg hover:opacity-90 disabled:opacity-50"
                 >

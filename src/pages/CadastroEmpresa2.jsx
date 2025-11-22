@@ -1,16 +1,16 @@
 import React, { useState, useRef } from 'react'; // Importar o useRef
 import { useNavigate } from 'react-router-dom';
-import api from '../api/api'; 
+import api from '../api/api';
 
 // Ícone de seta
 const BackArrowIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" 
-    fill="none" 
-    viewBox="0 0 24" 
-    strokeWidth={1.5} 
-    stroke="currentColor" 
+  <svg xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
     className="cursor-pointer w-6 h-6"
-    >
+  >
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
   </svg>
 );
@@ -43,7 +43,7 @@ const CadastroEmpresaPage2 = () => {
     setFormData(prevData => ({ ...prevData, [name]: value }));
   };
 
- const cadastroEmpresaPage2 = async (e) => {
+  const cadastroEmpresaPage2 = async (e) => {
     //e.preventDefault();
     setIsLoading(true);
     const userId = sessionStorage.getItem("user_id");
@@ -94,7 +94,7 @@ const CadastroEmpresaPage2 = () => {
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="bg-white font-sans w-full max-w-2xl mx-auto p-6 sm:p-8">
+      <div className="bg-white w-full max-w-2xl mx-auto p-6 sm:p-8">
         <div className="relative flex justify-center items-center mb-8">
           <button
             onClick={() => navigate('/cadastro/empresa')}
@@ -113,14 +113,14 @@ const CadastroEmpresaPage2 = () => {
               CEP
             </label>
 
-            <input type="text" 
-              id="cep" 
-              name="cep" 
-              value={formData.cep} 
-              onChange={handleChange} 
-              placeholder="CEP" 
-              required 
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+            <input type="text"
+              id="cep"
+              name="cep"
+              value={formData.cep}
+              onChange={handleChange}
+              placeholder="00000-000"
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
@@ -129,14 +129,14 @@ const CadastroEmpresaPage2 = () => {
               Endereço
             </label>
 
-            <input type="text" 
-              id="address" 
-              name="address" 
-              value={formData.address} 
-              onChange={handleChange} 
-              placeholder="Rua, Travessa, Av." 
-              required 
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+            <input type="text"
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              placeholder="Rua, Travessa, Av."
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
@@ -145,14 +145,14 @@ const CadastroEmpresaPage2 = () => {
               Número
             </label>
 
-            <input type="text" 
-              id="number" 
-              name="number" 
-              value={formData.number} 
-              onChange={handleChange} 
-              placeholder="Número" 
-              required 
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+            <input type="text"
+              id="number"
+              name="number"
+              value={formData.number}
+              onChange={handleChange}
+              placeholder="Número"
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
@@ -160,14 +160,14 @@ const CadastroEmpresaPage2 = () => {
             <label htmlFor="city" className="block text-sm font-bold mb-2 text-gray-800 text-[20px]">
               Cidade
             </label>
-            <input type="text" 
-              id="city" 
-              name="city" 
-              value={formData.city} 
-              onChange={handleChange} 
+            <input type="text"
+              id="city"
+              name="city"
+              value={formData.city}
+              onChange={handleChange}
               placeholder="Cidade"
-              required 
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
@@ -176,14 +176,14 @@ const CadastroEmpresaPage2 = () => {
               Bairro
             </label>
 
-            <input type="text" 
-              id="street" 
-              name="street" 
-              value={formData.street} 
-              onChange={handleChange} 
-              placeholder="Bairro" 
-              required 
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" 
+            <input type="text"
+              id="street"
+              name="street"
+              value={formData.street}
+              onChange={handleChange}
+              placeholder="Bairro"
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
@@ -202,10 +202,10 @@ const CadastroEmpresaPage2 = () => {
             />
           </div>
 
-          <button type="submit" 
-            disabled={isLoading} 
+          <button type="submit"
+            disabled={isLoading}
             onClick={handleSubmit}
-            className="cursor-pointer w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-300 disabled:bg-orange-300 disabled:cursor-not-allowed"
+            className="cursor-pointer w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-400 transition-colors duration-300 disabled:bg-orange-300 disabled:cursor-not-allowed"
           >
             Criar perfil
           </button>

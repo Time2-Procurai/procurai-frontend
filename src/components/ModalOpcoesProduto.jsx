@@ -13,7 +13,7 @@ export default function ModalOpcoesProduto({ onClose, onExcluirClick, produtoId 
       >
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 text-gray-400 hover:text-gray-700"
+          className="cursor-pointer absolute right-4 top-4 text-gray-400 hover:text-gray-700"
         >
           <X size={24} />
         </button>
@@ -29,7 +29,7 @@ export default function ModalOpcoesProduto({ onClose, onExcluirClick, produtoId 
 
           <button
             onClick={onExcluirClick}
-            className="flex items-center gap-3 text-lg font-medium text-red-600 hover:text-red-800"
+            className="cursor-pointer flex items-center gap-3 text-lg font-medium text-red-600 hover:text-red-800"
           >
             <Trash2 size={24} />
             <span>Excluir produto</span>

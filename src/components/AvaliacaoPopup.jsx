@@ -17,13 +17,12 @@ const RatingStarsInput = ({ rating, setRating }) => {
             onMouseEnter={() => setHoverRating(ratingValue)}
             onMouseLeave={() => setHoverRating(0)}
           >
-            <Star 
-              size={32} 
-              className={`transition-colors ${
-                ratingValue <= (hoverRating || rating)
+            <Star
+              size={32}
+              className={`transition-colors ${ratingValue <= (hoverRating || rating)
                   ? 'text-[#FD7702] fill-[#FD7702]'
                   : 'text-gray-300'
-              }`} 
+                }`}
             />
           </button>
         );
@@ -49,10 +48,10 @@ function AvaliacaoPopup({ aberto, onFechar, storeId }) {
     const files = Array.from(e.target.files);
     // Limita a 4 fotos
     const newFiles = files.slice(0, 4 - photos.length);
-    
+
     const updatedFiles = [...photos, ...newFiles];
     setPhotos(updatedFiles);
-    
+
     const newPreviews = updatedFiles.map(file => URL.createObjectURL(file));
     setPhotoPreviews(newPreviews);
   };
@@ -109,7 +108,7 @@ function AvaliacaoPopup({ aberto, onFechar, storeId }) {
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
       <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg relative">
-        <button 
+        <button
           onClick={onFechar}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"
         >
@@ -117,7 +116,7 @@ function AvaliacaoPopup({ aberto, onFechar, storeId }) {
         </button>
 
         <h2 className="text-xl font-bold text-gray-900 mb-4">Avaliar a loja</h2>
-        
+
         <form onSubmit={handleSubmit}>
           {/* 1. Seleção de Estrelas */}
           <div className="mb-4">
@@ -158,7 +157,7 @@ function AvaliacaoPopup({ aberto, onFechar, storeId }) {
                   </button>
                 </div>
               ))}
-              
+
               {/* Botão de Adicionar */}
               {photos.length < 4 && (
                 <button
@@ -183,7 +182,7 @@ function AvaliacaoPopup({ aberto, onFechar, storeId }) {
 
           {/* Erro e Botão de Envio */}
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-          
+
           <button
             type="submit"
             disabled={isLoading || rating === 0}
