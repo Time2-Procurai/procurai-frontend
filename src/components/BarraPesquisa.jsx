@@ -9,9 +9,9 @@ function BarraPesquisa() {
     const tipoUsuario = localStorage.getItem('userRole');
 
     if (tipoUsuario === "cliente") {
-      navigate("/FeedCliente/" + localStorage.getItem('userId'));
+      navigate("/feedcliente/" + localStorage.getItem('userId'));
     } else if (tipoUsuario === "lojista") {
-      navigate("/FeedEmpresa/" + localStorage.getItem('userId'));
+      navigate("/feedempresa/" + localStorage.getItem('userId'));
     } else {
       navigate("/"); // fallback, caso não haja tipo definido
     }

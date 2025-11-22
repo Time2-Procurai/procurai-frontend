@@ -152,7 +152,7 @@ function EditarPerfilLoja() {
             <ChevronLeft size={28} />
           </button>
 
-          <h1 className="text-2xl font-semibold">Editar Perfil da Loja</h1>
+          <h1 className="text-2xl font-semibold">Editar o perfil da loja</h1>
 
           {/* Área de upload da capa + foto */}
           <div className="relative w-full max-w-4xl mb-8">

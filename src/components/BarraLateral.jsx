@@ -25,14 +25,14 @@ function BarraLateral() {
             <div className="flex justify-around mt-6">
               <button
                 onClick={() => setShowLogoutPopup(false)}
-                className="px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-200 text-gray-800 font-medium cursor-pointer"
+                className="px-4 py-2 rounded-lg hover:bg-gray-300 bg-gray-200 font-semibold cursor-pointer"
               >
                 Cancelar
               </button>
 
               <button
                 onClick={confirmarLogout}
-                className="px-8 py-2 rounded-lg bg-orange-500 hover:bg-orange-400 text-white font-semibold cursor-pointer"
+                className="px-9 py-2 rounded-lg bg-orange-500 hover:bg-orange-400 text-white font-semibold cursor-pointer"
               >
                 Sair
               </button>

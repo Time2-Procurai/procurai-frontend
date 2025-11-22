@@ -144,7 +144,7 @@ function EditarPerfilCliente() {
           </button>
 
           <div className="w-full max-w-xl mx-auto">
-            <h1 className="text-2xl font-semibold mb-6 text-center">Editar Perfil</h1>
+            <h1 className="text-2xl font-semibold mb-6 text-center">Editar o perfil</h1>
 
             {/* FOTO DE PERFIL */}
             <div className="flex flex-col items-center mb-6">
@@ -173,6 +173,7 @@ function EditarPerfilCliente() {
               type="file"
               accept="image/*"
               onChange={handleFotoChange}
+              // value={formData.profile_picture || ""} -- Queria puxar a imagem atual, mas não dá?
               ref={fileInputRef}
               className="hidden"
             />

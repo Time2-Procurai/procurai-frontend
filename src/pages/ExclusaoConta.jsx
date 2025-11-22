@@ -54,7 +54,7 @@ function ExclusaoContaPage() {
         <div className="inline-block align-top w-[calc(100%-16rem)] h-full p-8 bg-white">
           <div className="flex items-center justify-start mb-6">
             <button
-              onClick={() => navigate("/Configuracoes/" + localStorage.getItem('userId'))}
+              onClick={() => navigate("/configuracoes/" + localStorage.getItem('userId'))}
               className="hover:cursor-pointer text-black p-2 pr-4 transition hover:opacity-80"
             >
               <ChevronLeft size={28} />
@@ -108,14 +108,14 @@ function ExclusaoContaPage() {
 
                       <div className="flex justify-between gap-4">
                         <button
-                          className="w-full py-2 rounded-lg font-semibold bg-gray-200 hover:bg-gray-300 transition"
+                          className="w-full py-2 rounded-lg font-semibold bg-gray-200 hover:bg-gray-300 transition cursor-pointer"
                           onClick={() => setShowPopup(false)}
                         >
                           Cancelar
                         </button>
 
                         <button
-                          className="w-full py-2 rounded-lg font-semibold bg-orange-500 text-white hover:bg-orange-400 transition"
+                          className="w-full py-2 rounded-lg font-semibold bg-orange-500 text-white hover:bg-orange-400 transition cursor-pointer"
                           onClick={handleConfirmDelete} r
                         >
                           Excluir

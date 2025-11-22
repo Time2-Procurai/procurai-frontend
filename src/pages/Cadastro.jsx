@@ -58,12 +58,34 @@ function Cadastro() {
     } catch (error) {
       console.error("Erro ao cadastrar usuário:", error);
 
-      if (error.response && error.response.data) {
+      if (error.response?.data) {
+        const data = error.response.data;
+
+        // E-mail já existe
+        if (data.email) {
+          setError("Este e-mail já está cadastrado.");
+          return;
+        }
+
+        // Senha inválida
+        if (data.password) {
+          setError(data.password[0]);
+          return;
+        }
+
+        // Outros erros conhecidos
+        if (data.password_confirm) {
+          setError(data.password_confirm[0]);
+          return;
+        }
+
+        // Caso backend mande algo inesperado
         setError("Erro ao cadastrar. Verifique os dados informados.");
-        console.error("Detalhes do erro:", error.response.data);
-      } else {
-        setError("Não foi possível conectar ao servidor.\nTente novamente.");
+        return;
       }
+
+      // Caso sem resposta do servidor
+      setError("Não foi possível conectar ao servidor.\nTente novamente.");
     }
   };
 
@@ -122,7 +144,6 @@ function Cadastro() {
                 }}
                 placeholder="Digite seu e-mail"
                 className="shadow-sm w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-main"
-                required
               />
             </div>
 
@@ -137,7 +158,6 @@ function Cadastro() {
                 }}
                 placeholder="Digite sua senha"
                 className="shadow-sm w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-main"
-                required
               />
             </div>
 
@@ -152,13 +172,12 @@ function Cadastro() {
                 }}
                 placeholder="Confirme sua senha"
                 className="shadow-sm w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-main"
-                required
               />
             </div>
 
             <button type="submit"
               className="shadow-lg cursor-pointer w-full bg-[#FD7702] md:bg-main text-main md:text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 active:opacity-80 transition duration-300"
-              onClick={handleCadastro}>
+              >
               Criar conta
             </button>
 

@@ -141,6 +141,14 @@ const CadastroClientePage = () => {
         // Verifica se o erro é no full_name
         if (errors.full_name) {
           errorMessage = `Nome completo: ${errors.full_name[0]}`;
+        } else if (errors.cpf) {
+          const msg = errors.cpf[0];
+
+          if (msg.toLowerCase().includes("already exists")) {
+            errorMessage = "CPF: Este CPF já está cadastrado.";
+          } else {
+            errorMessage = `CPF: ${msg}`;
+          }
         } else {
           // Tenta extrair o primeiro erro genérico
           const firstErrorKey = Object.keys(errors)[0];
@@ -150,7 +158,7 @@ const CadastroClientePage = () => {
         }
       }
       setError(errorMessage);
-      alert(errorMessage);
+      //alert(errorMessage);
 
     } finally {
       setIsLoading(false);
@@ -197,6 +205,13 @@ const CadastroClientePage = () => {
           className="hidden"
           accept="image/png, image/jpeg, image/jpg"
         />
+
+        {error && (
+          <p className="bg-red-100 text-red-700 text-center p-3 rounded-md mb-4 whitespace-pre-line">
+            {error}
+          </p>
+        )}
+
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">

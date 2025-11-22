@@ -80,7 +80,7 @@ function ForgotPasswordPage() {
                     setError("");
                   }}
                   placeholder="Digite seu e-mail cadastrado"
-                  className="shadow-sm w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-main"
+                  className="shadow-sm w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-main"
                   required
                   disabled={loading}
                 />
@@ -98,7 +98,7 @@ function ForgotPasswordPage() {
                 <p className="text-pink-100 md:text-gray-700">
                   Lembrou sua senha?{' '}
                   <a href="/login" className="text-[#1A225F] md:text-main font-bold hover:underline">
-                    Retornar para o Login
+                    Voltar para o Login
                   </a>
                 </p>
               </div>

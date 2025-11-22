@@ -69,7 +69,7 @@ function LoginPage() {
 
     } catch (err) {
       console.error('Falha no login:', err);
-      setError('Email ou senha inválidos.');
+      setError('E-mail ou senha inválidos.');
     }
   };
 
@@ -108,7 +108,6 @@ function LoginPage() {
                 }}
                 placeholder="Digite seu e-mail"
                 className="shadow-sm w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-main"
-                required
               />
             </div>
 
@@ -126,7 +125,6 @@ function LoginPage() {
                 }}
                 placeholder="Digite sua senha"
                 className="shadow-sm w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-main"
-                required
               />
             </div>
 
@@ -136,16 +134,10 @@ function LoginPage() {
               </a>
             </p>
 
-            {/* OBSERVAÇÃO: Mudei o type para 'button' para não submeter o form */}
-            <button type="button"
-              className="shadow-lg w-full border-1 mb-5 md:bg-main text-main font-bold py-3 px-4 rounded-lg hover:opacity-90 active:opacity-80 transition duration-300 cursor-pointer">
-              Faça Login com o Google
-            </button>
-
             {/* Este é o botão que submete o formulário */}
             <button type="submit"
               className="shadow-lg w-full bg-[#FD7702] md:bg-main text-main md:text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 active:opacity-80 transition duration-300 cursor-pointer"
-              onClick={handleLogin}>
+              >
               Entrar
             </button>
 
