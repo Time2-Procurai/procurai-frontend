@@ -20,9 +20,11 @@ import ProtectedRoute from './components/ProtectedRoute';
 import TelaProduto from './pages/TelaProduto.jsx';
 import ResultadosBusca from './pages/ResultadosBusca.jsx';
 import EsqueciSenha from './pages/EsqueciSenha.jsx';
-import RedefinirSenhaConfirmacao from './pages/RedefinirSenhaConfirmacao';
-import PostDetalhes from './pages/PostDetalhes.jsx';
+import RedefinirSenhaConfirmacao from './pages/RedefinirSenhaConfirmacao'; 
 import TelaAvaliacoes from './pages/TelaAvaliacoes.jsx';
+// --- NOVO IMPORT ---
+import TelaFavoritos from './pages/TelaFavoritos.jsx'; 
+
 function Home() {
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center text-center">
@@ -38,40 +40,39 @@ function Home() {
 
 function App() {
   return (
-    <AuthProvider>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/feedcliente/:userId" element={<FeedPageCliente />} />
-        <Route path="/feedempresa/:userId" element={<FeedPageEmpresa />} />
-        <Route path="/configuracoes/:userId" element={<ConfiguracoesPage />} />
-        <Route path="/redefinicaosenha/:userId" element={<RedefinicaoSenhaPage />} />
-        <Route path="/exclusaoconta/:userId" element={<ExclusaoContaPage />} />
-        <Route path='/cadastro' element={<Cadastro />} />
-        <Route path='/cadastro/cliente' element={<CadastroCliente />} />
-        <Route path='/cadastro/empresa' element={<CadastroEmpresaPage />} />
-        <Route path='/cadastro/empresa/2' element={<CadastroEmpresaPage2 />} />
-        <Route path='/produto/:produtoId' element={<TelaProduto />} />
-        <Route path='/redefinirSenha' element={<EsqueciSenha />} />
+   <AuthProvider> 
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/feedcliente/:userId" element={<FeedPageCliente />}/>
+      <Route path="/feedempresa/:userId" element={<FeedPageEmpresa />}/>
+      <Route path="/configuracoes/:userId" element ={<ConfiguracoesPage/>}/>
+      <Route path="/redefinicaosenha/:userId" element={<RedefinicaoSenhaPage/>}/>
+      <Route path="/exclusaoconta/:userId" element={<ExclusaoContaPage/>}/>
+      <Route path='/cadastro' element={<Cadastro />} />
+      <Route path='/cadastro/cliente' element={<CadastroCliente />} />
+      <Route path='/cadastro/empresa' element={<CadastroEmpresaPage />}/>
+      <Route path='/cadastro/empresa/2' element={<CadastroEmpresaPage2 />}/>
+      <Route path='/produto/:produtoId' element={<TelaProduto/>}/>
+      <Route path='/redefinirSenha' element={<EsqueciSenha/>}/>
+      
+      <Route path='/perfil/empresa/:userId' element={<PerfilEmpresa />}/>       
+      <Route path='/perfil/cliente/:userId' element={<PerfilCliente />}/>
+      
+      <Route path='/produtos/:userId' element={<CatalogoEmpresa />}/>
+      <Route path='/produtos/adicionar/' element ={<AdicionarProduto />}/>
+      <Route path ='/EditarPerfilLoja/:userId' element={<EditarPerfilLoja/>}/>
+      <Route path='/EditarPerfilCliente/' element={<EditarPerfilCliente/>}/>
+      <Route path="/search/" element={<ResultadosBusca />} />
+      <Route path="/redefinir-senha/:uid/:token" element={<RedefinirSenhaConfirmacao />} />
+      <Route path='/produto/:produtoId/avaliacoes' element={<TelaAvaliacoes/>}/>
 
-        {/* --- CORREÇÃO AQUI --- */}
-        {/* Agora a rota aceita um ID dinâmico (ex: /perfil/empresa/5) */}
-        <Route path='/perfil/empresa/:userId' element={<PerfilEmpresa />} />
+      {/* --- NOVA ROTA DE FAVORITOS --- */}
+      {/* Mantendo o padrão de passar o ID do usuário na URL */}
+      <Route path='/favoritos/:userId' element={<TelaFavoritos/>}/>
 
-        {/* --- CORREÇÃO AQUI --- */}
-        {/* Aplicado o mesmo para o perfil do cliente */}
-        <Route path='/perfil/cliente/:userId' element={<PerfilCliente />} />
-        <Route path='/post/:postId' element={<PostDetalhes />} />
-        <Route path='/produtos/:userId' element={<CatalogoEmpresa />} />
-        <Route path='/produtos/adicionar/' element={<AdicionarProduto />} />
-        <Route path='/EditarPerfilLoja/:userId' element={<EditarPerfilLoja />} />
-        <Route path='/EditarPerfilCliente/' element={<EditarPerfilCliente />} />
-        <Route path="/search/" element={<ResultadosBusca />} />
-        <Route path="/redefinir-senha/:uid/:token" element={<RedefinirSenhaConfirmacao />} />
-        <Route path='/produto/:produtoId/avaliacoes' element={<TelaAvaliacoes/>}/>
-      </Routes>
-
-    </AuthProvider>
+    </Routes>
+   </AuthProvider>
   );
 }
 
