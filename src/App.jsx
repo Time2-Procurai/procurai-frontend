@@ -21,6 +21,8 @@ import TelaProduto from './pages/TelaProduto.jsx';
 import ResultadosBusca from './pages/ResultadosBusca.jsx';
 import EsqueciSenha from './pages/EsqueciSenha.jsx';
 import RedefinirSenhaConfirmacao from './pages/RedefinirSenhaConfirmacao'; 
+import TelaAvaliacoes from './pages/TelaAvaliacoes.jsx';
+
 function Home() {
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center text-center">
@@ -67,6 +69,7 @@ function App() {
       <Route path='/EditarPerfilCliente/' element={<EditarPerfilCliente/>}/>
       <Route path="/search/" element={<ResultadosBusca />} />
       <Route path="/redefinir-senha/:uid/:token" element={<RedefinirSenhaConfirmacao />} />
+      <Route path='/produto/:produtoId/avaliacoes' element={<TelaAvaliacoes/>}/>
     </Routes>
 
   </AuthProvider>
