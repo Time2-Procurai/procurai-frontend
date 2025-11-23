@@ -21,6 +21,7 @@ import TelaProduto from './pages/TelaProduto.jsx';
 import ResultadosBusca from './pages/ResultadosBusca.jsx';
 import EsqueciSenha from './pages/EsqueciSenha.jsx';
 import RedefinirSenhaConfirmacao from './pages/RedefinirSenhaConfirmacao';
+import PostDetalhes from './pages/PostDetalhes.jsx';
 function Home() {
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center text-center">
@@ -59,7 +60,7 @@ function App() {
         {/* --- CORREÇÃO AQUI --- */}
         {/* Aplicado o mesmo para o perfil do cliente */}
         <Route path='/perfil/cliente/:userId' element={<PerfilCliente />} />
-
+        <Route path='/post/:postId' element={<PostDetalhes />} />
         <Route path='/produtos/:userId' element={<CatalogoEmpresa />} />
         <Route path='/produtos/adicionar/' element={<AdicionarProduto />} />
         <Route path='/EditarPerfilLoja/:userId' element={<EditarPerfilLoja />} />
