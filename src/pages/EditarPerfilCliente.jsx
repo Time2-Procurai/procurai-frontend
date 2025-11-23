@@ -18,8 +18,8 @@ function EditarPerfilCliente() {
 
   // 2. Estados separados para o arquivo (envio) e preview (exibição)
   const [profileImageFile, setProfileImageFile] = useState(null);
-  const [profileImagePreview, setProfileImagePreview] = useState(null); 
-  
+  const [profileImagePreview, setProfileImagePreview] = useState(null);
+
   // 3. Estados de controle
   const [isFetching, setIsFetching] = useState(true); // Para o carregamento inicial
   const [isLoading, setIsLoading] = useState(false);   // Para o envio (submit)
@@ -31,20 +31,20 @@ function EditarPerfilCliente() {
       setIsFetching(true);
       try {
         // O backend (UserProfileView) usa o token para saber quem é o usuário
-        const response = await api.get('/user/profile/'); 
+        const response = await api.get('/user/profile/');
         const { user, profile } = response.data;
-        
+
         setFormData({
           full_name: user.full_name || '',
           username: user.username || '',
           interesses: profile?.interesses || '', // Acessa o perfil (pode ser null)
         });
-        
+
         // Define a foto de perfil *existente*
         if (profile?.profile_picture) {
           setProfileImagePreview(profile.profile_picture);
         }
-        
+
       } catch (err) {
         console.error("Erro ao buscar dados do perfil:", err);
         setError("Não foi possível carregar seus dados.");
@@ -83,7 +83,7 @@ function EditarPerfilCliente() {
     setError(null);
 
     const submissionData = new FormData();
-    
+
     // Adiciona os campos de texto
     submissionData.append('full_name', formData.full_name);
     submissionData.append('username', formData.username);
@@ -93,13 +93,13 @@ function EditarPerfilCliente() {
     if (profileImageFile) {
       submissionData.append('profile_picture', profileImageFile);
     }
-    
+
     try {
       // Usa PATCH para atualização parcial no mesmo endpoint
       await api.patch('/user/profile/', submissionData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      
+
       alert("Perfil atualizado com sucesso!");
       navigate(-1); // Volta para a página anterior
 
@@ -110,11 +110,11 @@ function EditarPerfilCliente() {
       setIsLoading(false);
     }
   };
-  
+
   // --- 7. Tela de Carregamento Inicial ---
   if (isFetching) {
     return (
-       <div className="h-screen text-gray-800 flex flex-col min-w-[1024px] bg-gray-50">
+      <div className="h-screen text-gray-800 flex flex-col min-w-[1024px] bg-gray-50">
         <BarraPesquisa />
         <div className="flex flex-1 overflow-hidden">
           <BarraLateral />
@@ -134,21 +134,21 @@ function EditarPerfilCliente() {
 
         {/* Conteúdo principal */}
         <div className="flex-1 flex flex-col py-8 overflow-y-auto relative">
-          
+
           {/* --- 8. Seta "Voltar" --- */}
           <button
             onClick={() => navigate(-1)} // -1 = Voltar
-            className="absolute top-6 left-6 text-gray-600 hover:text-gray-900 transition-colors"
+            className="absolute top-6 left-6 text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
           >
             <ChevronLeft size={28} />
           </button>
-          
+
           <div className="w-full max-w-xl mx-auto">
-            <h1 className="text-2xl font-semibold mb-6 text-center">Editar Perfil</h1>
+            <h1 className="text-2xl font-semibold mb-6 text-center">Editar o perfil</h1>
 
             {/* FOTO DE PERFIL */}
             <div className="flex flex-col items-center mb-6">
-              <div 
+              <div
                 className="relative w-32 h-32 cursor-pointer"
                 onClick={handleImageContainerClick} // Aciona o clique
               >
@@ -156,7 +156,7 @@ function EditarPerfilCliente() {
                   {profileImagePreview ? (
                     <img
                       src={profileImagePreview}
-                      alt="Foto de perfil"
+                      alt=""
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -165,7 +165,7 @@ function EditarPerfilCliente() {
                   )}
                 </div>
               </div>
-               <span className="text-gray-600 text-sm mt-2">Alterar foto</span>
+              <span className="text-gray-800 text-md mt-2 font-bold">Alterar foto de perfil </span>
             </div>
 
             {/* Input de arquivo escondido */}
@@ -173,6 +173,7 @@ function EditarPerfilCliente() {
               type="file"
               accept="image/*"
               onChange={handleFotoChange}
+              // value={formData.profile_picture || ""} -- Queria puxar a imagem atual, mas não dá?
               ref={fileInputRef}
               className="hidden"
             />
@@ -224,12 +225,12 @@ function EditarPerfilCliente() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-[#FD7702] text-white font-bold py-3 rounded-lg hover:opacity-90 transition disabled:bg-orange-300"
+                  className="w-full bg-[#FD7702] text-white font-bold py-3 rounded-lg hover:opacity-90 transition disabled:bg-orange-300 cursor-pointer"
                 >
                   {isLoading ? "Salvando..." : "Salvar"}
                 </button>
               </div>
-              
+
               {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
             </form>
           </div>

@@ -10,11 +10,10 @@ const InteractiveRating = ({ rating, setRating }) => {
           <Star
             key={starValue}
             size={28}
-            className={`cursor-pointer transition-colors ${
-              starValue <= rating
+            className={`cursor-pointer transition-colors ${starValue <= rating
                 ? 'text-[#FD7702] fill-[#FD7702]'
                 : 'text-gray-300'
-            }`}
+              }`}
             onClick={() => setRating(starValue)}
           />
         );

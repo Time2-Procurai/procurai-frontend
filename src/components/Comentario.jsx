@@ -1,5 +1,6 @@
 import React from "react";
 
+
 function Comentario({ usuario, data, estrelas, titulo, texto }) {
   const renderEstrelas = () => {
     const estrelasArray = [];
@@ -16,6 +17,7 @@ function Comentario({ usuario, data, estrelas, titulo, texto }) {
         <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-[#FD7702] font-bold text-lg">
           {usuario?.charAt(0).toUpperCase()}
         </div>
+        
 
         {/* Conteúdo */}
         <div className="flex-1">
