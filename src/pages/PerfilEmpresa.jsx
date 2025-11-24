@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 
 // --- DADOS MOCKADOS (Publicações) ---
-// Adicionei 'postImage' para termos o que clicar
 const MOCK_POSTS = [
   {
     id: 1,
@@ -22,7 +21,7 @@ const MOCK_POSTS = [
     tag: "Promoção",
     likes: 12,
     comments: 2,
-    //postImage: "https://placehold.co/600x300/png?text=Oferta+DeWalt" // Imagem da publicação
+    // postImage: "..." 
   },
   {
     id: 2,
@@ -32,15 +31,7 @@ const MOCK_POSTS = [
     tag: null,
     likes: 45,
     comments: 8,
-    //postImage: "https://placehold.co/600x300/png?text=Feirao+2025" // Imagem da publicação
   }
-];
-
-// --- DADOS MOCKADOS (Produtos em Promoção) ---
-const MOCK_PROMOS = [
-  { id: 1, name: "Parafusadeira DEWALT LT3", price: "R$ 180,90", discount: "20% OFF" },
-  { id: 2, name: "Furadeira Impacto", price: "R$ 220,00", discount: "15% OFF" },
-  { id: 3, name: "Jogo de Chaves", price: "R$ 89,90", discount: "10% OFF" },
 ];
 
 function PerfilEmpresa() {
@@ -55,38 +46,46 @@ function PerfilEmpresa() {
   const [lojaData, setLojaData] = useState(null);
 
   const [posts, setPosts] = useState(MOCK_POSTS);
-  const [promos, setPromos] = useState(MOCK_PROMOS);
+  // Agora 'promos' começa vazio e será preenchido pela API
+  const [promos, setPromos] = useState([]); 
 
   const [menuAbertoId, setMenuAbertoId] = useState(null);
 
   useEffect(() => {
-    const fetchDadosLoja = async () => {
+    const fetchDados = async () => {
       if (!profileIdFromUrl) return;
 
       try {
-        const response = await api.get(`/user/listar/usuarios/${profileIdFromUrl}/`);
-        const { street, number, neighborhood, city, complement } = response.data;
+        // 1. Buscar dados do Perfil da Loja
+        const responseUser = await api.get(`/user/listar/usuarios/${profileIdFromUrl}/`);
+        const { street, number, neighborhood, city, complement } = responseUser.data;
         const enderecoCompleto = [street, number, neighborhood, city, complement].filter(Boolean).join(', ');
 
         setLojaData({
-          nome: response.data.full_name, // Corrigido para full_name (User) ou company_name se disponível
-          categoria: response.data.company_category || "Categoria não definida",
+          nome: responseUser.data.full_name,
+          categoria: responseUser.data.company_category || "Categoria não definida",
           rating: "4,9",
           status: "Aberto",
-          descricao: response.data.description || "Sem descrição disponível.",
-          horario: response.data.operating_hours || "Horário não informado.",
-          contato: response.data.phone || "Sem telefone.",
+          descricao: responseUser.data.description || "Sem descrição disponível.",
+          horario: responseUser.data.operating_hours || "Horário não informado.",
+          contato: responseUser.data.phone || "Sem telefone.",
           endereco: enderecoCompleto || "Endereço não informado.",
-          bannerUrl: response.data.cover_picture,
-          profileUrl: response.data.profile_picture,
+          bannerUrl: responseUser.data.cover_picture,
+          profileUrl: responseUser.data.profile_picture,
           mapUrl: null,
         });
+
+        // 2. Buscar Produtos da Loja (Para a seção "Meus produtos em promoção")
+        const responseProducts = await api.get(`/products/store/${profileIdFromUrl}/`);
+        // Pegamos, por exemplo, os 3 primeiros produtos para exibir como destaque
+        setPromos(responseProducts.data.slice(0, 3));
+
       } catch (e) {
-        console.error("Erro ao obter dados do usuário:", e);
+        console.error("Erro ao obter dados:", e);
       }
     };
 
-    fetchDadosLoja();
+    fetchDados();
   }, [profileIdFromUrl]);
 
   const handleAdicionarPost = (dados) => {
@@ -98,7 +97,7 @@ function PerfilEmpresa() {
       tag: dados.titulo ? dados.titulo : null,
       likes: 0,
       comments: 0,
-      postImage: "https://placehold.co/600x300/png?text=Nova+Publicacao" // Placeholder para novos posts
+      postImage: "https://placehold.co/600x300/png?text=Nova+Publicacao"
     };
     setPosts([novoPost, ...posts]);
   };
@@ -174,7 +173,7 @@ function PerfilEmpresa() {
 
               {isOwner && visitanteTipo === 'empresa' ? (
                 <button
-                  onClick={() => navigate(`/EditarPerfilLoja/${profileIdFromUrl}`)}
+                  onClick={() => navigate(`/EditarPerfilLoja`)}
                   className="hover:cursor-pointer absolute top-4 ring-2 ring-[#FD7702] right-4 rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-md transition hover:bg-gray-50"
                 >
                   Editar perfil
@@ -309,7 +308,6 @@ function PerfilEmpresa() {
                   {posts.map((post) => (
                     <div 
                       key={post.id} 
-                      // Removi o 'onClick' do container e o cursor-pointer global
                       className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm relative"
                     >
                       {/* Header Post */}
@@ -364,14 +362,12 @@ function PerfilEmpresa() {
                         </div>
                       </div>
 
-                      {/* Texto do Post (NÃO Clicável) */}
-                      <div onClick={() => navigate(`/post/${post.id}`)}>    
+                      {/* Texto do Post */}
                       <p className="text-sm text-gray-700 leading-relaxed mb-3 text-justify">
                         {post.content}
                       </p>
-                      </div>
 
-                      {/* --- IMAGEM DO POST (SOMENTE ELA É CLICÁVEL) --- */}
+                      {/* IMAGEM DO POST */}
                       {post.postImage && (
                         <div 
                           className="w-full h-64 mb-4 rounded-lg overflow-hidden cursor-pointer hover:opacity-95 transition-opacity"
@@ -408,43 +404,62 @@ function PerfilEmpresa() {
                   </div>
                 </div>
 
-                {/* --- SEÇÃO DE PROMOÇÕES RESTAURADA --- */}
+                {/* --- SEÇÃO DE PROMOÇÕES DINÂMICA --- */}
                 <div className="mb-10">
                   <hr className="border-gray-200 mb-8" />
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-bold text-gray-900">Meus produtos em promoção</h2>
                     {isOwner && (
-                      <button className="cursor-pointer px-4 py-1.5 text-sm font-semibold text-[#FD7702] border border-[#FD7702] rounded-full hover:bg-orange-50 transition active:scale-95">
-                        Editar promoções
+                      <button 
+                        onClick={() => navigate(`/produtos/${profileIdFromUrl}`)}
+                        className="cursor-pointer px-4 py-1.5 text-sm font-semibold text-[#FD7702] border border-[#FD7702] rounded-full hover:bg-orange-50 transition active:scale-95"
+                      >
+                        Gerenciar
                       </button>
                     )}
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                    {promos.map((promo) => (
-                      <div key={promo.id} className="cursor-pointer bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition">
-                        <div className="h-48 bg-white p-4 flex items-center justify-center relative">
-                          <img
-                            src="https://placehold.co/400x400/png?text=Ferramenta"
-                            alt={promo.name}
-                            className="max-h-full max-w-full object-contain"
-                          />
-                        </div>
-                        <div className="bg-gray-200 p-4 flex flex-col gap-1">
-                          <h3 className="font-bold text-gray-900 text-sm leading-tight">
-                            {promo.name}
-                          </h3>
-                          <div className="flex items-center justify-between mt-1">
-                            <span className="text-gray-900 font-medium">
-                              {promo.price}
-                            </span>
-                            <span className="text-[#FD7702] font-bold text-sm">
-                              {promo.discount}
-                            </span>
+                  
+                  {promos.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                      {promos.map((product) => (
+                        <div 
+                          key={product.id} 
+                          className="cursor-pointer bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition"
+                          onClick={() => navigate(`/produto/${product.id}`)}
+                        >
+                          <div className="h-48 bg-white p-4 flex items-center justify-center relative">
+                            {product.product_image ? (
+                              <img
+                                src={product.product_image}
+                                alt={product.name}
+                                className="max-h-full max-w-full object-contain"
+                              />
+                            ) : (
+                              <Store size={48} className="text-gray-400" />
+                            )}
+                          </div>
+                          <div className="bg-gray-200 p-4 flex flex-col gap-1">
+                            <h3 className="font-bold text-gray-900 text-sm leading-tight truncate">
+                              {product.name}
+                            </h3>
+                            <div className="flex items-center justify-between mt-1">
+                              <span className="text-gray-900 font-medium">
+                                R$ {parseFloat(product.price).toFixed(2).replace('.', ',')}
+                              </span>
+                              {/* Mostra "Negociável" se is_negotiable for true */}
+                              {product.is_negotiable && (
+                                <span className="text-[#FD7702] font-bold text-xs uppercase">
+                                  Negociável
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-center py-4">Nenhum produto cadastrado ainda.</p>
+                  )}
                 </div>
 
               </div>
