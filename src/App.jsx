@@ -21,6 +21,9 @@ import TelaProduto from './pages/TelaProduto.jsx';
 import ResultadosBusca from './pages/ResultadosBusca.jsx';
 import EsqueciSenha from './pages/EsqueciSenha.jsx';
 import RedefinirSenhaConfirmacao from './pages/RedefinirSenhaConfirmacao';
+import EsqueciSenha2 from './pages/EsqueciSenha2.jsx';
+import EsqueciSenha3 from './pages/EsqueciSenha3.jsx';
+
 function Home() {
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center text-center">
@@ -51,6 +54,8 @@ function App() {
         <Route path='/cadastro/empresa/2' element={<CadastroEmpresaPage2 />} />
         <Route path='/produto/:produtoId' element={<TelaProduto />} />
         <Route path='/redefinirSenha' element={<EsqueciSenha />} />
+        <Route path="/redefinirSenha/2" element={<EsqueciSenha2 />} />
+        <Route path="/redefinirSenha/3" element={<EsqueciSenha3 />} /> {/* Adicionar lógica de ID dinâmico se necessário */}
 
         {/* --- CORREÇÃO AQUI --- */}
         {/* Agora a rota aceita um ID dinâmico (ex: /perfil/empresa/5) */}
