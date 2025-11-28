@@ -25,6 +25,7 @@ import PostDetalhes from './pages/PostDetalhes.jsx';
 import TelaAvaliacoes from './pages/TelaAvaliacoes.jsx';
 import EsqueciSenha2 from './pages/EsqueciSenha2.jsx';
 import EsqueciSenha3 from './pages/EsqueciSenha3.jsx';
+import TelaFavoritos from './pages/TelaFavoritos.jsx'; 
 function Home() {
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center text-center">
@@ -73,6 +74,7 @@ function App() {
         <Route path="/search/" element={<ResultadosBusca />} />
         <Route path="/redefinir-senha/:uid/:token" element={<RedefinirSenhaConfirmacao />} />
         <Route path='/produto/:produtoId/avaliacoes' element={<TelaAvaliacoes/>}/>
+        <Route path='/favoritos/:userId' element={<TelaFavoritos/>}/>
       </Routes>
 
     </AuthProvider>
