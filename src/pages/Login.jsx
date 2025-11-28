@@ -20,11 +20,11 @@ function LoginPage() {
       return;
     }
 
-    const passwordRegex = /^[A-Za-z0-9!@#$%&*.\-_?]{8,}$/;
+    /*const passwordRegex = /^[A-Za-z0-9!@#$%&*.\-_?]{8,}$/;
     if (!passwordRegex.test(password)) {
       setError("Insira uma senha válida.");
       return;
-    }
+    }*/
 
     try {
       const response = await api.post('user/token/', {
