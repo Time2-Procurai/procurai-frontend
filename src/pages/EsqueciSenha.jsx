@@ -28,6 +28,7 @@ function ForgotPasswordPage() {
 
       setSuccess('Um link de redefinição foi enviado para o seu e-mail.');
       setEmail(''); // Limpa o campo após o sucesso
+      navigate('/redefinirSenha/2');
 
     } catch (err) {
       console.error('Falha ao solicitar redefinição:', err);
