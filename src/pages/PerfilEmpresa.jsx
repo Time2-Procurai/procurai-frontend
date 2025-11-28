@@ -8,7 +8,7 @@ import api from '../api/api';
 import {
   ChevronLeft, Star, Store, Map,
   Share2, MoreVertical, Heart, ThumbsDown, MessageCircle,
-  Trash2
+  Trash2 // <--- 1. Importei o ícone da lixeira
 } from 'lucide-react';
 
 // --- DADOS MOCKADOS (Publicações) ---
@@ -17,21 +17,27 @@ const MOCK_POSTS = [
     id: 1,
     author: "Zezinho Construções",
     date: "04/09/25",
-    content: "A Zezinho Construções preparou uma oferta especial para você que não abre mão de qualidade e performance nas suas ferramentas. A poderosa parafusadeira DeWalt LT3 está com preço promocional por tempo limitado!",
+    content: "A Zezinho Construções preparou uma oferta especial para você que não abre mão de qualidade e performance nas suas ferramentas. A poderosa parafusadeira DeWalt LT3 está com preço promocional por tempo limitado! Ideal para uso profissional ou doméstico.",
     tag: "Promoção",
     likes: 12,
-    comments: 2,
-    // postImage: "..." 
+    comments: 2
   },
   {
     id: 2,
     author: "Zezinho Construções",
     date: "01/09/25",
-    content: "⚡ Zezinho Construções convida você para o Grande Feirão da Construção 2025! Nos dias 18, 19 e 20 de outubro, nossa loja estará em clima de promoção.",
+    content: "⚡ Zezinho Construções convida você para o Grande Feirão da Construção 2025! Nos dias 18, 19 e 20 de outubro, nossa loja estará em clima de promoção com descontos de até 50% em ferramentas, tintas e materiais elétricos.",
     tag: null,
     likes: 45,
-    comments: 8,
+    comments: 8
   }
+];
+
+// --- DADOS MOCKADOS (Produtos em Promoção) ---
+const MOCK_PROMOS = [
+  { id: 1, name: "Parafusadeira DEWALT LT3", price: "R$ 180,90", discount: "20% OFF" },
+  { id: 2, name: "Parafusadeira DEWALT LT3", price: "R$ 180,90", discount: "20% OFF" },
+  { id: 3, name: "Parafusadeira DEWALT LT3", price: "R$ 180,90", discount: "20% OFF" },
 ];
 
 function PerfilEmpresa() {
@@ -46,48 +52,49 @@ function PerfilEmpresa() {
   const [lojaData, setLojaData] = useState(null);
 
   const [posts, setPosts] = useState(MOCK_POSTS);
-  // Agora 'promos' começa vazio e será preenchido pela API
-  const [promos, setPromos] = useState([]); 
+  const [promos, setPromos] = useState(MOCK_PROMOS);
 
+  // --- 2. Novo Estado: Controla qual menu está aberto pelo ID do post ---
   const [menuAbertoId, setMenuAbertoId] = useState(null);
 
   useEffect(() => {
-    const fetchDados = async () => {
-      if (!profileIdFromUrl) return;
+    const fetchDadosLoja = async () => {
+      if (!profileIdFromUrl) {
+        console.error("ID do perfil não encontrado na URL.");
+        return;
+      }
 
       try {
-        // 1. Buscar dados do Perfil da Loja
-        const responseUser = await api.get(`/user/listar/usuarios/${profileIdFromUrl}/`);
-        const { street, number, neighborhood, city, complement } = responseUser.data;
-        const enderecoCompleto = [street, number, neighborhood, city, complement].filter(Boolean).join(', ');
+        const response = await api.get(`/user/listar/usuarios/${profileIdFromUrl}/`);
+        console.log("Dados da loja obtidos:", response.data);
+
+        const { street, number, neighborhood, city, complement } = response.data;
+        const enderecoCompleto = [street, number, neighborhood, city, complement]
+          .filter(Boolean)
+          .join(', ');
 
         setLojaData({
-          nome: responseUser.data.full_name,
-          categoria: responseUser.data.company_category || "Categoria não definida",
+          nome: response.data.company_name,
+          categoria: response.data.company_category || "Categoria não definida",
           rating: "4,9",
           status: "Aberto",
-          descricao: responseUser.data.description || "Sem descrição disponível.",
-          horario: responseUser.data.operating_hours || "Horário não informado.",
-          contato: responseUser.data.phone || "Sem telefone.",
+          descricao: response.data.description || "Sem descrição disponível.",
+          horario: response.data.operating_hours || "Horário não informado.",
+          contato: response.data.phone || "Sem telefone.",
           endereco: enderecoCompleto || "Endereço não informado.",
-          bannerUrl: responseUser.data.cover_picture,
-          profileUrl: responseUser.data.profile_picture,
+          bannerUrl: response.data.cover_picture,
+          profileUrl: response.data.profile_picture,
           mapUrl: null,
         });
-
-        // 2. Buscar Produtos da Loja (Para a seção "Meus produtos em promoção")
-        const responseProducts = await api.get(`/products/store/${profileIdFromUrl}/`);
-        // Pegamos, por exemplo, os 3 primeiros produtos para exibir como destaque
-        setPromos(responseProducts.data.slice(0, 3));
-
       } catch (e) {
-        console.error("Erro ao obter dados:", e);
+        console.error("Erro ao obter dados do usuário:", e);
       }
     };
 
-    fetchDados();
+    fetchDadosLoja();
   }, [profileIdFromUrl]);
 
+  // --- FUNÇÃO PARA CRIAR O POST ---
   const handleAdicionarPost = (dados) => {
     const novoPost = {
       id: Date.now(),
@@ -96,24 +103,27 @@ function PerfilEmpresa() {
       content: dados.descricao,
       tag: dados.titulo ? dados.titulo : null,
       likes: 0,
-      comments: 0,
-      postImage: "https://placehold.co/600x300/png?text=Nova+Publicacao"
+      comments: 0
     };
     setPosts([novoPost, ...posts]);
   };
 
+  // --- 3. FUNÇÃO PARA DELETAR O POST ---
   const handleDeletarPost = (id) => {
     if (window.confirm("Tem certeza que deseja excluir esta publicação?")) {
+      // Remove o post da lista filtrando pelo ID
       setPosts(posts.filter((post) => post.id !== id));
+      // Fecha o menu
       setMenuAbertoId(null);
     }
   };
 
+  // Função auxiliar para alternar o menu
   const toggleMenu = (id) => {
     if (menuAbertoId === id) {
-      setMenuAbertoId(null);
+      setMenuAbertoId(null); // Fecha se já estiver aberto
     } else {
-      setMenuAbertoId(id);
+      setMenuAbertoId(id); // Abre o novo
     }
   };
 
@@ -126,9 +136,9 @@ function PerfilEmpresa() {
         <BarraPesquisa />
         <div className="flex flex-1 overflow-hidden">
           <BarraLateral />
-          <div className="flex-1 flex justify-center items-center">
+          <main className="flex-1 overflow-y-auto bg-white flex items-center justify-center">
             <p className="text-xl text-gray-500 animate-pulse">Carregando perfil...</p>
-          </div>
+          </main>
         </div>
       </div>
     );
@@ -153,8 +163,8 @@ function PerfilEmpresa() {
           />
 
           <div>
-            {/* Header / Banner */}
             <div className="relative">
+              {/* Banner */}
               {lojaData.bannerUrl ? (
                 <div
                   className="h-40 w-full bg-cover bg-center"
@@ -164,16 +174,28 @@ function PerfilEmpresa() {
                 <div className="h-40 w-full bg-gray-400" />
               )}
 
+              {/* Botão de voltar */}
               <button
-                onClick={() => navigate(-1)}
+                onClick={() => {
+                  const role = localStorage.getItem('userRole');
+                  const id = localStorage.getItem('userId');
+
+                  if (role === 'lojista') {
+                    navigate(`/FeedEmpresa/${id}`);
+                  } else {
+                    // Assume que se não for lojista, é cliente
+                    navigate(`/FeedCliente/${id}`);
+                  }
+                }}
                 className="hover:cursor-pointer absolute top-4 left-4 text-black p-2 transition hover:opacity-80 bg-white/50 rounded-full"
               >
                 <ChevronLeft size={28} />
               </button>
 
-              {isOwner && visitanteTipo === 'empresa' ? (
+              {/* Botões Editar/Avaliar */}
+              {isOwner && visitanteTipo === 'lojista' ? (
                 <button
-                  onClick={() => navigate(`/EditarPerfilLoja`)}
+                  onClick={() => navigate(`/EditarPerfilLoja/${localStorage.getItem("userId")}`)}
                   className="hover:cursor-pointer absolute top-4 ring-2 ring-[#FD7702] right-4 rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-md transition hover:bg-gray-50"
                 >
                   Editar perfil
@@ -194,6 +216,7 @@ function PerfilEmpresa() {
                 </>
               ) : null}
 
+              {/* Foto de Perfil */}
               <div className="absolute left-1/2 top-full -translate-x-1/2 -translate-y-1/2">
                 {lojaData.profileUrl ? (
                   <img
@@ -209,6 +232,7 @@ function PerfilEmpresa() {
               </div>
             </div>
 
+            {/* Infos principais da loja */}
             <div className="px-6 pt-14 pb-4">
               <div className="text-center">
                 <h1 className="text-3xl font-bold text-gray-900">{lojaData.nome}</h1>
@@ -218,6 +242,7 @@ function PerfilEmpresa() {
                   <Star size={20} className="fill-current text-orange-500" />
                 </div>
               </div>
+
               <div className="mt-4 flex justify-end">
                 <div className="flex items-center space-x-1.5">
                   <Store size={20} className="text-gray-700" />
@@ -226,7 +251,7 @@ function PerfilEmpresa() {
               </div>
             </div>
 
-            {/* Abas */}
+            {/* Navegação das Abas */}
             <div className="border-b border-gray-200">
               <nav className="flex justify-center space-x-10">
                 <button
@@ -250,7 +275,7 @@ function PerfilEmpresa() {
               </nav>
             </div>
 
-            {/* Aba Informações */}
+            {/* 1. Aba Informações */}
             {abaAtiva === 'Informações' && (
               <div className="p-4">
                 <div className="rounded-xl border border-gray-200 p-5 shadow-sm">
@@ -287,29 +312,34 @@ function PerfilEmpresa() {
               </div>
             )}
 
-            {/* Aba Comunidade */}
+            {/* 2. Aba Comunidade */}
             {abaAtiva === 'Comunidade' && (
               <div className="p-4 md:px-8 max-w-4xl mx-auto bg-gray-50 min-h-[400px]">
 
                 <div className="flex items-center justify-between mb-6 pt-4">
                   <h2 className="text-xl font-bold text-gray-900">Publicações</h2>
-                  {isOwner && (
+
+                  {isOwner ? (
                     <button
                       onClick={() => setModalPostAberto(true)}
                       className="cursor-pointer px-4 py-1.5 text-sm font-semibold text-[#FD7702] border border-[#FD7702] rounded-full hover:bg-orange-50 transition active:scale-95"
                     >
                       Criar publicação
                     </button>
-                  )}
+                  ) : visitanteTipo === 'cliente' ? (
+                    <button
+                      onClick={() => console.log("Seguir empresa...")}
+                      className="cursor-pointer px-6 py-1.5 text-sm font-bold text-white bg-[#FD7702] rounded-full shadow-md hover:opacity-90 transition active:scale-95"
+                    >
+                      Seguir
+                    </button>
+                  ) : null}
                 </div>
 
-                {/* Lista de Publicações */}
                 <div className="space-y-6 mb-12">
                   {posts.map((post) => (
-                    <div 
-                      key={post.id} 
-                      className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm relative"
-                    >
+                    <div key={post.id} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow relative">
+
                       {/* Header Post */}
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
@@ -335,20 +365,21 @@ function PerfilEmpresa() {
                           </div>
                         </div>
 
-                        {/* Ações Topo (Share, Menu) */}
                         <div className="flex items-center text-gray-400 gap-2">
-                          <button className="hover:text-gray-600 cursor-pointer p-1 rounded hover:bg-gray-100">
-                            <Share2 size={18} />
-                          </button>
+                          <button className="hover:text-gray-600 cursor-pointer"><Share2 size={18} /></button>
+
+                          {/* --- 4. LÓGICA DO MENU DROPDOWN --- */}
                           <div className="relative">
                             <button
                               onClick={() => toggleMenu(post.id)}
-                              className="hover:text-gray-600 cursor-pointer p-1 rounded hover:bg-gray-100"
+                              className="hover:text-gray-600 cursor-pointer p-1"
                             >
                               <MoreVertical size={18} />
                             </button>
+
+                            {/* O Menu só aparece se for o dono E o ID coincidir */}
                             {isOwner && menuAbertoId === post.id && (
-                              <div className="absolute right-0 top-6 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden">
+                              <div className="absolute right-0 top-6 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden animate-in fade-in zoom-in duration-100">
                                 <button
                                   onClick={() => handleDeletarPost(post.id)}
                                   className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 cursor-pointer transition"
@@ -359,42 +390,24 @@ function PerfilEmpresa() {
                               </div>
                             )}
                           </div>
+                          {/* --- FIM DO DROPDOWN --- */}
+
                         </div>
                       </div>
 
-                      {/* Texto do Post */}
-                      <p className="text-sm text-gray-700 leading-relaxed mb-3 text-justify">
+                      <p className="text-sm text-gray-700 leading-relaxed mb-4 text-justify">
                         {post.content}
                       </p>
-
-                      {/* IMAGEM DO POST */}
-                      {post.postImage && (
-                        <div 
-                          className="w-full h-64 mb-4 rounded-lg overflow-hidden cursor-pointer hover:opacity-95 transition-opacity"
-                          onClick={() => navigate(`/post/${post.id}`)}
-                        >
-                          <img 
-                            src={post.postImage} 
-                            alt="Conteúdo do post" 
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      )}
-
                       <hr className="border-gray-100 mb-3" />
-                      
-                      {/* Ações Rodapé */}
                       <div className="flex items-center gap-6">
                         <button className="flex items-center gap-1.5 text-gray-500 hover:text-red-500 transition group cursor-pointer">
                           <Heart size={20} className="group-hover:fill-current" />
-                          <span className="text-xs">{post.likes}</span>
                         </button>
                         <button className="flex items-center gap-1.5 text-gray-500 hover:text-gray-800 transition cursor-pointer">
                           <ThumbsDown size={20} />
                         </button>
                         <button className="flex items-center gap-1.5 text-gray-500 hover:text-blue-500 transition cursor-pointer">
                           <MessageCircle size={20} />
-                          <span className="text-xs">{post.comments}</span>
                         </button>
                       </div>
                     </div>
@@ -404,62 +417,43 @@ function PerfilEmpresa() {
                   </div>
                 </div>
 
-                {/* --- SEÇÃO DE PROMOÇÕES DINÂMICA --- */}
+                {/* Seção Promoções */}
                 <div className="mb-10">
                   <hr className="border-gray-200 mb-8" />
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-bold text-gray-900">Meus produtos em promoção</h2>
                     {isOwner && (
-                      <button 
-                        onClick={() => navigate(`/produtos/${profileIdFromUrl}`)}
-                        className="cursor-pointer px-4 py-1.5 text-sm font-semibold text-[#FD7702] border border-[#FD7702] rounded-full hover:bg-orange-50 transition active:scale-95"
-                      >
-                        Gerenciar
+                      <button className="cursor-pointer px-4 py-1.5 text-sm font-semibold text-[#FD7702] border border-[#FD7702] rounded-full hover:bg-orange-50 transition active:scale-95">
+                        Editar promoções
                       </button>
                     )}
                   </div>
-                  
-                  {promos.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                      {promos.map((product) => (
-                        <div 
-                          key={product.id} 
-                          className="cursor-pointer bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition"
-                          onClick={() => navigate(`/produto/${product.id}`)}
-                        >
-                          <div className="h-48 bg-white p-4 flex items-center justify-center relative">
-                            {product.product_image ? (
-                              <img
-                                src={product.product_image}
-                                alt={product.name}
-                                className="max-h-full max-w-full object-contain"
-                              />
-                            ) : (
-                              <Store size={48} className="text-gray-400" />
-                            )}
-                          </div>
-                          <div className="bg-gray-200 p-4 flex flex-col gap-1">
-                            <h3 className="font-bold text-gray-900 text-sm leading-tight truncate">
-                              {product.name}
-                            </h3>
-                            <div className="flex items-center justify-between mt-1">
-                              <span className="text-gray-900 font-medium">
-                                R$ {parseFloat(product.price).toFixed(2).replace('.', ',')}
-                              </span>
-                              {/* Mostra "Negociável" se is_negotiable for true */}
-                              {product.is_negotiable && (
-                                <span className="text-[#FD7702] font-bold text-xs uppercase">
-                                  Negociável
-                                </span>
-                              )}
-                            </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    {promos.map((promo) => (
+                      <div key={promo.id} className="cursor-pointer bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+                        <div className="h-48 bg-white p-4 flex items-center justify-center relative">
+                          <img
+                            src="https://placehold.co/400x400/png?text=Ferramenta"
+                            alt={promo.name}
+                            className="max-h-full max-w-full object-contain"
+                          />
+                        </div>
+                        <div className="bg-gray-200 p-4 flex flex-col gap-1">
+                          <h3 className="font-bold text-gray-900 text-sm leading-tight">
+                            {promo.name}
+                          </h3>
+                          <div className="flex items-center justify-between mt-1">
+                            <span className="text-gray-900 font-medium">
+                              {promo.price}
+                            </span>
+                            <span className="text-[#FD7702] font-bold text-sm">
+                              {promo.discount}
+                            </span>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 text-center py-4">Nenhum produto cadastrado ainda.</p>
-                  )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
               </div>
