@@ -19,6 +19,7 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import TelaProduto from './pages/TelaProduto.jsx';
 import ResultadosBusca from './pages/ResultadosBusca.jsx';
+import PesquisaProduto from './pages/PesquisaProduto.jsx'
 
 function Home() {
   return (
@@ -64,6 +65,7 @@ function App() {
       <Route path ='/EditarPerfilLoja/:userId' element={<EditarPerfilLoja/>}/>
       <Route path='/EditarPerfilCliente/' element={<EditarPerfilCliente/>}/>
       <Route path="/search/" element={<ResultadosBusca />} />
+      <Route path='/PesquisarProduto' element={<PesquisaProduto/>}/>
     </Routes>
 
   </AuthProvider>
