@@ -25,7 +25,12 @@ import PostDetalhes from './pages/PostDetalhes.jsx';
 import TelaAvaliacoes from './pages/TelaAvaliacoes.jsx';
 import EsqueciSenha2 from './pages/EsqueciSenha2.jsx';
 import EsqueciSenha3 from './pages/EsqueciSenha3.jsx';
-import TelaFavoritos from './pages/TelaFavoritos.jsx'; 
+import TelaFavoritos from './pages/TelaFavoritos.jsx';
+import PesquisaProduto from './pages/PesquisaProduto.jsx'
+import TelaPromocoes from './pages/TelaPromocoes.jsx';
+import TelaAdicionarPromocao from './pages/TelaAdicionarPromocao.jsx';
+
+
 function Home() {
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center text-center">
@@ -57,7 +62,7 @@ function App() {
         <Route path='/produto/:produtoId' element={<TelaProduto />} />
         <Route path='/redefinirSenha' element={<EsqueciSenha />} />
         <Route path="/redefinirSenha/2" element={<EsqueciSenha2 />} />
-        <Route path="/redefinirSenha/3" element={<EsqueciSenha3 />} />
+        <Route path="/redefinirSenha/3" element={<EsqueciSenha3 />} /> {/* Adicionar lógica de ID dinâmico se necessário */}
 
         {/* --- CORREÇÃO AQUI --- */}
         {/* Agora a rota aceita um ID dinâmico (ex: /perfil/empresa/5) */}
@@ -73,8 +78,12 @@ function App() {
         <Route path='/EditarPerfilCliente/' element={<EditarPerfilCliente />} />
         <Route path="/search/" element={<ResultadosBusca />} />
         <Route path="/redefinir-senha/:uid/:token" element={<RedefinirSenhaConfirmacao />} />
+        <Route path='/produto/:produtoId/avaliacoes' element={<TelaAvaliacoes />} />
+        <Route path='/favoritos/:userId' element={<TelaFavoritos />} />
+        <Route path='/PesquisarProduto' element={<PesquisaProduto />} />
+        <Route path="/promocoes/:userId" element={<TelaPromocoes />} />
+        <Route path="/promocoes/adicionar" element={<TelaAdicionarPromocao />} />
         <Route path='/produto/:produtoId/avaliacoes' element={<TelaAvaliacoes/>}/>
-        <Route path='/favoritos/:userId' element={<TelaFavoritos/>}/>
       </Routes>
 
     </AuthProvider>

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import api from '../api/api'; 
+import api from '../api/api';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import BarraPesquisa from '../components/BarraPesquisa';
 import BarraLateral from '../components/BarraLateral';
-import { ChevronLeft, MoreVertical, Star, Bookmark, MessageCircle, ShoppingBag, Store } from 'lucide-react'; 
+import { ChevronLeft, MoreVertical, Star, Bookmark, MessageCircle, ShoppingBag, Store } from 'lucide-react';
 
 // Import dos Modais e Componentes
 import ModalAvaliacao from '../components/ModalAvaliacao';
@@ -66,10 +66,10 @@ export default function TelaProduto() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [quantidade, setQuantidade] = useState(1);
-  
+
   // --- ESTADOS PARA O FAVORITO E FEEDBACK ---
   const [isFavorited, setIsFavorited] = useState(false);
-  const [showFeedback, setShowFeedback] = useState(false); 
+  const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackType, setFeedbackType] = useState('add'); // 'add' ou 'remove'
 
   // Modais
@@ -110,7 +110,7 @@ export default function TelaProduto() {
         const ownerId = productResponse.data.owner_id;
         const sellerResponse = await api.get(`/user/listar/usuarios/${ownerId}/`);
         setSeller(sellerResponse.data);
-        
+
         // 3. Define dados de review mockados
         setLatestReview(mockReviewData.latestReview);
         setReviewSummary(mockReviewData.reviewSummary);
@@ -129,13 +129,13 @@ export default function TelaProduto() {
   // --- LÓGICA DE FAVORITAR COM TOAST ---
   const handleToggleFavorite = () => {
     const favoritosAtuais = JSON.parse(localStorage.getItem('meusFavoritos') || '[]');
-    
+
     if (isFavorited) {
       // Remover dos favoritos
       const novaLista = favoritosAtuais.filter(item => item.id !== product.id);
       localStorage.setItem('meusFavoritos', JSON.stringify(novaLista));
       setIsFavorited(false);
-      
+
       // Feedback de Remoção
       setFeedbackType('remove');
       setShowFeedback(true);
@@ -147,14 +147,14 @@ export default function TelaProduto() {
         id: product.id,
         nome: product.name,
         preco: `R$ ${parseFloat(product.price).toFixed(2).replace('.', ',')}`,
-        desconto: product.is_negotiable ? 'Negociável' : '', 
+        desconto: product.is_negotiable ? 'Negociável' : '',
         imagem: product.product_image
       };
-      
+
       favoritosAtuais.push(novoItem);
       localStorage.setItem('meusFavoritos', JSON.stringify(favoritosAtuais));
       setIsFavorited(true);
-      
+
       // Feedback de Adição
       setFeedbackType('add');
       setShowFeedback(true);
@@ -164,7 +164,7 @@ export default function TelaProduto() {
 
   const handleOpenOptions = () => setIsOptionsModalOpen(true);
   const handleOpenDelete = () => { setIsOptionsModalOpen(false); setIsDeleteModalOpen(true); };
-  
+
   const handleConfirmDelete = async () => {
     try {
       await api.delete(`/products/delete/${produtoId}/`);
@@ -176,7 +176,7 @@ export default function TelaProduto() {
       alert("Falha ao excluir o produto.");
     }
   };
-  
+
   const isOwner = product && (visitanteTipo === 'lojista') && (visitanteId == product.owner_id);
 
   if (isLoading || !product || !seller) {
@@ -206,11 +206,11 @@ export default function TelaProduto() {
   return (
     <>
       <div className="h-screen text-gray-800 flex flex-col min-w-[1024px] relative">
-        
+
         <BarraPesquisa />
-        
+
         {/* --- COMPONENTE DE FEEDBACK (TOAST) --- */}
-        <FeedbackFav 
+        <FeedbackFav
           visible={showFeedback}
           type={feedbackType}
           onClose={() => setShowFeedback(false)}
@@ -219,7 +219,7 @@ export default function TelaProduto() {
 
         <div className="flex flex-1 overflow-hidden">
           <BarraLateral />
-          
+
           <main className="flex-1 overflow-y-auto bg-white p-6 md:p-8">
             <header className="flex justify-between items-center mb-4">
               <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-gray-100 text-gray-700">
@@ -285,9 +285,8 @@ export default function TelaProduto() {
 
                     <button
                       onClick={handleToggleFavorite}
-                      className={`flex items-center gap-2 text-xs font-semibold p-2 -ml-2 rounded-md transition-all ${
-                        isFavorited ? 'text-[#FD7702] bg-[#FD7702]/10' : 'text-[#FD7702] hover:underline hover:bg-gray-50'
-                      }`}
+                      className={`flex items-center gap-2 text-xs font-semibold p-2 -ml-2 rounded-md transition-all ${isFavorited ? 'text-[#FD7702] bg-[#FD7702]/10' : 'text-[#FD7702] hover:underline hover:bg-gray-50'
+                        }`}
                     >
                       {isFavorited ? <Bookmark size={18} fill="#FD7702" /> : <Bookmark size={18} />}
                       {isFavorited ? 'Produto favoritado' : 'Adicionar aos favoritos'}
@@ -303,11 +302,11 @@ export default function TelaProduto() {
             <section className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 {seller.profile_picture ? (
-                   <img src={seller.profile_picture} alt={seller.full_name} className="w-16 h-16 rounded-full object-cover" />
+                  <img src={seller.profile_picture} alt={seller.full_name} className="w-16 h-16 rounded-full object-cover" />
                 ) : (
                   <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-gray-500"><Store size={32} /></div>
                 )}
-                
+
                 <div>
                   <h3 className="font-semibold text-gray-900">{seller.full_name}</h3>
                   <p className="text-sm text-gray-500">{seller.company_category || "Loja"}</p>

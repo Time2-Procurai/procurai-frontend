@@ -39,7 +39,7 @@ function ExclusaoContaPage() {
       console.error("Erro ao excluir conta:", err);
       setError("Não foi possível excluir sua conta. Tente novamente mais tarde.");
     } finally {
-    setShowPopup(false);
+      setShowPopup(false);
     }
   };
 

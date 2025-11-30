@@ -52,7 +52,7 @@ function AdicionarProduto() {
   const handleImageUpload = (event) => {
     const files = Array.from(event.target.files);
     // Limita ao total de 4 imagens
-    const newFiles = files.slice(0, 4 - imageFiles.length); 
+    const newFiles = files.slice(0, 4 - imageFiles.length);
 
     const newFileObjects = [...imageFiles, ...newFiles];
     const newPreviewURLs = newFileObjects.map((file) => URL.createObjectURL(file));
@@ -83,7 +83,7 @@ function AdicionarProduto() {
     submissionData.append("is_service", isServico);
     submissionData.append("is_negotiable", isNegotiable);
     //submissionData.append("owner_id", localStorage.getItem('userId')); // Assumindo que o userId da loja está no localStorage
-    
+
     // ATENÇÃO: Adicionando a primeira imagem.
     // O backend precisa esperar um campo chamado "product_image".
     if (imageFiles.length > 0) {
@@ -98,7 +98,7 @@ function AdicionarProduto() {
           "Content-Type": "multipart/form-data",
         },
       });
-      console.log("payload:" +response.data)
+      console.log("payload:" + response.data)
       // Redirecionar para o catálogo (ou perfil)
       navigate("/perfil/empresa/" + localStorage.getItem('userId'));
 
@@ -106,7 +106,7 @@ function AdicionarProduto() {
       console.error("Erro ao cadastrar produto:", err);
       setError("Houve um erro ao cadastrar o produto. Tente novamente.");
     } finally {
-      
+
       setIsLoading(false);
     }
   };
@@ -263,7 +263,7 @@ function AdicionarProduto() {
               {isLoading ? "Cadastrando..." : "Cadastrar"}
             </button>
           </div>
-          
+
           {error && (
             <div className="md:col-span-2 text-center text-red-500">
               {error}

@@ -20,8 +20,8 @@ const RatingStarsInput = ({ rating, setRating }) => {
             <Star
               size={32}
               className={`transition-colors ${ratingValue <= (hoverRating || rating)
-                  ? 'text-[#FD7702] fill-[#FD7702]'
-                  : 'text-gray-300'
+                ? 'text-[#FD7702] fill-[#FD7702]'
+                : 'text-gray-300'
                 }`}
             />
           </button>

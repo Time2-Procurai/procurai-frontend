@@ -16,7 +16,7 @@ const BackArrowIcon = () => (
 );
 
 // Lista de interesses
-const interestsOptions = ['Alimentos e Bebidas', 'Beleza', 'Brinquedos', 'Construção', 'Culinária', 'Decoração', 'Esportes', 
+const interestsOptions = ['Alimentos e Bebidas', 'Beleza', 'Brinquedos', 'Construção', 'Culinária', 'Decoração', 'Esportes',
   'Livros', 'Papelaria', 'Saúde', 'Tecnologia'
 ];
 

@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import BarraPesquisa from '../components/BarraPesquisa';
 import BarraLateral from '../components/BarraLateral';
-import { 
-  ChevronLeft, Store, Heart, ThumbsDown, MessageCircle, Share2, 
-  Send, MoreVertical, Smile 
+import {
+  ChevronLeft, Store, Heart, ThumbsDown, MessageCircle, Share2,
+  Send, MoreVertical, Smile
 } from 'lucide-react';
 
 // --- MOCK DE DADOS (Mantido para simulação) ---
@@ -12,8 +12,8 @@ const getMockPostDetalhado = (id) => {
   return {
     id: id,
     author: "Zézinho Construções",
-    authorId: 6, 
-    authorAvatar: null, 
+    authorId: 6,
+    authorAvatar: null,
     date: "04/09/25",
     content: "A Zezinho Construções preparou uma oferta especial para você que não abre mão de qualidade e performance nas suas ferramentas. A poderosa parafusadeira DeWalt LT3 está com preço promocional por tempo limitado! Ideal para uso profissional ou doméstico, ela oferece alta durabilidade, torque eficiente e praticidade para o dia a dia na obra ou na oficina. Aproveite as condições facilitadas de pagamento e garanta agora a sua na Zezinho Construções. Não perca essa chance de trabalhar com uma das melhores marcas do mercado por um preço que cabe no seu bolso. Zezinho Construções — tudo para sua construção com confiança e economia.",
     tag: "Promoção",
@@ -41,7 +41,7 @@ function PostDetalhes() {
       const data = getMockPostDetalhado(postId);
       setPost(data);
       setLoading(false);
-    }, 500); 
+    }, 500);
   }, [postId]);
 
   const handleEnviarComentario = (e) => {
@@ -50,7 +50,7 @@ function PostDetalhes() {
 
     const comentario = {
       id: Date.now(),
-      user: "Você", 
+      user: "Você",
       avatar: null,
       text: novoComentario,
       date: new Date().toLocaleDateString('pt-BR')
@@ -85,7 +85,7 @@ function PostDetalhes() {
         <BarraLateral />
 
         <main className="flex-1 overflow-y-auto p-6 md:p-8">
-          
+
           {/* Cabeçalho da Página */}
           <div className="flex items-center gap-3 mb-6 max-w-4xl mx-auto">
             <button
@@ -100,10 +100,10 @@ function PostDetalhes() {
           </div>
 
           <div className="max-w-4xl mx-auto space-y-6">
-            
+
             {/* --- CARD DO POST --- */}
             <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm relative">
-              
+
               {/* Ícone de Compartilhar (Topo Direito) */}
               <button className="absolute top-6 right-6 text-gray-500 hover:text-gray-800 transition">
                 <Share2 size={24} />
@@ -112,7 +112,7 @@ function PostDetalhes() {
               {/* Header do Autor */}
               <div className="flex items-start gap-4 mb-4">
                 {/* Avatar */}
-                <div 
+                <div
                   className="h-14 w-14 rounded-full overflow-hidden border border-gray-200 bg-gray-100 flex items-center justify-center cursor-pointer flex-shrink-0"
                   onClick={() => navigate(`/perfil/empresa/${post.authorId}`)}
                 >
@@ -126,7 +126,7 @@ function PostDetalhes() {
                 {/* Nome e Data */}
                 <div className="mt-1">
                   <div className="flex items-center gap-2">
-                    <h3 
+                    <h3
                       className="font-bold text-gray-900 text-base cursor-pointer hover:underline"
                       onClick={() => navigate(`/perfil/empresa/${post.authorId}`)}
                     >
@@ -170,7 +170,7 @@ function PostDetalhes() {
                 onChange={(e) => setNovoComentario(e.target.value)}
                 className="w-full rounded-full border-2 border-[#FD7702] py-3 pl-6 pr-12 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-200 transition bg-white"
               />
-              <button 
+              <button
                 type="submit"
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#FD7702] transition"
               >
@@ -185,13 +185,13 @@ function PostDetalhes() {
             <div className="space-y-4">
               {post.commentsList.map((comment) => (
                 <div key={comment.id} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex gap-4 relative">
-                  
+
                   {/* Avatar do Comentário */}
                   <div className="h-12 w-12 rounded-full bg-[#FDF6EC] border border-orange-100 flex-shrink-0 flex items-center justify-center overflow-hidden">
-                     {/* Placeholder colorido para diferenciar */}
-                     <span className="font-bold text-[#FD7702] text-xl">
-                        {comment.user.charAt(0).toUpperCase()}
-                     </span>
+                    {/* Placeholder colorido para diferenciar */}
+                    <span className="font-bold text-[#FD7702] text-xl">
+                      {comment.user.charAt(0).toUpperCase()}
+                    </span>
                   </div>
 
                   {/* Conteúdo do Comentário */}

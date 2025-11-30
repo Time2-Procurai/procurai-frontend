@@ -13,7 +13,7 @@ function ResultadosBusca() {
   // Estados separados para cada tipo de resultado
   const [empresas, setEmpresas] = useState([]);
   const [produtos, setProdutos] = useState([]);
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -34,10 +34,10 @@ function ResultadosBusca() {
           api.get(`/user/listar/empresas/?search=${query}`),
           api.get(`/products/?search=${query}`)
         ]);
-        
+
         setEmpresas(resEmpresas.data);
         setProdutos(resProdutos.data);
-        
+
       } catch (err) {
         console.error("Erro ao buscar:", err);
         setError("Não foi possível realizar a busca.");
@@ -54,12 +54,12 @@ function ResultadosBusca() {
 
   return (
     <div className="h-screen text-gray-800 flex flex-col min-w-[1024px]">
-      <BarraPesquisa /> 
+      <BarraPesquisa />
 
       <div className="flex flex-1 overflow-hidden">
         <BarraLateral />
         <main className="flex-1 overflow-y-auto p-8 bg-white">
-          
+
           <h1 className="text-2xl font-bold mb-6 text-gray-800">
             {query ? `Resultados para "${query}"` : "Faça uma busca"}
           </h1>
@@ -72,7 +72,7 @@ function ResultadosBusca() {
             <p className="text-xl text-red-500">{error}</p>
           ) : (
             <div className="space-y-12">
-              
+
               {/* --- MENSAGEM SE NÃO ACHAR NADA --- */}
               {semResultados && (
                 <div className="text-center text-gray-500 py-10">

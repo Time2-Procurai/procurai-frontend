@@ -9,7 +9,7 @@ function FeedPageEmpresa() {
   return (
     <div className="h-screen text-gray-800">
       <BarraPesquisa />
-      
+
       <div className="h-[calc(100%-56px)]"> {/* altura total menos a barra do topo */}
         {/* barra lateral */}
         <BarraLateral />

@@ -2,16 +2,15 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, Star } from 'lucide-react';
 import { useAuth } from '../context/UseAuth.jsx';
-import BarraLateral from '../components/BarraLateral'; 
+import BarraLateral from '../components/BarraLateral';
 import BarraPesquisa from '../components/BarraPesquisa';
 const FilterButton = ({ label, isActive, onClick }) => (
   <button
     onClick={onClick}
-    className={`rounded-md border px-4 py-1.5 text-sm font-semibold transition-colors ${
-      isActive
+    className={`rounded-md border px-4 py-1.5 text-sm font-semibold transition-colors ${isActive
         ? 'border-[#FD7702] bg-[#FD7702] text-white'
         : 'border-orange-200 bg-white text-gray-600 hover:border-[#FD7702] hover:text-[#FD7702]'
-    }`}
+      }`}
   >
     {label}
   </button>
@@ -45,7 +44,7 @@ const ReviewCard = ({ review }) => (
     {review.images && review.images.length > 0 && (
       <div className="flex gap-2">
         {review.images.map((img, index) => (
-          <img key={index} src={img} alt={`Foto ${index}`} className="h-16 w-16 rounded-lg border border-gray-200 object-cover"/>
+          <img key={index} src={img} alt={`Foto ${index}`} className="h-16 w-16 rounded-lg border border-gray-200 object-cover" />
         ))}
       </div>
     )}
@@ -79,10 +78,10 @@ export default function TelaAvaliacoes() {
   const stats = useMemo(() => {
     const total = reviews.length;
     if (total === 0) return { average: '0,0', count: 0 };
-    
+
     const sum = reviews.reduce((acc, curr) => acc + curr.rating, 0);
     const avg = (sum / total).toFixed(1).replace('.', ',');
-    
+
     return { average: avg, count: total };
   }, [reviews]);
 

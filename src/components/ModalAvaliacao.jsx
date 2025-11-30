@@ -11,8 +11,8 @@ const InteractiveRating = ({ rating, setRating }) => {
             key={starValue}
             size={28}
             className={`cursor-pointer transition-colors ${starValue <= rating
-                ? 'text-[#FD7702] fill-[#FD7702]'
-                : 'text-gray-300'
+              ? 'text-[#FD7702] fill-[#FD7702]'
+              : 'text-gray-300'
               }`}
             onClick={() => setRating(starValue)}
           />

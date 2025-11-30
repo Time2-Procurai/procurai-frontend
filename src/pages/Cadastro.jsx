@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import LadoLogoPage from "../components/LadoLogoPage";
 import { useNavigate } from "react-router-dom";
@@ -177,7 +178,7 @@ function Cadastro() {
 
             <button type="submit"
               className="shadow-lg cursor-pointer w-full bg-[#FD7702] md:bg-main text-main md:text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 active:opacity-80 transition duration-300"
-              >
+            >
               Criar conta
             </button>
 

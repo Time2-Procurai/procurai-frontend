@@ -50,10 +50,10 @@ function FeedPageCliente() {
     const fetchLojas = async () => {
       try {
         // Busca todos os usuários e filtra apenas os lojistas
-       
+
         const response = await api.get('/user/listar/empresas/');
         const apenasLojas = response.data.filter(user => user.is_lojista);
-        
+
         // Pega apenas as 4 primeiras para exibir no feed (opcional)
         setLojas(apenasLojas.slice(0, 4));
       } catch (error) {
@@ -75,7 +75,7 @@ function FeedPageCliente() {
 
         {/* Área central */}
         <main className="flex-1 overflow-y-auto p-8 bg-white">
-          
+
           {/* Comunidades sugeridas (Mock) */}
           <section className="mb-16">
             <h2 className="text-lg font-semibold mb-8">
@@ -115,9 +115,9 @@ function FeedPageCliente() {
             <h2 className="text-lg font-semibold mb-8">Lojas recomendadas</h2>
 
             {isLoading ? (
-               <div className="flex justify-center py-10">
-                 <p className="text-gray-500 animate-pulse">Carregando lojas...</p>
-               </div>
+              <div className="flex justify-center py-10">
+                <p className="text-gray-500 animate-pulse">Carregando lojas...</p>
+              </div>
             ) : lojas.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {lojas.map((loja) => (
@@ -146,7 +146,7 @@ function FeedPageCliente() {
                     <p className="text-sm text-gray-500 mb-4">
                       {loja.company_category || "Loja"}
                     </p>
-                    
+
                     <button
                       className="mt-auto border-2 border-[#FD7702] text-[#FD7702] font-medium py-1.5 px-6 rounded-full hover:cursor-pointer hover:bg-[#FD7702] hover:text-white transition-colors"
                     >

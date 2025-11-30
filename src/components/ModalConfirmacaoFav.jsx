@@ -1,22 +1,22 @@
 import React from 'react';
 
-export default function ModalConfirmacaoFav({ 
-  isOpen, 
-  onClose, 
-  onConfirm, 
-  title, 
-  message, 
-  confirmText = "Confirmar", 
-  cancelText = "Cancelar" 
+export default function ModalConfirmacaoFav({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  message,
+  confirmText = "Confirmar",
+  cancelText = "Cancelar"
 }) {
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full animate-scaleIn">
-        
+
         <div className="flex flex-col items-center text-center">
-          
+
           <h3 className="text-xl font-bold text-gray-900 mb-2 mt-2">{title}</h3>
           <p className="text-gray-500 mb-6">
             {message}

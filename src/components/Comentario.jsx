@@ -19,6 +19,7 @@ function Comentario({ usuario, data, estrelas, titulo, texto }) {
         </div>
         
 
+
         {/* Conteúdo */}
         <div className="flex-1">
           <div className="flex justify-between items-center">

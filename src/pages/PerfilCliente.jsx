@@ -4,7 +4,7 @@ import BarraLateral from "../components/BarraLateral";
 import BarraPesquisa from "../components/BarraPesquisa";
 // Removi o UploadFoto, pois esta é uma tela de visualização.
 // Vamos adicionar um ícone de placeholder.
-import { User } from "lucide-react"; 
+import { User } from "lucide-react";
 import Comentario from "../components/Comentario";
 import api from "../api/api"; // Importe a sua instância do API
 
@@ -15,10 +15,14 @@ function PerfilCliente() {
   const { userId: profileIdFromUrl } = useParams(); // ID do perfil a ser visto
   const visitanteId = localStorage.getItem('userId'); // ID de quem está logado
 
+  // --- 1. Hooks para dados dinâmicos ---
+  const { userId: profileIdFromUrl } = useParams(); // ID do perfil a ser visto
+  const visitanteId = localStorage.getItem('userId'); // ID de quem está logado
+
   const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // --- 2. useEffect para buscar dados ---
   useEffect(() => {
     if (!profileIdFromUrl) {
@@ -67,9 +71,9 @@ function PerfilCliente() {
         </div>
       );
     }
-    
+
     if (!userData) {
-        return null; // Não deve acontecer se o loading/error funcionar
+      return null; // Não deve acontecer se o loading/error funcionar
     }
 
     // --- 5. Conteúdo Principal (quando os dados carregam) ---
@@ -80,15 +84,15 @@ function PerfilCliente() {
           <div className="mr-6">
             {/* Foto de Perfil Dinâmica */}
             {userData.profile_picture ? (
-                <img
-                    src={userData.profile_picture}
-                    alt="Foto de Perfil"
-                    className="h-24 w-24 rounded-full border-4 border-white shadow-lg object-cover"
-                />
+              <img
+                src={userData.profile_picture}
+                alt="Foto de Perfil"
+                className="h-24 w-24 rounded-full border-4 border-white shadow-lg object-cover"
+              />
             ) : (
-                <div className="h-24 w-24 rounded-full border-4 border-white shadow-lg bg-gray-300 flex items-center justify-center">
-                    <User size={48} className="text-gray-500" />
-                </div>
+              <div className="h-24 w-24 rounded-full border-4 border-white shadow-lg bg-gray-300 flex items-center justify-center">
+                <User size={48} className="text-gray-500" />
+              </div>
             )}
           </div>
 
@@ -97,7 +101,7 @@ function PerfilCliente() {
             <h2 className="text-xl font-semibold text-gray-800">{userData.full_name}</h2>
             {/* Username Dinâmico */}
             <p className="text-gray-500 text-sm">@{userData.username}</p>
-            
+
             {/* TODO: Esta contagem (150) precisaria vir da API */}
             <p className="mt-2 text-gray-600 text-sm">
               Escreveu <span className="font-semibold text-black">150</span> avaliações ou comentários
@@ -118,17 +122,17 @@ function PerfilCliente() {
         {/* TODO: No futuro, esta seção também deve ser carregada via API */}
         <div className="mt-6 space-y-6">
           <Comentario
-            usuario="luizmatheus"
-            data="04/09/25"
-            estrelas={5}
+            usuario={userData.full_name}
+            data="02/09/25"
+            estrelas={4}
             titulo="Excelente ferramenta!"
-            texto="SenSalSilOlNal"
+            texto="Bom custo-benefício!"
           />
           <Comentario
-            usuario="luizmatheus"
+            usuario={userData.full_name}
             data="04/09/25"
-            estrelas={4}
-            texto="Comprei essa parafusadeira na promoção e foi um ótimo investimento! O preço estava excelente e a entrega chegou bem rápido. A ferramenta é potente, leve e super fácil de usar. O atendimento da Zezinho Construções também foi impecável, responderam tudo com muita paciência. Recomendo de olhos fechados!"
+            estrelas={5}
+            texto="Comprei essa parafusadeira na promoção e foi um ótimo investimento! O preço estava excelente e a entrega chegou bem rápido. A ferramenta é potente, leve e super fácil de usar. O atendimento da Zézinho Construções também foi impecável, responderam tudo com muita paciência. Recomendo de olhos fechados!"
           />
         </div>
       </div>

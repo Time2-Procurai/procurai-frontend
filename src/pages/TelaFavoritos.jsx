@@ -2,16 +2,16 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Trash2, Check } from 'lucide-react';
 import { useAuth } from '../context/UseAuth.jsx';
-import BarraLateral from '../components/BarraLateral'; 
+import BarraLateral from '../components/BarraLateral';
 import BarraPesquisa from '../components/BarraPesquisa';
-import ModalConfirmacaoFav from '../components/ModalConfirmacaoFav'; 
+import ModalConfirmacaoFav from '../components/ModalConfirmacaoFav';
 
 export default function TelaFavoritos() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   const [favoritos, setFavoritos] = useState([]);
-  
+
   // estados para controle de interação
   const [showModal, setShowModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
@@ -34,7 +34,7 @@ export default function TelaFavoritos() {
     if (itemToDelete) {
       const novaLista = favoritos.filter((item) => item.id !== itemToDelete);
       setFavoritos(novaLista);
-      
+
       localStorage.setItem('meusFavoritos', JSON.stringify(novaLista));
 
       setShowModal(false);
@@ -54,15 +54,15 @@ export default function TelaFavoritos() {
 
   return (
     <div className="h-screen text-gray-800 flex flex-col min-w-[1024px] relative">
-      
+
       <BarraPesquisa />
 
       <div className="flex flex-1 overflow-hidden">
         <BarraLateral />
 
         <main className="flex-1 overflow-y-auto bg-white p-6">
-          <div className="w-full"> 
-            
+          <div className="w-full">
+
             <header className="flex items-center mb-4">
               <button
                 onClick={() => navigate(-1)}
@@ -84,10 +84,10 @@ export default function TelaFavoritos() {
               {favoritos.length > 0 ? (
                 favoritos.map((produto) => (
                   <div key={produto.id} className="relative flex flex-col rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
-                    
+
                     <div className="relative flex h-56 items-center justify-center bg-white p-4">
-                      <img src={produto.imagem} alt={produto.nome} className="max-h-full max-w-full object-contain"/>
-                      
+                      <img src={produto.imagem} alt={produto.nome} className="max-h-full max-w-full object-contain" />
+
                       <button
                         onClick={() => handleTrashClick(produto.id)}
                         className="absolute bottom-0 right-4 translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full border border-orange-400 bg-white text-gray-600 hover:bg-red-50 hover:border-red-500 hover:text-red-500 transition-all shadow-sm z-10"
@@ -123,7 +123,7 @@ export default function TelaFavoritos() {
         confirmText="Confirmar"
         cancelText="Cancelar"
       />
-      
+
     </div>
   );
 }
