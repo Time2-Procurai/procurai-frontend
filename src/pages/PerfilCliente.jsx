@@ -9,11 +9,7 @@ import Comentario from "../components/Comentario";
 import api from "../api/api"; // Importe a sua instância do API
 
 function PerfilCliente() {
-  const navigate = useNavigate();
-  
-  // --- 1. Hooks para dados dinâmicos ---
-  const { userId: profileIdFromUrl } = useParams(); // ID do perfil a ser visto
-  const visitanteId = localStorage.getItem('userId'); // ID de quem está logado
+  const navigate = useNavigate(); 
 
   // --- 1. Hooks para dados dinâmicos ---
   const { userId: profileIdFromUrl } = useParams(); // ID do perfil a ser visto
