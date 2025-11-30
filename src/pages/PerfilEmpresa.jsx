@@ -4,11 +4,13 @@ import BarraPesquisa from '../components/BarraPesquisa';
 import BarraLateral from '../components/BarraLateral';
 import AvaliacaoPopup from "../components/AvaliacaoPopup";
 import CriarPostPopup from '../components/CriarPostPopup';
+import ModalEnquete from '../components/ModalEnquete'; 
+import EnquetePost from '../components/EnquetePost'; 
 import api from '../api/api';
 import {
   ChevronLeft, Star, Store, Map,
   Share2, MoreVertical, Heart, ThumbsDown, MessageCircle,
-  Trash2 // <--- 1. Importei o ícone da lixeira
+  Trash2
 } from 'lucide-react';
 
 // --- DADOS MOCKADOS (Publicações) ---
@@ -20,7 +22,8 @@ const MOCK_POSTS = [
     content: "A Zezinho Construções preparou uma oferta especial para você que não abre mão de qualidade e performance nas suas ferramentas. A poderosa parafusadeira DeWalt LT3 está com preço promocional por tempo limitado! Ideal para uso profissional ou doméstico.",
     tag: "Promoção",
     likes: 12,
-    comments: 2
+    comments: 2,
+    type: "text"
   },
   {
     id: 2,
@@ -29,7 +32,8 @@ const MOCK_POSTS = [
     content: "⚡ Zezinho Construções convida você para o Grande Feirão da Construção 2025! Nos dias 18, 19 e 20 de outubro, nossa loja estará em clima de promoção com descontos de até 50% em ferramentas, tintas e materiais elétricos.",
     tag: null,
     likes: 45,
-    comments: 8
+    comments: 8,
+    type: "text"
   }
 ];
 
@@ -48,13 +52,14 @@ function PerfilEmpresa() {
 
   const [popupAberto, setPopupAberto] = useState(false);
   const [modalPostAberto, setModalPostAberto] = useState(false);
+  const [modalEnqueteAberto, setModalEnqueteAberto] = useState(false);
+
   const [abaAtiva, setAbaAtiva] = useState('Informações');
   const [lojaData, setLojaData] = useState(null);
 
   const [posts, setPosts] = useState(MOCK_POSTS);
   const [promos, setPromos] = useState(MOCK_PROMOS);
 
-  // --- 2. Novo Estado: Controla qual menu está aberto pelo ID do post ---
   const [menuAbertoId, setMenuAbertoId] = useState(null);
 
   useEffect(() => {
@@ -66,8 +71,7 @@ function PerfilEmpresa() {
 
       try {
         const response = await api.get(`/user/listar/usuarios/${profileIdFromUrl}/`);
-        console.log("Dados da loja obtidos:", response.data);
-
+        
         const { street, number, neighborhood, city, complement } = response.data;
         const enderecoCompleto = [street, number, neighborhood, city, complement]
           .filter(Boolean)
@@ -94,7 +98,6 @@ function PerfilEmpresa() {
     fetchDadosLoja();
   }, [profileIdFromUrl]);
 
-  // --- FUNÇÃO PARA CRIAR O POST ---
   const handleAdicionarPost = (dados) => {
     const novoPost = {
       id: Date.now(),
@@ -103,27 +106,41 @@ function PerfilEmpresa() {
       content: dados.descricao,
       tag: dados.titulo ? dados.titulo : null,
       likes: 0,
-      comments: 0
+      comments: 0,
+      type: "text"
     };
     setPosts([novoPost, ...posts]);
   };
 
-  // --- 3. FUNÇÃO PARA DELETAR O POST ---
+  const handleAdicionarEnquete = (dadosEnquete) => {
+    const novoPostEnquete = {
+        id: Date.now(),
+        author: lojaData.nome,
+        date: "Agora",
+        type: "enquete", 
+        question: dadosEnquete.pergunta, 
+        options: dadosEnquete.opcoes,    
+        likes: 0,
+        comments: 0
+    };
+    
+    setPosts([novoPostEnquete, ...posts]);
+    setModalEnqueteAberto(false);
+    alert("Enquete publicada com sucesso!"); 
+  };
+
   const handleDeletarPost = (id) => {
     if (window.confirm("Tem certeza que deseja excluir esta publicação?")) {
-      // Remove o post da lista filtrando pelo ID
       setPosts(posts.filter((post) => post.id !== id));
-      // Fecha o menu
       setMenuAbertoId(null);
     }
   };
 
-  // Função auxiliar para alternar o menu
   const toggleMenu = (id) => {
     if (menuAbertoId === id) {
-      setMenuAbertoId(null); // Fecha se já estiver aberto
+      setMenuAbertoId(null);
     } else {
-      setMenuAbertoId(id); // Abre o novo
+      setMenuAbertoId(id);
     }
   };
 
@@ -161,6 +178,14 @@ function PerfilEmpresa() {
             userAvatar={lojaData?.profileUrl}
             onPublicar={handleAdicionarPost}
           />
+          
+          <ModalEnquete 
+            isOpen={modalEnqueteAberto}
+            onClose={() => setModalEnqueteAberto(false)}
+            userName={lojaData?.nome}
+            userAvatar={lojaData?.profileUrl}
+            onConfirm={handleAdicionarEnquete} 
+          />
 
           <div>
             <div className="relative">
@@ -179,11 +204,9 @@ function PerfilEmpresa() {
                 onClick={() => {
                   const role = localStorage.getItem('userRole');
                   const id = localStorage.getItem('userId');
-
                   if (role === 'lojista') {
                     navigate(`/FeedEmpresa/${id}`);
                   } else {
-                    // Assume que se não for lojista, é cliente
                     navigate(`/FeedCliente/${id}`);
                   }
                 }}
@@ -254,24 +277,9 @@ function PerfilEmpresa() {
             {/* Navegação das Abas */}
             <div className="border-b border-gray-200">
               <nav className="flex justify-center space-x-10">
-                <button
-                  onClick={() => setAbaAtiva('Informações')}
-                  className={`${abaAtiva === 'Informações' ? abaAtivaClass : abaInativaClass} cursor-pointer`}
-                >
-                  Informações
-                </button>
-                <button
-                  onClick={() => setAbaAtiva('Comunidade')}
-                  className={`${abaAtiva === 'Comunidade' ? abaAtivaClass : abaInativaClass} cursor-pointer`}
-                >
-                  Comunidade
-                </button>
-                <Link
-                  to={`/produtos/${profileIdFromUrl}`}
-                  className={abaInativaClass}
-                >
-                  Produtos
-                </Link>
+                <button onClick={() => setAbaAtiva('Informações')} className={`${abaAtiva === 'Informações' ? abaAtivaClass : abaInativaClass} cursor-pointer`}>Informações</button>
+                <button onClick={() => setAbaAtiva('Comunidade')} className={`${abaAtiva === 'Comunidade' ? abaAtivaClass : abaInativaClass} cursor-pointer`}>Comunidade</button>
+                <Link to={`/produtos/${profileIdFromUrl}`} className={abaInativaClass}>Produtos</Link>
               </nav>
             </div>
 
@@ -279,6 +287,7 @@ function PerfilEmpresa() {
             {abaAtiva === 'Informações' && (
               <div className="p-4">
                 <div className="rounded-xl border border-gray-200 p-5 shadow-sm">
+                  {/* ... Conteúdo da Aba Informações (Igual) ... */}
                   <div className="flex flex-col md:flex-row gap-5">
                     <div className="flex-1">
                       <div className="mb-4">
@@ -318,21 +327,13 @@ function PerfilEmpresa() {
 
                 <div className="flex items-center justify-between mb-6 pt-4">
                   <h2 className="text-xl font-bold text-gray-900">Publicações</h2>
-
                   {isOwner ? (
-                    <button
-                      onClick={() => setModalPostAberto(true)}
-                      className="cursor-pointer px-4 py-1.5 text-sm font-semibold text-[#FD7702] border border-[#FD7702] rounded-full hover:bg-orange-50 transition active:scale-95"
-                    >
-                      Criar publicação
-                    </button>
+                    <div className="flex gap-3">
+                      <button onClick={() => setModalPostAberto(true)} className="cursor-pointer px-4 py-1.5 text-sm font-semibold text-[#FD7702] border border-[#FD7702] rounded-full hover:bg-orange-50 transition active:scale-95">Criar publicação</button>
+                      <button onClick={() => setModalEnqueteAberto(true)} className="cursor-pointer px-4 py-1.5 text-sm font-semibold text-[#FD7702] border border-[#FD7702] rounded-full hover:bg-orange-50 transition active:scale-95">Criar enquete</button>
+                    </div>
                   ) : visitanteTipo === 'cliente' ? (
-                    <button
-                      onClick={() => console.log("Seguir empresa...")}
-                      className="cursor-pointer px-6 py-1.5 text-sm font-bold text-white bg-[#FD7702] rounded-full shadow-md hover:opacity-90 transition active:scale-95"
-                    >
-                      Seguir
-                    </button>
+                    <button onClick={() => console.log("Seguir empresa...")} className="cursor-pointer px-6 py-1.5 text-sm font-bold text-white bg-[#FD7702] rounded-full shadow-md hover:opacity-90 transition active:scale-95">Seguir</button>
                   ) : null}
                 </div>
 
@@ -356,9 +357,7 @@ function PerfilEmpresa() {
                             <h3 className="text-sm font-bold text-gray-900">{post.author}</h3>
                             <div className="flex items-center gap-2">
                               {post.tag && (
-                                <span className="px-2 py-0.5 rounded bg-orange-100 text-[#FD7702] text-[10px] font-bold uppercase border border-orange-200">
-                                  {post.tag}
-                                </span>
+                                <span className="px-2 py-0.5 rounded bg-orange-100 text-[#FD7702] text-[10px] font-bold uppercase border border-orange-200">{post.tag}</span>
                               )}
                               <span className="text-xs text-gray-500">{post.date}</span>
                             </div>
@@ -367,37 +366,34 @@ function PerfilEmpresa() {
 
                         <div className="flex items-center text-gray-400 gap-2">
                           <button className="hover:text-gray-600 cursor-pointer"><Share2 size={18} /></button>
-
-                          {/* --- 4. LÓGICA DO MENU DROPDOWN --- */}
                           <div className="relative">
-                            <button
-                              onClick={() => toggleMenu(post.id)}
-                              className="hover:text-gray-600 cursor-pointer p-1"
-                            >
+                            <button onClick={() => toggleMenu(post.id)} className="hover:text-gray-600 cursor-pointer p-1">
                               <MoreVertical size={18} />
                             </button>
-
-                            {/* O Menu só aparece se for o dono E o ID coincidir */}
                             {isOwner && menuAbertoId === post.id && (
                               <div className="absolute right-0 top-6 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden animate-in fade-in zoom-in duration-100">
-                                <button
-                                  onClick={() => handleDeletarPost(post.id)}
-                                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 cursor-pointer transition"
-                                >
-                                  <Trash2 size={14} />
-                                  Excluir
+                                <button onClick={() => handleDeletarPost(post.id)} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 cursor-pointer transition">
+                                  <Trash2 size={14} /> Excluir
                                 </button>
                               </div>
                             )}
                           </div>
-                          {/* --- FIM DO DROPDOWN --- */}
-
                         </div>
                       </div>
+                      {post.type === 'enquete' ? (
+                        <div className="mb-4 w-full">
+                          <EnquetePost 
+                            question={post.question}
+                            options={post.options}
+                          />
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-700 leading-relaxed mb-4 text-justify">
+                          {post.content}
+                        </p>
+                      )}
+                      {/* --------------------------------------------------------- */}
 
-                      <p className="text-sm text-gray-700 leading-relaxed mb-4 text-justify">
-                        {post.content}
-                      </p>
                       <hr className="border-gray-100 mb-3" />
                       <div className="flex items-center gap-6">
                         <button className="flex items-center gap-1.5 text-gray-500 hover:text-red-500 transition group cursor-pointer">
@@ -423,32 +419,20 @@ function PerfilEmpresa() {
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-bold text-gray-900">Meus produtos em promoção</h2>
                     {isOwner && (
-                      <button className="cursor-pointer px-4 py-1.5 text-sm font-semibold text-[#FD7702] border border-[#FD7702] rounded-full hover:bg-orange-50 transition active:scale-95">
-                        Editar promoções
-                      </button>
+                      <button className="cursor-pointer px-4 py-1.5 text-sm font-semibold text-[#FD7702] border border-[#FD7702] rounded-full hover:bg-orange-50 transition active:scale-95">Editar promoções</button>
                     )}
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                     {promos.map((promo) => (
                       <div key={promo.id} className="cursor-pointer bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex flex-col">
                         <div className="h-48 bg-white p-4 flex items-center justify-center relative">
-                          <img
-                            src="https://placehold.co/400x400/png?text=Ferramenta"
-                            alt={promo.name}
-                            className="max-h-full max-w-full object-contain"
-                          />
+                          <img src="https://placehold.co/400x400/png?text=Ferramenta" alt={promo.name} className="max-h-full max-w-full object-contain" />
                         </div>
                         <div className="bg-gray-200 p-4 flex flex-col gap-1">
-                          <h3 className="font-bold text-gray-900 text-sm leading-tight">
-                            {promo.name}
-                          </h3>
+                          <h3 className="font-bold text-gray-900 text-sm leading-tight">{promo.name}</h3>
                           <div className="flex items-center justify-between mt-1">
-                            <span className="text-gray-900 font-medium">
-                              {promo.price}
-                            </span>
-                            <span className="text-[#FD7702] font-bold text-sm">
-                              {promo.discount}
-                            </span>
+                            <span className="text-gray-900 font-medium">{promo.price}</span>
+                            <span className="text-[#FD7702] font-bold text-sm">{promo.discount}</span>
                           </div>
                         </div>
                       </div>
