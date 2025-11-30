@@ -29,7 +29,7 @@ import TelaFavoritos from './pages/TelaFavoritos.jsx';
 import PesquisaProduto from './pages/PesquisaProduto.jsx'
 import TelaPromocoes from './pages/TelaPromocoes.jsx';
 import TelaAdicionarPromocao from './pages/TelaAdicionarPromocao.jsx';
-
+import Notificacoes from './pages/Notificacoes.jsx';
 
 function Home() {
   return (
@@ -84,6 +84,7 @@ function App() {
         <Route path="/promocoes/:userId" element={<TelaPromocoes />} />
         <Route path="/promocoes/adicionar" element={<TelaAdicionarPromocao />} />
         <Route path='/produto/:produtoId/avaliacoes' element={<TelaAvaliacoes/>}/>
+        <Route path="/notificacoes" element={<Notificacoes />} />
       </Routes>
 
     </AuthProvider>

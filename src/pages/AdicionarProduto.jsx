@@ -82,23 +82,32 @@ function AdicionarProduto() {
     submissionData.append("category_name", categoria);
     submissionData.append("is_service", isServico);
     submissionData.append("is_negotiable", isNegotiable);
-    //submissionData.append("owner_id", localStorage.getItem('userId')); // Assumindo que o userId da loja está no localStorage
+    
+    // O owner_id NÃO deve ser enviado (o backend pega do token)
 
     // ATENÇÃO: Adicionando a primeira imagem.
-    // O backend precisa esperar um campo chamado "product_image".
     if (imageFiles.length > 0) {
       submissionData.append("product_image", imageFiles[0]);
     }
-    // (Se o seu backend suportar múltiplas imagens, você precisaria iterar)
 
     try {
+      // --- CORREÇÃO PARA VISUALIZAR OS DADOS ---
+      // FormData não mostra nada com console.log(submissionData.nome)
+      console.log("--- Enviando dados ---");
+      for (let [key, value] of submissionData.entries()) {
+        console.log(`${key}:`, value);
+      }
+      console.log("----------------------");
+
       // Ajustado para bater com o seu urls.py (que usa '' para criar)
-      const response = await api.post("/products/", submissionData, { // <--- CORRIGIDO
+      const response = await api.post("/products/", submissionData, { 
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-      console.log("payload:" + response.data)
+      
+      console.log("Produto criado com sucesso:", response.data);
+      
       // Redirecionar para o catálogo (ou perfil)
       navigate("/perfil/empresa/" + localStorage.getItem('userId'));
 
@@ -106,7 +115,6 @@ function AdicionarProduto() {
       console.error("Erro ao cadastrar produto:", err);
       setError("Houve um erro ao cadastrar o produto. Tente novamente.");
     } finally {
-
       setIsLoading(false);
     }
   };
@@ -263,7 +271,7 @@ function AdicionarProduto() {
               {isLoading ? "Cadastrando..." : "Cadastrar"}
             </button>
           </div>
-
+          
           {error && (
             <div className="md:col-span-2 text-center text-red-500">
               {error}

@@ -15,13 +15,12 @@ const BackArrowIcon = () => (
   </svg>
 );
 
-
 const categoriesOptions = [
-  { key: 'ROUP', name: 'Construção' },
-  { key: 'ELET', name: 'Cosméticos' },
-  { key: 'COSM', name: 'Eletrônicos' },
+  { key: 'Construção', name: 'Construção' },
+  { key: 'ROUP', name: 'Roupas e Acessórios' },
+  { key: 'ELET', name: 'Eletrônicos' },
+  { key: 'COSM', name: 'Cosméticos' },
   { key: 'REST', name: 'Restaurantes' },
-  { key: 'Construção', name: 'Roupas e Acessórios' },
   { key: 'Saúde', name: 'Saúde' }
 ];
 
@@ -29,8 +28,8 @@ const CadastroEmpresaPage = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     companyName: '',
-    fullName: '', // Para o User
-    cpf: '',        // Para o User
+    fullName: '', 
+    cpf: '',        
     cnpj: '',
     phone: '',
     hour: '',
@@ -38,10 +37,9 @@ const CadastroEmpresaPage = () => {
   });
 
   const [selectedCategory, setSelectedCategory] = useState('');
-
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [userId, setUserId] = useState(null); // Estado para o ID
+  const [userId, setUserId] = useState(null);
 
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [profileImagePreview, setProfileImagePreview] = useState(null);
@@ -63,7 +61,6 @@ const CadastroEmpresaPage = () => {
     setFormData(prevData => ({ ...prevData, [name]: value }));
   };
 
-
   const handleCategoryClick = (categoryKey) => {
     setSelectedCategory(prevCategory =>
       prevCategory === categoryKey ? '' : categoryKey
@@ -83,7 +80,7 @@ const CadastroEmpresaPage = () => {
     }
   };
 
-  // --- FUNÇÃO DE SUBMISSÃO UNIFICADA ---
+  // --- FUNÇÃO DE SUBMISSÃO ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -95,52 +92,61 @@ const CadastroEmpresaPage = () => {
       return;
     }
 
-
-    const submissionData = new FormData();
-
-
-    submissionData.append('company_name', formData.companyName);
-    submissionData.append('full_name', formData.fullName); // Campo para o User
-    submissionData.append('cpf', formData.cpf);         // Campo para o User
-    submissionData.append('cnpj', formData.cnpj);
-    submissionData.append('description', formData.description);
-    submissionData.append('phone', formData.phone);
-    submissionData.append('operating_hours', formData.hour);
-
-
-    if (selectedCategory) {
-      submissionData.append('company_category', selectedCategory);
-    } else {
-
+    if (!selectedCategory) {
       setError("Por favor, selecione uma categoria para a empresa.");
       setIsLoading(false);
       return;
     }
 
+    const submissionData = new FormData();
+
+    // Mapeamento dos campos para o que o Backend (Serializer) espera
+    submissionData.append('company_name', formData.companyName);
+    submissionData.append('full_name', formData.fullName); 
+    submissionData.append('cpf', formData.cpf);         
+    submissionData.append('cnpj', formData.cnpj);
+    submissionData.append('description', formData.description);
+    submissionData.append('phone', formData.phone);
+    submissionData.append('operating_hours', formData.hour);
+    submissionData.append('company_category', selectedCategory);
 
     if (profileImageFile) {
       submissionData.append('profile_picture', profileImageFile);
     }
 
-
     try {
-      // 5. Enviar o FormData
+      // Envia para a rota que cria a Loja.
+      // O Backend (Tela2LojistaProfileView) já está configurado para criar a Comunidade automaticamente.
       const response = await api.post(
         `user/register/tela2/lojista/${userId}/`,
         submissionData
-
+        // NOTA: Removi o header 'Content-Type' manual.
+        // O Axios define automaticamente como 'multipart/form-data' com o boundary correto.
       );
 
       console.log("Resposta da API:", response.data);
-      alert("Perfil criado com sucesso!");
-
-
-      navigate('/cadastro/empresa/2');
+      
+      alert("Perfil e Comunidade criados com sucesso!");
+      
+      // Avança para a próxima etapa: Endereço
+      navigate('/cadastro/empresa/2'); 
 
     } catch (error) {
       console.error("Erro ao cadastrar empresa:", error.response?.data || error.message);
-      setError("Erro ao cadastrar. Verifique os dados informados.");
-      alert("Erro ao cadastrar. Verifique os dados informados.");
+      
+      // Lógica para mostrar o erro amigável
+      let msg = "Erro ao cadastrar. Verifique os dados.";
+      if (error.response?.data) {
+          const keys = Object.keys(error.response.data);
+          if (keys.length > 0) {
+            const firstError = error.response.data[keys[0]];
+            // Se for uma lista de erros, pega o primeiro
+            const errorText = Array.isArray(firstError) ? firstError[0] : firstError;
+            msg = `${keys[0]}: ${errorText}`;
+          }
+      }
+      setError(msg);
+      alert(msg);
     } finally {
       setIsLoading(false);
     }
@@ -177,15 +183,14 @@ const CadastroEmpresaPage = () => {
             <img
               src={profileImagePreview}
               alt="Prévia do perfil"
-              className="w-36 h-36 rounded-full object-cover mb-3" // Ajustei o tamanho
+              className="w-36 h-36 rounded-full object-cover mb-3"
             />
           ) : (
-            <div className="w-36 h-36 bg-gray-200 rounded-full mb-3"></div> // Ajustei o tamanho
+            <div className="w-36 h-36 bg-gray-200 rounded-full mb-3"></div>
           )}
           <span className="block text-sm font-bold mt-2 text-gray-800 text-[20px]">Adicione uma foto de perfil</span>
         </div>
 
-        {/* Input de ficheiro escondido */}
         <input
           type="file"
           ref={fileInputRef}
@@ -259,14 +264,14 @@ const CadastroEmpresaPage = () => {
             <label htmlFor="description" className="block text-sm font-bold mb-2 text-gray-800 text-[20px]">
               Descrição da empresa
             </label>
-            <textarea // Mudei para <textarea> para melhor digitação
+            <textarea 
               id="description"
               name="description"
               value={formData.description}
               onChange={handleChange}
               placeholder="Dê uma descrição do seu negócio"
               required
-              rows={4} // Altura do campo
+              rows={4}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
             />
           </div>
@@ -290,7 +295,7 @@ const CadastroEmpresaPage = () => {
             <label htmlFor="hour" className="block text-sm font-bold mb-2 text-gray-800 text-[20px]">
               Horário de funcionamento
             </label>
-            <input type="text" // Mudei de 'hour' para 'text'
+            <input type="text" 
               id="hour"
               name="hour"
               value={formData.hour}
@@ -306,16 +311,13 @@ const CadastroEmpresaPage = () => {
               Categorias da empresa
             </label>
             <div className="flex flex-wrap justify-center gap-2">
-
-              {/* --- MUDANÇA IMPORTANTE ---
-                  Atualizei o map para usar os objetos (key/name) */}
               {categoriesOptions.map((category) => (
                 <button key={category.key}
                   type="button"
-                  onClick={() => handleCategoryClick(category.key)} // Passa a CHAVE (ex: 'ELET')
+                  onClick={() => handleCategoryClick(category.key)} 
                   className={`cursor-pointer px-4 py-2 rounded-full font-medium text-sm transition-colors duration-200 
                   ${selectedCategory === category.key ? 'bg-orange-500 text-white border border-orange-500' : 'bg-white text-gray-800 border border-gray-300 hover:bg-gray-100'}`}>
-                  {category.name} {/* Mostra o NOME (ex: 'Eletrônicos') */}
+                  {category.name} 
                 </button>
               ))}
             </div>
