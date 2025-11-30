@@ -15,10 +15,6 @@ function PerfilCliente() {
   const { userId: profileIdFromUrl } = useParams(); // ID do perfil a ser visto
   const visitanteId = localStorage.getItem('userId'); // ID de quem está logado
 
-  // --- 1. Hooks para dados dinâmicos ---
-  const { userId: profileIdFromUrl } = useParams(); // ID do perfil a ser visto
-  const visitanteId = localStorage.getItem('userId'); // ID de quem está logado
-
   const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
