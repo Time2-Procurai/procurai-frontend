@@ -45,9 +45,9 @@ function ResultadosBusca() {
         setIsLoading(false);
       }
     };
-
+    
     fetchResultados();
-  }, [query]);
+  }, [query]); 
 
   // Verifica se não encontrou NADA em nenhuma das duas listas
   const semResultados = !isLoading && !error && empresas.length === 0 && produtos.length === 0;
