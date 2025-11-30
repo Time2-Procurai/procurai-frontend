@@ -21,8 +21,14 @@ import TelaProduto from './pages/TelaProduto.jsx';
 import ResultadosBusca from './pages/ResultadosBusca.jsx';
 import EsqueciSenha from './pages/EsqueciSenha.jsx';
 import RedefinirSenhaConfirmacao from './pages/RedefinirSenhaConfirmacao';
+import PostDetalhes from './pages/PostDetalhes.jsx';
+import TelaAvaliacoes from './pages/TelaAvaliacoes.jsx';
 import EsqueciSenha2 from './pages/EsqueciSenha2.jsx';
 import EsqueciSenha3 from './pages/EsqueciSenha3.jsx';
+import TelaFavoritos from './pages/TelaFavoritos.jsx';
+import PesquisaProduto from './pages/PesquisaProduto.jsx'
+import TelaPromocoes from './pages/TelaPromocoes.jsx';
+import TelaAdicionarPromocao from './pages/TelaAdicionarPromocao.jsx';
 
 function Home() {
   return (
@@ -64,13 +70,18 @@ function App() {
         {/* --- CORREÇÃO AQUI --- */}
         {/* Aplicado o mesmo para o perfil do cliente */}
         <Route path='/perfil/cliente/:userId' element={<PerfilCliente />} />
-
+        <Route path='/post/:postId' element={<PostDetalhes />} />
         <Route path='/produtos/:userId' element={<CatalogoEmpresa />} />
         <Route path='/produtos/adicionar/' element={<AdicionarProduto />} />
         <Route path='/EditarPerfilLoja/:userId' element={<EditarPerfilLoja />} />
         <Route path='/EditarPerfilCliente/' element={<EditarPerfilCliente />} />
         <Route path="/search/" element={<ResultadosBusca />} />
         <Route path="/redefinir-senha/:uid/:token" element={<RedefinirSenhaConfirmacao />} />
+        <Route path='/produto/:produtoId/avaliacoes' element={<TelaAvaliacoes />} />
+        <Route path='/favoritos/:userId' element={<TelaFavoritos />} />
+        <Route path='/PesquisarProduto' element={<PesquisaProduto />} />
+        <Route path="/promocoes/:userId" element={<TelaPromocoes />} />
+        <Route path="/promocoes/adicionar" element={<TelaAdicionarPromocao />} />
       </Routes>
 
     </AuthProvider>

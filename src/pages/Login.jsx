@@ -20,11 +20,11 @@ function LoginPage() {
       return;
     }
 
-    const passwordRegex = /^[A-Za-z0-9!@#$%&*.\-_?]{8,}$/;
+    /*const passwordRegex = /^[A-Za-z0-9!@#$%&*.\-_?]{8,}$/;
     if (!passwordRegex.test(password)) {
       setError("Insira uma senha válida.");
       return;
-    }
+    }*/
 
     try {
       const response = await api.post('user/token/', {
@@ -137,7 +137,7 @@ function LoginPage() {
             {/* Este é o botão que submete o formulário */}
             <button type="submit"
               className="shadow-lg w-full bg-[#FD7702] md:bg-main text-main md:text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 active:opacity-80 transition duration-300 cursor-pointer"
-              >
+            >
               Entrar
             </button>
 

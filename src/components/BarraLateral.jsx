@@ -65,7 +65,7 @@ function BarraLateral() {
               </button>
 
               <button
-                onClick={() => navigate("/Promocoes/" + localStorage.getItem('userId'))}
+                onClick={() => navigate("/promocoes/" + localStorage.getItem('userId'))}
                 className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer"
               >
                 <span className="text-lg">🏷️</span>
@@ -118,7 +118,7 @@ function BarraLateral() {
               </button>
 
               <button
-                onClick={() => navigate("/Promocoes/" + localStorage.getItem('userId'))}
+                onClick={() => navigate("/promocoes/" + localStorage.getItem('userId'))}
                 className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer"
               >
                 <span className="text-lg">🏷️</span>
