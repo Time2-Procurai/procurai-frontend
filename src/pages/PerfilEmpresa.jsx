@@ -250,7 +250,7 @@ function PerfilEmpresa() {
               {/* Botões Editar/Avaliar */}
               {isOwner && visitanteTipo === 'lojista' ? (
                 <button
-                  onClick={() => navigate(`/EditarPerfilLoja`)}
+                  onClick={() => navigate(`/EditarPerfilLoja/`+localStorage.getItem('userId'))}
                   className="hover:cursor-pointer absolute top-4 ring-2 ring-[#FD7702] right-4 rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-md transition hover:bg-gray-50"
                 >
                   Editar perfil

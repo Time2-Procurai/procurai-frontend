@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BarraPesquisa from '../components/BarraPesquisa';
 import BarraLateral from '../components/BarraLateral';
-import { ChevronLeft, Bell } from 'lucide-react';
+import { ChevronLeft, Bell, Store } from 'lucide-react';
 import api from '../api/api'; // Importe a API
 
 function Notificacoes() {
@@ -14,6 +14,14 @@ function Notificacoes() {
   // --- 1. BUSCAR NOTIFICAÇÕES DA API ---
   useEffect(() => {
     const fetchNotificacoes = async () => {
+      // 1. Verificação de Segurança Local
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        // Se não tiver token, nem tenta chamar a API, vai pro login direto
+        navigate('/login');
+        return;
+      }
+
       setIsLoading(true);
       try {
         // Chama o endpoint que criamos no Django
@@ -21,6 +29,14 @@ function Notificacoes() {
         setNotificacoes(response.data);
       } catch (err) {
         console.error("Erro ao buscar notificações:", err);
+        
+        // 2. Verificação de Segurança da Resposta
+        if (err.response && err.response.status === 401) {
+             // Se o token for inválido/expirado, redireciona
+             navigate('/login');
+             return;
+        }
+
         setError("Não foi possível carregar suas notificações.");
       } finally {
         setIsLoading(false);
@@ -28,7 +44,7 @@ function Notificacoes() {
     };
 
     fetchNotificacoes();
-  }, []);
+  }, [navigate]); // Adicionei navigate às dependências
 
   // --- 2. LÓGICA DE REDIRECIONAMENTO ---
   const handleNotificationClick = async (notificacao) => {
@@ -43,17 +59,12 @@ function Notificacoes() {
       }
 
       // Redireciona baseado no tipo e no objeto vinculado
-      // O serializer retorna 'content_type_id' e 'object_id', ou você pode usar a lógica abaixo
       if (notificacao.type === 'new_post' && notificacao.object_id) {
         navigate(`/post/${notificacao.object_id}`);
       } else if (notificacao.type === 'favorite_promo' && notificacao.object_id) {
         navigate(`/produto/${notificacao.object_id}`);
       } else {
-        // Fallback: vai para o perfil da loja que gerou a notificação
-        // O serializer deve retornar o ID do ator/loja. Vamos assumir que vem no 'actor_id' ou similar.
-        // Se não tiver, você pode precisar ajustar o serializer para enviar 'actor_id'.
-        // Por enquanto, vamos tentar navegar se tivermos essa info, senão não faz nada.
-        console.log("Redirecionamento genérico para a loja");
+        console.log("Notificação genérica ou sem link");
       }
     } catch (err) {
       console.error("Erro ao processar clique:", err);
@@ -65,9 +76,16 @@ function Notificacoes() {
     switch (type) {
       case 'announcement': return 'anunciou uma nova promoção';
       case 'favorite_promo': return 'está com uma promoção no produto que você favoritou';
-      case 'new_post': return 'fez uma nova publicação';
+      case 'new_post': return 'fez um nova publicação';
       default: return 'enviou uma notificação';
     }
+  };
+
+  // Helper simples para formatar preço caso venha como número
+  const formatPrice = (val) => {
+    if (!val) return "";
+    if (typeof val === 'string' && val.includes('R$')) return val;
+    return parseFloat(val).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
 
   return (
@@ -148,17 +166,37 @@ function Notificacoes() {
                       </div>
                     )}
 
-                    {/* Produto Favoritado */}
-                    {notificacao.type === 'favorite_promo' && notificacao.productName && (
+                    {/* Produto Favoritado (CARD COM PREÇOS) */}
+                    {notificacao.type === 'favorite_promo' && (
                       <div className="mt-3 bg-white border border-gray-200 rounded-md p-4 shadow-sm inline-block min-w-[300px]">
-                        <p className="font-bold text-gray-800 text-base">
-                          {notificacao.productName}
+                        <p className="font-bold text-gray-800 text-base mb-1">
+                          {notificacao.productName || "Produto em oferta"}
                         </p>
+                        
+                        {/* Exibe preços se o backend enviar (productOldPrice / productNewPrice) */}
+                        {(notificacao.productNewPrice || notificacao.content) ? (
+                            <div className="flex items-center gap-3">
+                                {notificacao.productOldPrice && (
+                                    <span className="text-xs text-gray-400 line-through">
+                                        {formatPrice(notificacao.productOldPrice)}
+                                    </span>
+                                )}
+                                <span className="text-[#FD7702] font-extrabold text-lg">
+                                    {formatPrice(notificacao.productNewPrice)}
+                                </span>
+                                {/* Fallback: se não tiver campos específicos, mostra o content */}
+                                {!notificacao.productNewPrice && (
+                                    <span className="text-sm text-gray-600">{notificacao.content}</span>
+                                )}
+                            </div>
+                        ) : (
+                             <p className="text-xs text-[#FD7702] font-semibold">Clique para ver o desconto!</p>
+                        )}
                       </div>
                     )}
                     
                     <p className="text-xs text-gray-400 mt-3">
-                      {notificacao.date} {/* Já vem formatado do backend pelo naturaltime */}
+                      {notificacao.date}
                     </p>
                   </div>
 

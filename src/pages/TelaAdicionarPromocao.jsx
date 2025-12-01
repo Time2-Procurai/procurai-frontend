@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BarraPesquisa from '../components/BarraPesquisa';
 import BarraLateral from '../components/BarraLateral';
-import { ChevronLeft, Store, ShoppingBag, X, Check } from 'lucide-react';
+import { ChevronLeft, ShoppingBag } from 'lucide-react';
 import api from '../api/api';
 import ModalDefinirPromocao from '../components/ModalDefinirPromocao';
 
@@ -16,6 +16,7 @@ function TelaAdicionarPromocao() {
   // Estados do Modal de Desconto
   const [produtoSelecionado, setProdutoSelecionado] = useState(null);
   const [porcentagemDesconto, setPorcentagemDesconto] = useState('');
+  const [isSaving, setIsSaving] = useState(false); // Estado de loading ao salvar
 
   useEffect(() => {
     const fetchProdutos = async () => {
@@ -31,46 +32,60 @@ function TelaAdicionarPromocao() {
     fetchProdutos();
   }, [lojistaId]);
 
-  // Função para salvar a promoção
+  // --- FUNÇÃO PRINCIPAL: APLICA O DESCONTO NO BACKEND ---
   const handleSalvarPromocao = async () => {
     if (!produtoSelecionado || !porcentagemDesconto) return;
 
-    const desconto = parseInt(porcentagemDesconto);
+    const desconto = parseFloat(porcentagemDesconto);
     if (isNaN(desconto) || desconto <= 0 || desconto >= 100) {
       alert("Por favor, insira uma porcentagem válida (1-99).");
       return;
     }
 
+    setIsSaving(true);
+
     try {
-      // --- SIMULAÇÃO DE PERSISTÊNCIA (LOCALSTORAGE) ---
-      // Como não posso alterar seu banco de dados para adicionar o campo 'discount_percentage',
-      // vou salvar num objeto local para que a TelaPromocoes consiga ler.
-      // Em produção, você faria: await api.patch(`/products/${produtoSelecionado.id}/`, { discount_percentage: desconto });
+      // 1. Calcular o novo preço
+      const precoAtual = parseFloat(produtoSelecionado.price);
+      const valorDoDesconto = precoAtual * (desconto / 100);
+      const novoPreco = precoAtual - valorDoDesconto;
 
-      const promocoesSalvas = JSON.parse(localStorage.getItem('promocoes_ativas') || '{}');
-      promocoesSalvas[produtoSelecionado.id] = desconto;
-      localStorage.setItem('promocoes_ativas', JSON.stringify(promocoesSalvas));
+      // 2. Preparar o payload como FormData (CORREÇÃO PARA O ERRO 415)
+      // O backend espera multipart/form-data por causa do parser de imagens configurado na View
+      const formData = new FormData();
+      
+      formData.append('price', novoPreco.toFixed(2));
+      formData.append('old_price', precoAtual.toFixed(2)); // Salva o original
+      formData.append('is_promotion', 'true'); // Envia como string, o Django converte
 
-      // Feedback visual
-      alert(`Promoção de ${desconto}% aplicada em ${produtoSelecionado.name}!`);
-      setProdutoSelecionado(null); // Fecha modal
+      // 3. Enviar para a API
+      // Não definimos 'Content-Type' manualmente, o axios faz isso ao ver o FormData
+      const response = await api.patch(`/products/${produtoSelecionado.id}/`, formData);
+
+      // 4. Atualizar a lista localmente (para o usuário ver a mudança na hora)
+      setProdutos(prevProdutos => 
+        prevProdutos.map(prod => 
+          prod.id === produtoSelecionado.id ? response.data : prod
+        )
+      );
+
+      alert(`Sucesso! O preço caiu de R$ ${precoAtual.toFixed(2)} para R$ ${novoPreco.toFixed(2)}.`);
+      
+      // 5. Limpar e fechar modal
+      setProdutoSelecionado(null);
       setPorcentagemDesconto('');
 
     } catch (error) {
-      console.error("Erro ao salvar promoção", error);
-      alert("Erro ao aplicar promoção.");
+      console.error("Erro ao aplicar promoção:", error);
+      alert("Erro ao aplicar promoção. Tente novamente.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const formatPrice = (price) => {
     return parseFloat(price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
-
-  // Cálculo do preço novo para preview
-  const precoOriginal = produtoSelecionado ? parseFloat(produtoSelecionado.price) : 0;
-  const precoComDesconto = produtoSelecionado && porcentagemDesconto
-    ? precoOriginal * (1 - (parseInt(porcentagemDesconto) / 100))
-    : precoOriginal;
 
   return (
     <div className="h-screen text-gray-800 flex flex-col min-w-[1024px] bg-[#F8F9FA]">
@@ -87,16 +102,26 @@ function TelaAdicionarPromocao() {
           </div>
 
           {isLoading ? (
-            <p className="text-gray-500 animate-pulse">Carregando catálogo...</p>
+            <div className="flex justify-center py-20">
+                 <p className="text-gray-500 animate-pulse">Carregando catálogo...</p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-4 gap-6">
               {produtos.map((produto) => (
                 <div
                   key={produto.id}
                   onClick={() => setProdutoSelecionado(produto)}
-                  className="bg-white rounded-xl shadow-sm border border-gray-200 cursor-pointer hover:ring-2 hover:ring-[#FD7702] transition overflow-hidden group"
+                  className={`bg-white rounded-xl shadow-sm border cursor-pointer hover:ring-2 hover:ring-[#FD7702] transition overflow-hidden group 
+                    ${produto.is_promotion ? 'border-orange-300 ring-1 ring-orange-200' : 'border-gray-200'}`}
                 >
-                  <div className="h-40 bg-gray-100 p-4 flex justify-center items-center">
+                  <div className="h-40 bg-gray-100 p-4 flex justify-center items-center relative">
+                    {/* Badge se já estiver em promoção */}
+                    {produto.is_promotion && (
+                        <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                            EM OFERTA
+                        </span>
+                    )}
+                    
                     {produto.product_image ? (
                       <img src={produto.product_image} alt={produto.name} className="max-h-full max-w-full object-contain mix-blend-multiply" />
                     ) : (
@@ -104,10 +129,21 @@ function TelaAdicionarPromocao() {
                     )}
                   </div>
                   <div className="p-4">
-                    <h3 className="font-bold text-gray-900 text-sm truncate">{produto.name}</h3>
-                    <p className="text-gray-500 text-xs mt-1">Preço atual: {formatPrice(produto.price)}</p>
+                    <h3 className="font-bold text-gray-900 text-sm truncate" title={produto.name}>{produto.name}</h3>
+                    
+                    <div className="mt-1">
+                        {produto.is_promotion && produto.old_price ? (
+                            <div className="flex flex-col">
+                                <span className="text-xs text-gray-400 line-through">{formatPrice(produto.old_price)}</span>
+                                <span className="text-sm font-bold text-red-600">{formatPrice(produto.price)}</span>
+                            </div>
+                        ) : (
+                            <p className="text-gray-500 text-xs">Preço atual: {formatPrice(produto.price)}</p>
+                        )}
+                    </div>
+
                     <div className="mt-3 text-center py-2 bg-orange-50 text-[#FD7702] font-semibold rounded-lg text-sm group-hover:bg-[#FD7702] group-hover:text-white transition">
-                      Aplicar Desconto
+                      {produto.is_promotion ? 'Alterar Desconto' : 'Aplicar Desconto'}
                     </div>
                   </div>
                 </div>
@@ -123,6 +159,7 @@ function TelaAdicionarPromocao() {
             porcentagem={porcentagemDesconto}
             setPorcentagem={setPorcentagemDesconto}
             onConfirm={handleSalvarPromocao}
+            isLoading={isSaving} // Passar estado de loading para o modal desabilitar botão
           />
         </main>
       </div>

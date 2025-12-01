@@ -13,7 +13,7 @@ import FeedbackFav from '../components/FeedbackFav';
 
 // Componente de Estrelas (Visual)
 const RatingStars = ({ rating, size = 16 }) => {
-  const starsToDisplay = Math.round(rating);
+  const starsToDisplay = Math.round(rating || 0);
   const emptyStars = 5 - starsToDisplay;
   return (
     <div className="flex">
@@ -41,28 +41,16 @@ const ErrorDisplay = ({ message }) => (
   </div>
 );
 
-// --- DADOS MOCKADOS (Reviews) ---
-const mockReviewData = {
-  latestReview: {
-    user: 'gabrielgermano',
-    date: '04/08/25',
-    rating: 5,
-    text: 'Excelente ferramenta! Muito potente e com ótima autonomia.',
-    images: [
-      'https://i.imgur.com/v2JvP9Y.png', 'https://i.imgur.com/M6TqGq7.png',
-      'https://i.imgur.com/W2Nl89d.png', 'https://i.imgur.com/Yl6h8fO.png'
-    ],
-    avatar: 'https://i.imgur.com/9w2g5G9.png'
-  },
-  reviewSummary: { rating: 4.9, count: 100 }
-};
-
 export default function TelaProduto() {
+  const { produtoId } = useParams();
+  const navigate = useNavigate();
+
   const [product, setProduct] = useState(null);
   const [seller, setSeller] = useState(null);
-  const [latestReview, setLatestReview] = useState(null);
-  const [reviewSummary, setReviewSummary] = useState(null);
-
+  
+  // Estado para Avaliações Reais
+  const [reviews, setReviews] = useState([]); 
+  
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [quantidade, setQuantidade] = useState(1);
@@ -76,9 +64,6 @@ export default function TelaProduto() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
-  const { produtoId } = useParams();
-  const navigate = useNavigate();
 
   // Auth
   const visitanteTipo = localStorage.getItem('userRole');
@@ -100,20 +85,31 @@ export default function TelaProduto() {
         // 1. Busca Produto
         const productResponse = await api.get(`/products/${produtoId}/`);
         setProduct(productResponse.data);
-
-        // Verifica LocalStorage para ver se já é favorito
-        const favoritosSalvos = JSON.parse(localStorage.getItem('meusFavoritos') || '[]');
-        const existe = favoritosSalvos.some(item => item.id === productResponse.data.id);
-        setIsFavorited(existe);
+        const ownerId = productResponse.data.owner_id;
 
         // 2. Busca Vendedor
-        const ownerId = productResponse.data.owner_id;
         const sellerResponse = await api.get(`/user/listar/usuarios/${ownerId}/`);
         setSeller(sellerResponse.data);
 
-        // 3. Define dados de review mockados
-        setLatestReview(mockReviewData.latestReview);
-        setReviewSummary(mockReviewData.reviewSummary);
+        // 3. Busca Avaliações do Produto
+        try {
+            const reviewsResponse = await api.get(`/evaluations/product/${produtoId}/`);
+            setReviews(reviewsResponse.data);
+        } catch (err) {
+            console.error("Erro ao buscar avaliações:", err);
+        }
+
+        // 4. Verifica se já é favorito (checando na API)
+        if (isCliente) {
+            try {
+                const favResponse = await api.get('/products/favorites/');
+                // Verifica se o produto atual está na lista de favoritos do usuário
+                const isFav = favResponse.data.some(fav => fav.product.id === parseInt(produtoId));
+                setIsFavorited(isFav);
+            } catch (err) {
+                console.error("Erro ao verificar favoritos:", err);
+            }
+        }
 
       } catch (err) {
         console.error('Erro ao buscar dados:', err);
@@ -124,41 +120,30 @@ export default function TelaProduto() {
     };
 
     fetchData();
-  }, [produtoId]);
+  }, [produtoId, isCliente]);
 
-  // --- LÓGICA DE FAVORITAR COM TOAST ---
-  const handleToggleFavorite = () => {
-    const favoritosAtuais = JSON.parse(localStorage.getItem('meusFavoritos') || '[]');
+  // --- LÓGICA DE FAVORITAR INTEGRADA AO BACKEND ---
+  const handleToggleFavorite = async () => {
+    try {
+        // Chama o endpoint de toggle (adiciona ou remove)
+        const response = await api.post(`/products/favorite/${produtoId}/`);
+        
+        const novoEstado = response.data.is_favorited;
+        setIsFavorited(novoEstado);
+        console.log('Response: ', response.data);
+        // Mostra o Feedback visual (Toast)
+        setFeedbackType(novoEstado ? 'add' : 'remove');
+        setShowFeedback(true);
+        setTimeout(() => setShowFeedback(false), 3000);
 
-    if (isFavorited) {
-      // Remover dos favoritos
-      const novaLista = favoritosAtuais.filter(item => item.id !== product.id);
-      localStorage.setItem('meusFavoritos', JSON.stringify(novaLista));
-      setIsFavorited(false);
-
-      // Feedback de Remoção
-      setFeedbackType('remove');
-      setShowFeedback(true);
-      setTimeout(() => setShowFeedback(false), 3000);
-
-    } else {
-      // Adicionar aos favoritos
-      const novoItem = {
-        id: product.id,
-        nome: product.name,
-        preco: `R$ ${parseFloat(product.price).toFixed(2).replace('.', ',')}`,
-        desconto: product.is_negotiable ? 'Negociável' : '',
-        imagem: product.product_image
-      };
-
-      favoritosAtuais.push(novoItem);
-      localStorage.setItem('meusFavoritos', JSON.stringify(favoritosAtuais));
-      setIsFavorited(true);
-
-      // Feedback de Adição
-      setFeedbackType('add');
-      setShowFeedback(true);
-      setTimeout(() => setShowFeedback(false), 5000);
+    } catch (err) {
+        console.error("Erro ao favoritar:", err);
+        // Tratamento específico para erro 403 (Não autorizado / Não é cliente)
+        if (err.response && err.response.status === 403) {
+            alert("Apenas clientes podem favoritar produtos.");
+        } else {
+            alert("Não foi possível atualizar os favoritos. Tente novamente.");
+        }
     }
   };
 
@@ -178,6 +163,20 @@ export default function TelaProduto() {
   };
 
   const isOwner = product && (visitanteTipo === 'lojista') && (visitanteId == product.owner_id);
+
+  // --- CÁLCULOS DE AVALIAÇÃO ---
+  const reviewCount = reviews.length;
+  const averageRating = reviewCount > 0 
+      ? (reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviewCount).toFixed(1) 
+      : 0;
+  
+  const latestReview = reviewCount > 0 ? reviews[0] : null;
+
+  // Helper para formatar data
+  const formatDate = (dateString) => {
+      if(!dateString) return "";
+      return new Date(dateString).toLocaleDateString('pt-BR');
+  };
 
   if (isLoading || !product || !seller) {
     return (
@@ -214,7 +213,7 @@ export default function TelaProduto() {
           visible={showFeedback}
           type={feedbackType}
           onClose={() => setShowFeedback(false)}
-          onAction={() => navigate(`/favoritos/${visitanteId}`)}
+          onAction={() => navigate(`/favoritos`)} // Rota correta de favoritos
         />
 
         <div className="flex flex-1 overflow-hidden">
@@ -225,6 +224,7 @@ export default function TelaProduto() {
               <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-gray-100 text-gray-700">
                 <ChevronLeft size={24} />
               </button>
+
               {isOwner && (
                 <button onClick={handleOpenOptions} className="p-2 rounded-full hover:bg-gray-100 text-gray-700">
                   <MoreVertical size={24} />
@@ -232,53 +232,75 @@ export default function TelaProduto() {
               )}
             </header>
 
-            {/* SEÇÃO PRINCIPAL DO PRODUTO */}
+            {/* CONTEÚDO */}
             <div className="flex flex-col md:flex-row gap-6 lg:gap-8">
-              {/* Imagem */}
+              {/* IMAGEM */}
               <div className="md:w-5/12 lg:w-4/12 flex-shrink-0">
                 <div className="bg-gray-50 rounded-lg flex justify-center items-center p-4 aspect-square">
+                  {/* Usando product_image conforme API */}
                   {product.product_image ? (
-                    <img src={product.product_image} alt={product.name} className="max-h-80 object-contain" />
+                    <img 
+                        src={product.product_image} 
+                        alt={product.name} 
+                        className="max-h-80 object-contain" 
+                    />
                   ) : (
                     <ShoppingBag size={80} className="text-gray-300" />
                   )}
                 </div>
               </div>
 
-              {/* Informações */}
+              {/* INFO */}
               <div className="flex-1">
                 <section className="mb-4">
                   <h1 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h1>
                   <p className="text-xs text-gray-500 mb-1">Categoria: {product.category_name}</p>
+
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-extrabold text-[#FD7702]">
                       R$ {parseFloat(product.price).toFixed(2).replace('.', ',')}
                     </span>
                   </div>
-                  {product.is_negotiable && <p className="text-sm font-semibold text-green-600">Preço negociável</p>}
+                  {product.is_negotiable && <p className="text-sm font-semibold text-green-600 mt-1">Preço negociável</p>}
                 </section>
 
+                {/* DESCRIÇÃO */}
                 <section className="mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-2">Descrição do produto</h2>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                    Descrição do produto
+                  </h2>
                   <p className="text-sm text-gray-600 leading-relaxed">{product.description}</p>
                 </section>
 
+                {/* CLIENTE */}
                 {isCliente && (
                   <section className="mb-4">
                     <div className="flex items-center gap-4 mb-4">
                       <div className="w-1/3 max-w-[120px]">
-                        <label htmlFor="quantidade" className="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
+                        <label
+                          htmlFor="quantidade"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          Quantidade
+                        </label>
                         <select
                           id="quantidade"
                           value={quantidade}
                           onChange={(e) => setQuantidade(Number(e.target.value))}
                           className="w-full p-2 border rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
                         >
-                          {[1, 2, 3, 4, 5].map(num => <option key={num}>{num}</option>)}
+                          <option>1</option>
+                          <option>2</option>
+                          <option>3</option>
+                          <option>4</option>
+                          <option>5</option>
                         </select>
                       </div>
 
-                      <button onClick={() => alert('Redirecionando para link externo...')} className="bg-[#FD7702] text-white font-bold py-2 px-24 rounded-xl hover:bg-[#e66a00] transition-colors">
+                      <button
+                        onClick={() => alert('Redirecionando para link externo...')}
+                        className="bg-[#FD7702] text-white font-bold py-2 px-24 rounded-xl hover:bg-[#e66a00] transition-colors"
+                      >
                         Comprar
                       </button>
                     </div>
@@ -298,19 +320,28 @@ export default function TelaProduto() {
 
             <hr className="my-6 border-gray-200" />
 
-            {/* SEÇÃO DO VENDEDOR / LOJA */}
+            {/* LOJA */}
             <section className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-3">
+                {/* Foto da loja via API */}
                 {seller.profile_picture ? (
-                  <img src={seller.profile_picture} alt={seller.full_name} className="w-16 h-16 rounded-full object-cover" />
+                    <img
+                    src={seller.profile_picture}
+                    alt={seller.full_name}
+                    className="w-16 h-16 rounded-full object-cover"
+                    />
                 ) : (
-                  <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-gray-500"><Store size={32} /></div>
+                    <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+                        <Store size={32} className="text-gray-500"/>
+                    </div>
                 )}
 
                 <div>
                   <h3 className="font-semibold text-gray-900">{seller.full_name}</h3>
-                  <p className="text-sm text-gray-500">{seller.company_category || "Loja"}</p>
+                  <p className="text-sm text-gray-500">{seller.company_category || 'Loja'}</p>
+
                   <div className="flex items-center gap-1 text-sm">
+                    {/* Nota da loja (estática por enquanto ou vinda do user) */}
                     <span className="font-bold text-gray-800">4.9</span>
                     <Star size={14} className="text-[#FD7702] fill-[#FD7702]" />
                   </div>
@@ -318,9 +349,13 @@ export default function TelaProduto() {
               </div>
 
               <div className="flex items-center gap-2">
-                <Link to={`/perfil/empresa/${seller.id}`} className="px-4 py-2 border border-[#FD7702] text-[#FD7702] rounded-lg text-sm font-semibold hover:bg-[#FD7702]/10 transition-colors">
+                <Link
+                  to={`/perfil/empresa/${seller.id}`}
+                  className="px-4 py-2 border border-[#FD7702] text-[#FD7702] rounded-lg text-sm font-semibold hover:bg-[#FD7702]/10 transition-colors"
+                >
                   Visitar a loja
                 </Link>
+
                 {isCliente && (
                   <button className="px-4 py-2 bg-[#FD7702] text-white rounded-lg text-sm font-semibold hover:bg-[#e66a00] transition-colors flex items-center gap-2">
                     <MessageCircle size={16} />
@@ -332,52 +367,103 @@ export default function TelaProduto() {
 
             <hr className="my-6 border-gray-200" />
 
-            {/* SEÇÃO DE AVALIAÇÕES */}
+            {/* AVALIAÇÕES (DADOS REAIS) */}
             <section>
               <div className="flex justify-between items-center mb-3">
                 <h2 className="text-lg font-semibold text-gray-900">Avaliações</h2>
+
                 {isCliente && (
-                  <button onClick={() => setIsModalOpen(true)} className="text-sm font-semibold text-[#FD7702] hover:underline">
+                  <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="text-sm font-semibold text-[#FD7702] hover:underline"
+                  >
                     Avalie este produto
                   </button>
                 )}
               </div>
 
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl font-bold text-gray-900">{reviewSummary.rating}</span>
-                <RatingStars rating={reviewSummary.rating} size={18} />
-                <span className="text-sm text-gray-500 ml-2">({reviewSummary.count} avaliações)</span>
+                <span className="text-2xl font-bold text-gray-900">{averageRating}</span>
+                <RatingStars rating={averageRating} size={18} />
+                <span className="text-sm text-gray-500 ml-2">
+                  ({reviewCount} avaliações)
+                </span>
               </div>
 
-              <div className="border-t border-gray-200 pt-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <img src={latestReview.avatar} alt={latestReview.user} className="w-8 h-8 rounded-full" />
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">{latestReview.user}</p>
-                    <p className="text-xs text-gray-500">{latestReview.date}</p>
-                  </div>
-                </div>
-                <div className="mb-2"><RatingStars rating={latestReview.rating} size={16} /></div>
-                <p className="text-sm text-gray-700 mb-3">{latestReview.text}</p>
-                <div className="flex gap-2">
-                  {latestReview.images.map((img, i) => (
-                    <img key={i} src={img} alt={`Review ${i + 1}`} className="w-20 h-20 rounded-md object-cover" />
-                  ))}
-                </div>
-              </div>
+              {/* Exibe a avaliação mais recente se houver */}
+              {latestReview ? (
+                <div className="border-t border-gray-200 pt-4">
+                    <div className="flex items-center gap-2 mb-2">
+                    {latestReview.user.profile_picture ? (
+                         <img src={latestReview.user.profile_picture} alt="User" className="w-8 h-8 rounded-full object-cover" />
+                    ) : (
+                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                            <Store size={14} className="text-gray-500"/>
+                        </div>
+                    )}
+                    <div>
+                        <p className="text-sm font-semibold text-gray-900">{latestReview.user.full_name || "Usuário"}</p>
+                        <p className="text-xs text-gray-500">{formatDate(latestReview.created_at)}</p>
+                    </div>
+                    </div>
 
-              <Link to={`/produto/${produtoId}/avaliacoes`} className="w-full text-center block p-3 mt-4 text-sm font-semibold text-[#FD7702] rounded-lg hover:bg-[#FD7702]/10 transition-colors">
-                Ver todas
-              </Link>
+                    <div className="mb-2">
+                    <RatingStars rating={latestReview.rating} size={16} />
+                    </div>
+
+                    <p className="text-sm text-gray-700 mb-3">{latestReview.comment}</p>
+
+                    <div className="flex gap-2">
+                    {latestReview.photo_urls && latestReview.photo_urls.map((imgObj, i) => (
+                        <img
+                        key={imgObj.id || i}
+                        src={imgObj.photo}
+                        alt={`Review ${i + 1}`}
+                        className="w-20 h-20 rounded-md object-cover border border-gray-200"
+                        />
+                    ))}
+                    </div>
+                </div>
+              ) : (
+                <p className="text-gray-500 text-sm">Este produto ainda não tem avaliações.</p>
+              )}
+
+              {reviewCount > 1 && (
+                <Link
+                    to={`/produto/${produtoId}/avaliacoes`}
+                    className="w-full text-center block p-3 mt-4 text-sm font-semibold text-[#FD7702] rounded-lg hover:bg-[#FD7702]/10 transition-colors"
+                >
+                    Ver todas
+                </Link>
+              )}
             </section>
-
           </main>
         </div>
       </div>
 
-      {isModalOpen && <ModalAvaliacao productName={product.name} produtoId={produtoId} onClose={() => setIsModalOpen(false)} />}
-      {isOptionsModalOpen && <ModalOpcoesProduto produtoId={produtoId} onClose={() => setIsOptionsModalOpen(false)} onExcluirClick={handleOpenDelete} />}
-      {isDeleteModalOpen && <ModalExcluirProduto onClose={() => setIsDeleteModalOpen(false)} onConfirm={handleConfirmDelete} />}
+      {/* MODAIS */}
+      {isModalOpen && (
+        <ModalAvaliacao
+          productName={product.name}
+          produtoId={produtoId}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
+
+      {isOptionsModalOpen && (
+        <ModalOpcoesProduto
+          produtoId={produtoId}
+          onClose={() => setIsOptionsModalOpen(false)}
+          onExcluirClick={handleOpenDelete}
+        />
+      )}
+
+      {isDeleteModalOpen && (
+        <ModalExcluirProduto
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleConfirmDelete}
+        />
+      )}
     </>
   );
 }
