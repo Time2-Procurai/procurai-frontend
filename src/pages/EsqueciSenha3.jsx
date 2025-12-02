@@ -1,14 +1,26 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import LadoLogoPage from '../components/LadoLogoPage';
 import api from '../api/api';
 
-function ForgotPasswordPage3() {
+function EsqueciSenha3() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const email = location.state?.email;
+  const code = location.state?.code;
+
   const [password, setPassword] = useState("");
   const [confirmacao, setConfirmacao] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!email || !code) {
+      alert("Fluxo inválido. Por favor, inicie a recuperação de senha novamente.");
+      navigate('/redefinirSenha');
+    }
+  }, [email, code, navigate]);
 
   const handleRedefinirSenha = async (e) => {
     e.preventDefault();
@@ -20,40 +32,31 @@ function ForgotPasswordPage3() {
       return;
     }
 
+    setLoading(true);
+
     try {
-      const response = await api.patch("user/password_reset/confirm/", { // Trocar para 'user/change-password/' ?
+      await api.post("user/password-reset/confirm/", {
+        email: email,       
+        reset_code: code,   
         password: password,
-        password_confirm: confirmacao,
+        password_confirm: confirmacao 
       });
 
-      setSuccess(response.data.message || "Senha redefinida com sucesso!");
+      setSuccess("Senha redefinida com sucesso!");
 
       setTimeout(() => navigate("/login"), 1500);
 
     } catch (err) {
       console.error("Erro ao redefinir senha:", err);
-
       if (err.response?.data) {
         const errData = err.response.data;
-
-        const traducoes = {
-          "This password is too common.": "Esta senha é muito comum.",
-          "This password is entirely numeric.": "Esta senha é inteiramente numérica.",
-          "This field may not be blank.": "Este campo não pode ficar vazio.",
-          "This password is too weak.": "Esta senha é muito fraca.",
-          "This password is too short.": "A senha é muito curta.",
-          "This password is too similar to the username.": "A senha é muito parecida com o nome de usuário."
-        };
-
-        const msg =
-          errData.password?.[0] ||
-          errData.password_confirm?.[0] ||
-          "Senha inválida.";
-
-        setError(traducoes[msg] || msg);
+        const msg = errData.password?.[0] || errData.non_field_errors?.[0] || errData.error || "Senha inválida.";
+        setError(msg);
       } else {
         setError("Não foi possível conectar ao servidor.");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,9 +77,15 @@ function ForgotPasswordPage3() {
               Crie uma senha segura para proteger sua conta!
             </p>
 
+            {/* Mensagens */}
             {error && (
               <p className="bg-red-100 text-red-700 text-center p-3 mb-4 rounded-md">
                 {error}
+              </p>
+            )}
+            {success && (
+               <p className="bg-green-100 text-green-700 text-center p-3 mb-4 rounded-md">
+                {success}
               </p>
             )}
 
@@ -92,6 +101,8 @@ function ForgotPasswordPage3() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="shadow-sm w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 mb-6"
+                disabled={loading}
+                required
               />
 
               {/* Confirmar senha */}
@@ -104,13 +115,16 @@ function ForgotPasswordPage3() {
                 value={confirmacao}
                 onChange={(e) => setConfirmacao(e.target.value)}
                 className="shadow-sm w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                disabled={loading}
+                required
               />
 
               <button
                 type="submit"
-                className="mt-8 w-full bg-[#FD7702] md:bg-main text-white font-bold py-3 rounded-lg hover:opacity-90 cursor-pointer transition"
+                disabled={loading}
+                className={`mt-8 w-full bg-[#FD7702] md:bg-main text-white font-bold py-3 rounded-lg hover:opacity-90 cursor-pointer transition ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                Enviar
+                {loading ? 'Redefinindo...' : 'Enviar'}
               </button>
 
               <div className="mt-6 text-center">
@@ -129,4 +143,4 @@ function ForgotPasswordPage3() {
   );
 }
 
-export default ForgotPasswordPage3;
+export default EsqueciSenha3;

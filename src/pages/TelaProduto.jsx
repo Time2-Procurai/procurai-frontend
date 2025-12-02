@@ -3,7 +3,7 @@ import api from '../api/api';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import BarraPesquisa from '../components/BarraPesquisa';
 import BarraLateral from '../components/BarraLateral';
-import { ChevronLeft, MoreVertical, Star, Bookmark, MessageCircle, ShoppingBag, Store } from 'lucide-react';
+import { ChevronLeft, MoreVertical, Star, Bookmark, MessageCircle, ShoppingBag, Store, User } from 'lucide-react';
 
 // Import dos Modais e Componentes
 import ModalAvaliacao from '../components/ModalAvaliacao';
@@ -94,7 +94,26 @@ export default function TelaProduto() {
         // 3. Busca Avaliações do Produto
         try {
             const reviewsResponse = await api.get(`/evaluations/product/${produtoId}/`);
-            setReviews(reviewsResponse.data);
+            const reviewsData = reviewsResponse.data;
+
+            // Busca foto do usuário da última avaliação se necessário
+            if (reviewsData.length > 0) {
+                const latest = reviewsData[0];
+                const userId = latest.user?.id || latest.user; 
+                
+                if (userId) {
+                    try {
+                        const userDetails = await api.get(`/user/listar/usuarios/${userId}/`);
+                        if (typeof latest.user === 'object') {
+                            latest.user.profile_picture = userDetails.data.profile_picture;
+                            latest.user.full_name = userDetails.data.full_name; 
+                        }
+                    } catch (err) {
+                        console.warn("Não foi possível carregar a foto do avaliador.");
+                    }
+                }
+            }
+            setReviews(reviewsData);
         } catch (err) {
             console.error("Erro ao buscar avaliações:", err);
         }
@@ -103,7 +122,6 @@ export default function TelaProduto() {
         if (isCliente) {
             try {
                 const favResponse = await api.get('/products/favorites/');
-                // Verifica se o produto atual está na lista de favoritos do usuário
                 const isFav = favResponse.data.some(fav => fav.product.id === parseInt(produtoId));
                 setIsFavorited(isFav);
             } catch (err) {
@@ -122,23 +140,57 @@ export default function TelaProduto() {
     fetchData();
   }, [produtoId, isCliente]);
 
-  // --- LÓGICA DE FAVORITAR INTEGRADA AO BACKEND ---
+  // --- LÓGICA DE COMPRA (WHATSAPP) ---
+  const handleBuy = () => {
+    if (!seller || !seller.phone) {
+        alert("O vendedor não cadastrou um número de telefone.");
+        return;
+    }
+
+    // Remove caracteres não numéricos
+    const cleanPhone = seller.phone.replace(/\D/g, '');
+    
+    // Mensagem personalizada
+    const message = `Olá, ${seller.full_name}! Tenho interesse no produto "${product.name}" que vi no ProcurAí.`;
+    
+    // Adiciona código do país (55) se não tiver
+    const fullPhone = cleanPhone.length <= 11 ? `55${cleanPhone}` : cleanPhone;
+    
+    // Abre o WhatsApp
+    const whatsappUrl = `https://wa.me/${fullPhone}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const refreshReviews = async () => {
+    try {
+      const reviewsResponse = await api.get(`/evaluations/product/${produtoId}/`);
+      const reviewsData = reviewsResponse.data;
+      if (reviewsData.length > 0) {
+          const latest = reviewsData[0];
+          const userId = latest.user?.id || latest.user;
+          if (userId) {
+             const userDetails = await api.get(`/user/listar/usuarios/${userId}/`);
+             if (typeof latest.user === 'object') {
+                 latest.user.profile_picture = userDetails.data.profile_picture;
+             }
+          }
+      }
+      setReviews(reviewsData);
+    } catch (err) {
+      console.error("Erro ao atualizar avaliações:", err);
+    }
+  };
+
   const handleToggleFavorite = async () => {
     try {
-        // Chama o endpoint de toggle (adiciona ou remove)
         const response = await api.post(`/products/favorite/${produtoId}/`);
-        
         const novoEstado = response.data.is_favorited;
         setIsFavorited(novoEstado);
-        console.log('Response: ', response.data);
-        // Mostra o Feedback visual (Toast)
         setFeedbackType(novoEstado ? 'add' : 'remove');
         setShowFeedback(true);
         setTimeout(() => setShowFeedback(false), 3000);
-
     } catch (err) {
         console.error("Erro ao favoritar:", err);
-        // Tratamento específico para erro 403 (Não autorizado / Não é cliente)
         if (err.response && err.response.status === 403) {
             alert("Apenas clientes podem favoritar produtos.");
         } else {
@@ -164,7 +216,6 @@ export default function TelaProduto() {
 
   const isOwner = product && (visitanteTipo === 'lojista') && (visitanteId == product.owner_id);
 
-  // --- CÁLCULOS DE AVALIAÇÃO ---
   const reviewCount = reviews.length;
   const averageRating = reviewCount > 0 
       ? (reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviewCount).toFixed(1) 
@@ -172,7 +223,6 @@ export default function TelaProduto() {
   
   const latestReview = reviewCount > 0 ? reviews[0] : null;
 
-  // Helper para formatar data
   const formatDate = (dateString) => {
       if(!dateString) return "";
       return new Date(dateString).toLocaleDateString('pt-BR');
@@ -208,12 +258,12 @@ export default function TelaProduto() {
 
         <BarraPesquisa />
 
-        {/* --- COMPONENTE DE FEEDBACK (TOAST) --- */}
+        {/* TOAST DE FEEDBACK */}
         <FeedbackFav
           visible={showFeedback}
           type={feedbackType}
           onClose={() => setShowFeedback(false)}
-          onAction={() => navigate(`/favoritos`)} // Rota correta de favoritos
+          onAction={() => navigate(`/favoritos`)} 
         />
 
         <div className="flex flex-1 overflow-hidden">
@@ -237,7 +287,6 @@ export default function TelaProduto() {
               {/* IMAGEM */}
               <div className="md:w-5/12 lg:w-4/12 flex-shrink-0">
                 <div className="bg-gray-50 rounded-lg flex justify-center items-center p-4 aspect-square">
-                  {/* Usando product_image conforme API */}
                   {product.product_image ? (
                     <img 
                         src={product.product_image} 
@@ -264,7 +313,6 @@ export default function TelaProduto() {
                   {product.is_negotiable && <p className="text-sm font-semibold text-green-600 mt-1">Preço negociável</p>}
                 </section>
 
-                {/* DESCRIÇÃO */}
                 <section className="mb-4">
                   <h2 className="text-lg font-semibold text-gray-900 mb-2">
                     Descrição do produto
@@ -272,7 +320,7 @@ export default function TelaProduto() {
                   <p className="text-sm text-gray-600 leading-relaxed">{product.description}</p>
                 </section>
 
-                {/* CLIENTE */}
+                {/* AÇÕES DO CLIENTE */}
                 {isCliente && (
                   <section className="mb-4">
                     <div className="flex items-center gap-4 mb-4">
@@ -297,8 +345,9 @@ export default function TelaProduto() {
                         </select>
                       </div>
 
+                      {/* BOTÃO COMPRAR (WHATSAPP) */}
                       <button
-                        onClick={() => alert('Redirecionando para link externo...')}
+                        onClick={handleBuy}
                         className="bg-[#FD7702] text-white font-bold py-2 px-24 rounded-xl hover:bg-[#e66a00] transition-colors"
                       >
                         Comprar
@@ -323,7 +372,6 @@ export default function TelaProduto() {
             {/* LOJA */}
             <section className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                {/* Foto da loja via API */}
                 {seller.profile_picture ? (
                     <img
                     src={seller.profile_picture}
@@ -341,7 +389,6 @@ export default function TelaProduto() {
                   <p className="text-sm text-gray-500">{seller.company_category || 'Loja'}</p>
 
                   <div className="flex items-center gap-1 text-sm">
-                    {/* Nota da loja (estática por enquanto ou vinda do user) */}
                     <span className="font-bold text-gray-800">4.9</span>
                     <Star size={14} className="text-[#FD7702] fill-[#FD7702]" />
                   </div>
@@ -367,8 +414,8 @@ export default function TelaProduto() {
 
             <hr className="my-6 border-gray-200" />
 
-            {/* AVALIAÇÕES (DADOS REAIS) */}
-            <section>
+            {/* AVALIAÇÕES */}
+            <section className="pb-10">
               <div className="flex justify-between items-center mb-3">
                 <h2 className="text-lg font-semibold text-gray-900">Avaliações</h2>
 
@@ -390,7 +437,7 @@ export default function TelaProduto() {
                 </span>
               </div>
 
-              {/* Exibe a avaliação mais recente se houver */}
+              {/* Última avaliação */}
               {latestReview ? (
                 <div className="border-t border-gray-200 pt-4">
                     <div className="flex items-center gap-2 mb-2">
@@ -398,7 +445,7 @@ export default function TelaProduto() {
                          <img src={latestReview.user.profile_picture} alt="User" className="w-8 h-8 rounded-full object-cover" />
                     ) : (
                         <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                            <Store size={14} className="text-gray-500"/>
+                            <User size={14} className="text-gray-500"/>
                         </div>
                     )}
                     <div>
@@ -428,13 +475,15 @@ export default function TelaProduto() {
                 <p className="text-gray-500 text-sm">Este produto ainda não tem avaliações.</p>
               )}
 
-              {reviewCount > 1 && (
-                <Link
-                    to={`/produto/${produtoId}/avaliacoes`}
-                    className="w-full text-center block p-3 mt-4 text-sm font-semibold text-[#FD7702] rounded-lg hover:bg-[#FD7702]/10 transition-colors"
-                >
-                    Ver todas
-                </Link>
+              {reviewCount > 0 && (
+                <div className="text-right mt-4">
+                    <Link
+                        to={`/produto/${produtoId}/avaliacoes`}
+                        className="text-sm font-bold text-[#FD7702] hover:underline cursor-pointer"
+                    >
+                        Ver todas avaliações
+                    </Link>
+                </div>
               )}
             </section>
           </main>
@@ -447,6 +496,7 @@ export default function TelaProduto() {
           productName={product.name}
           produtoId={produtoId}
           onClose={() => setIsModalOpen(false)}
+          onSuccess={refreshReviews} 
         />
       )}
 

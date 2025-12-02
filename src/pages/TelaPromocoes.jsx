@@ -115,7 +115,7 @@ function TelaPromocoes() {
                     if (isOwner) {
                        navigate(`/FeedEmpresa`);
                     } else if (isCliente) {
-                       navigate(`/feedcliente`); // Cliente volta para o seu feed
+                       navigate(`/feedcliente/${paramId}`); // Cliente volta para o seu feed
                     } else {
                        navigate(`/perfil/empresa/${paramId}`);
                     }

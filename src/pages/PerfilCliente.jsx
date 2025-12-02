@@ -2,24 +2,21 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import BarraLateral from "../components/BarraLateral";
 import BarraPesquisa from "../components/BarraPesquisa";
-// Removi o UploadFoto, pois esta é uma tela de visualização.
-// Vamos adicionar um ícone de placeholder.
-import { User } from "lucide-react";
+import { User, MessageSquare } from "lucide-react"; // Adicionei MessageSquare para caso vazio
 import Comentario from "../components/Comentario";
-import api from "../api/api"; // Importe a sua instância do API
+import api from "../api/api";
 
 function PerfilCliente() {
   const navigate = useNavigate();
   
-  // --- 1. Hooks para dados dinâmicos ---
-  const { userId: profileIdFromUrl } = useParams(); // ID do perfil a ser visto
-  const visitanteId = localStorage.getItem('userId'); // ID de quem está logado
+  const { userId: profileIdFromUrl } = useParams(); 
+  const visitanteId = localStorage.getItem('userId');
 
   const [userData, setUserData] = useState(null);
+  const [comentarios, setComentarios] = useState([]); // Estado para os comentários
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // --- 2. useEffect para buscar dados ---
   useEffect(() => {
     if (!profileIdFromUrl) {
       console.error("ID do perfil não encontrado na URL.");
@@ -28,13 +25,19 @@ function PerfilCliente() {
       return;
     }
 
-    const fetchUserData = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        // Usamos o mesmo endpoint que já criamos
-        const response = await api.get(`/user/listar/usuarios/${profileIdFromUrl}/`);
-        setUserData(response.data);
+        // 1. Busca dados do usuário
+        const responseUser = await api.get(`/user/listar/usuarios/${profileIdFromUrl}/`);
+        setUserData(responseUser.data);
+
+        // 2. Busca avaliações feitas por esse usuário
+        // (Certifique-se de adicionar essa rota no backend, código abaixo)
+        const responseComments = await api.get(`/evaluations/user/${profileIdFromUrl}/`);
+        setComentarios(responseComments.data);
+
       } catch (err) {
         console.error("Erro ao buscar dados do cliente:", err);
         setError("Não foi possível carregar o perfil.");
@@ -43,14 +46,17 @@ function PerfilCliente() {
       }
     };
 
-    fetchUserData();
-  }, [profileIdFromUrl]); // Executa toda vez que o ID na URL mudar
+    fetchData();
+  }, [profileIdFromUrl]);
 
-  // --- 3. Lógica do botão Editar ---
   const isOwner = visitanteId === profileIdFromUrl;
 
-  // --- 4. Estados de Carregamento e Erro ---
-  // (Mostra o "Carregando..." dentro do layout principal)
+  // Helper para data
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    return new Date(dateString).toLocaleDateString('pt-BR');
+  };
+
   const renderContent = () => {
     if (isLoading) {
       return (
@@ -68,17 +74,13 @@ function PerfilCliente() {
       );
     }
 
-    if (!userData) {
-      return null; // Não deve acontecer se o loading/error funcionar
-    }
+    if (!userData) return null;
 
-    // --- 5. Conteúdo Principal (quando os dados carregam) ---
     return (
       <div className="flex-1 overflow-y-auto p-6">
-        {/*foto e dados */}
+        {/* Card do Perfil */}
         <div className="bg-white shadow-md rounded-2xl p-6 flex items-center relative">
           <div className="mr-6">
-            {/* Foto de Perfil Dinâmica */}
             {userData.profile_picture ? (
               <img
                 src={userData.profile_picture}
@@ -93,43 +95,50 @@ function PerfilCliente() {
           </div>
 
           <div className="flex flex-col justify-center">
-            {/* Nome Dinâmico */}
             <h2 className="text-xl font-semibold text-gray-800">{userData.full_name}</h2>
-            {/* Username Dinâmico */}
             <p className="text-gray-500 text-sm">@{userData.username}</p>
 
-            {/* TODO: Esta contagem (150) precisaria vir da API */}
             <p className="mt-2 text-gray-600 text-sm">
-              Escreveu <span className="font-semibold text-black">150</span> avaliações ou comentários
+              Escreveu <span className="font-semibold text-black">{comentarios.length}</span> avaliações ou comentários
             </p>
           </div>
 
-          {/* Botão editar (só aparece se for o dono) */}
           {isOwner && (
             <button
               onClick={() => navigate("/EditarPerfilCliente")}
-              className="hover:cursor-pointer absolute top-6 ring-2 ring-[#FD7702] right-6 rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-md">
+              className="hover:cursor-pointer absolute top-6 ring-2 ring-[#FD7702] right-6 rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-md transition hover:bg-gray-50">
               Editar perfil
             </button>
           )}
         </div>
 
-        {/* Seção de comentários (Estática, como no original) */}
-        {/* TODO: No futuro, esta seção também deve ser carregada via API */}
-        <div className="mt-6 space-y-6">
-          <Comentario
-            usuario={userData.full_name}
-            data="02/09/25"
-            estrelas={4}
-            titulo="Excelente ferramenta!"
-            texto="Bom custo-benefício!"
-          />
-          <Comentario
-            usuario={userData.full_name}
-            data="04/09/25"
-            estrelas={5}
-            texto="Comprei essa parafusadeira na promoção e foi um ótimo investimento! O preço estava excelente e a entrega chegou bem rápido. A ferramenta é potente, leve e super fácil de usar. O atendimento da Zézinho Construções também foi impecável, responderam tudo com muita paciência. Recomendo de olhos fechados!"
-          />
+        {/* Seção de Comentários Dinâmica */}
+        <div className="mt-8">
+          <h3 className="text-lg font-bold text-gray-800 mb-4">Últimas Avaliações</h3>
+          
+          <div className="space-y-6">
+            {comentarios.length > 0 ? (
+              comentarios.map((comentario) => (
+                <Comentario
+                  key={comentario.id}
+                  usuario={userData.full_name} // Nome do próprio usuário
+                  data={formatDate(comentario.created_at)}
+                  estrelas={comentario.rating}
+                  // Mostra onde foi feito o comentário (Produto ou Loja) como título
+                  titulo={comentario.product_name 
+                    ? `Avaliou o produto: ${comentario.product_name}` 
+                    : `Avaliou a loja: ${comentario.store_name || 'Loja'}`
+                  }
+                  texto={comentario.comment}
+                />
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10 text-gray-400 bg-white rounded-xl border border-dashed border-gray-300">
+                <MessageSquare size={48} className="mb-2 opacity-50"/>
+                <p>Este usuário ainda não fez avaliações.</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -137,12 +146,9 @@ function PerfilCliente() {
 
   return (
     <div className="h-screen text-gray-800 bg-gray-50">
-      {/* Barra superior */}
       <BarraPesquisa />
       <div className="flex h-[calc(100%-64px)]">
-        {/* Barra lateral fixa */}
         <BarraLateral />
-        {/* Conteúdo principal (Carregando, Erro ou Sucesso) */}
         {renderContent()}
       </div>
     </div>
@@ -150,3 +156,4 @@ function PerfilCliente() {
 }
 
 export default PerfilCliente;
+

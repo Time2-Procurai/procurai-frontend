@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Star, Plus, X } from 'lucide-react';
+import api from '../api/api'; // Importar a API
 
 const InteractiveRating = ({ rating, setRating }) => {
   return (
@@ -22,12 +23,18 @@ const InteractiveRating = ({ rating, setRating }) => {
   );
 };
 
-export default function ModalAvaliacao({ productName, produtoId, onClose }) {
+// Adicionei 'onSuccess' nas props para atualizar a tela pai
+export default function ModalAvaliacao({ productName, produtoId, onClose, onSuccess }) {
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState([]); // { file, previewUrl }
   const fileInputRef = useRef(null);
 
+  // Estados de controle
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Limpeza de memória das URLs de preview
   useEffect(() => {
     return () => {
       images.forEach(image => URL.revokeObjectURL(image.previewUrl));
@@ -50,16 +57,50 @@ export default function ModalAvaliacao({ productName, produtoId, onClose }) {
     setImages(prevImages => prevImages.filter((_, index) => index !== indexToRemove));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({
-      produtoId,
-      rating,
-      reviewText,
-      files: images.map(img => img.file)
+    
+    if (rating === 0) {
+        setError("Por favor, selecione uma nota de 1 a 5 estrelas.");
+        return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    // Prepara o FormData
+    const formData = new FormData();
+    formData.append('rating', rating);
+    formData.append('comment', reviewText);
+    // O ID do produto já vai na URL, mas alguns serializers pedem no body também.
+    // Por segurança, o backend geralmente pega da URL ou ignora este campo se a view injetar.
+    formData.append('product', produtoId); 
+
+    // Adiciona as imagens com o nome de campo que o serializer espera ('uploaded_photos')
+    images.forEach(imgObj => {
+        formData.append('uploaded_photos', imgObj.file);
     });
-    alert('avaliação postada');
-    onClose();
+
+    try {
+      // Rota: /api/evaluations/products/<id>/
+      // (Verifique se no seu backend é 'products' (plural) ou 'product' (singular))
+      await api.post(`/evaluations/products/${produtoId}/`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      alert('Avaliação enviada com sucesso!');
+      
+      // Chama o callback para atualizar a tela do produto
+      if (onSuccess) onSuccess();
+      
+      onClose();
+
+    } catch (err) {
+      console.error("Erro ao avaliar:", err);
+      setError("Erro ao enviar avaliação. Tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -81,6 +122,12 @@ export default function ModalAvaliacao({ productName, produtoId, onClose }) {
         <h1 className="mb-6 text-xl font-semibold text-gray-900">
           Avaliar produto
         </h1>
+
+        {error && (
+            <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-md border border-red-200">
+                {error}
+            </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <input
@@ -112,7 +159,7 @@ export default function ModalAvaliacao({ productName, produtoId, onClose }) {
                   <img
                     src={image.previewUrl}
                     alt={`Preview ${index + 1}`}
-                    className="h-full w-full rounded-lg object-cover"
+                    className="h-full w-full rounded-lg object-cover border border-gray-200"
                   />
                   <button
                     type="button"
@@ -128,10 +175,10 @@ export default function ModalAvaliacao({ productName, produtoId, onClose }) {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current.click()}
-                  className="flex h-24 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 text-gray-500 hover:bg-gray-50"
+                  className="flex h-24 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 text-gray-500 hover:bg-gray-50 transition-colors"
                 >
                   <Plus size={24} />
-                  <span className="mt-1 text-xs">Adicionar arquivo</span>
+                  <span className="mt-1 text-xs">Adicionar</span>
                 </button>
               )}
             </div>
@@ -145,16 +192,17 @@ export default function ModalAvaliacao({ productName, produtoId, onClose }) {
               value={reviewText}
               onChange={(e) => setReviewText(e.target.value)}
               placeholder="O que você achou do produto?"
-              className="mt-4 h-40 w-full rounded-lg border border-gray-300 p-4 focus:border-[#FD7702] focus:ring-[#FD7702]"
+              className="mt-4 h-40 w-full rounded-lg border border-gray-300 p-4 focus:border-[#FD7702] focus:ring-1 focus:ring-[#FD7702] outline-none resize-none"
               required
             />
           </section>
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-[#FD7702] py-3 text-lg font-bold text-white transition-colors hover:bg-[#e66a00]"
+            disabled={isLoading}
+            className="w-full rounded-lg bg-[#FD7702] py-3 text-lg font-bold text-white transition-colors hover:bg-[#e66a00] disabled:bg-orange-300 disabled:cursor-not-allowed"
           >
-            Postar
+            {isLoading ? 'Enviando...' : 'Postar'}
           </button>
         </form>
       </div>

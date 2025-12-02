@@ -1,15 +1,24 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import LadoLogoPage from '../components/LadoLogoPage';
 import api from '../api/api';
 
-function ForgotPasswordPage2() {
+function EsqueciSenha2() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const email = location.state?.email;
+
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate();
+  useEffect(() => {
+    if (!email) {
+      alert("Fluxo inválido. Por favor, inicie a recuperação de senha novamente.");
+      navigate('/redefinirSenha');
+    }
+  }, [email, navigate]);
 
   const handleVerifyCode = async (event) => {
     event.preventDefault();
@@ -18,15 +27,15 @@ function ForgotPasswordPage2() {
     setLoading(true);
 
     try {
-      // Ajuste esta rota conforme seu backend
-      await api.post('user/password_reset/verify/', { // Trocar ?
+      await api.post('user/password-reset/validate/', { 
+        email: email,
         code: code,
       });
 
       setSuccess('Código verificado com sucesso!');
-      // Redireciona para pagina de redefinir senha
+      
       setTimeout(() => {
-        navigate('/redefinirSenha/3');
+        navigate('/redefinirSenha/3', { state: { email, code } });
       }, 1200);
 
     } catch (err) {
@@ -38,11 +47,15 @@ function ForgotPasswordPage2() {
   };
 
   const handleResendCode = async () => {
+    setLoading(true);
+    setError('');
     try {
-      await api.post('user/password_reset/resend/');
+      await api.post('user/password-reset/request/', { email });
       setSuccess('Novo código enviado para seu e-mail.');
     } catch (err) {
       setError('Erro ao reenviar código. Tente novamente.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -59,13 +72,18 @@ function ForgotPasswordPage2() {
             </h1>
 
             <p className="font-semibold md:text-gray-800 mb-8 mt-4 text-md text-center">
-              Verifique se o código chegou no seu e-mail.
+              Verifique se o código chegou no seu e-mail: <strong>{email}</strong>
             </p>
 
             {/* Mensagens */}
             {error && (
               <p className="bg-red-100 text-red-700 text-center p-3 rounded-md mb-4">
                 {error}
+              </p>
+            )}
+            {success && (
+              <p className="bg-green-100 text-green-700 text-center p-3 rounded-md mb-4">
+                {success}
               </p>
             )}
 
@@ -78,7 +96,7 @@ function ForgotPasswordPage2() {
                 <input
                   type="text"
                   value={code}
-                  maxLength={6} // código de até 6 dígitos
+                  maxLength={6}
                   onChange={(e) => {
                     setCode(e.target.value);
                     setError('');
@@ -88,21 +106,22 @@ function ForgotPasswordPage2() {
                   disabled={loading}
                 />
 
-                <button
-                  type="button"
-                  onClick={handleResendCode}
-                  className="text-[#00008B] mt-4 hover:underline text-sm font-semibold cursor-pointer"
-                  disabled={loading}
-                >
-                  Reenviar código
-                </button>
+                <div className="text-right">
+                    <button
+                    type="button"
+                    onClick={handleResendCode}
+                    className="text-[#00008B] mt-4 hover:underline text-sm font-semibold cursor-pointer"
+                    disabled={loading}
+                    >
+                    Reenviar código
+                    </button>
+                </div>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className={`shadow-lg w-full bg-[#FD7702] md:bg-main text-main md:text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 active:opacity-80 transition duration-300 cursor-pointer ${loading ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
+                className={`shadow-lg w-full bg-[#FD7702] md:bg-main text-main md:text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 active:opacity-80 transition duration-300 cursor-pointer ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {loading ? 'Verificando...' : 'Enviar'}
               </button>
@@ -123,4 +142,4 @@ function ForgotPasswordPage2() {
   );
 }
 
-export default ForgotPasswordPage2;
+export default EsqueciSenha2;

@@ -1,9 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, Star } from 'lucide-react';
+import { ChevronLeft, Star, User } from 'lucide-react'; 
 import { useAuth } from '../context/UseAuth.jsx';
 import BarraLateral from '../components/BarraLateral';
 import BarraPesquisa from '../components/BarraPesquisa';
+import api from '../api/api'; 
+
+// Botão de Filtro (Design fiel ao print)
 const FilterButton = ({ label, isActive, onClick }) => (
   <button
     onClick={onClick}
@@ -16,56 +19,145 @@ const FilterButton = ({ label, isActive, onClick }) => (
   </button>
 );
 
+// Card de Avaliação (Layout idêntico ao print)
 const ReviewCard = ({ review }) => (
-  <div className="mb-4 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-    <div className="flex items-center gap-3 mb-3">
-      <img
-        src={review.userAvatar}
-        alt={review.userName}
-        className="h-10 w-10 rounded-full bg-gray-200 object-cover"
-      />
-      <div>
-        <h4 className="text-sm font-bold text-gray-900">{review.userName}</h4>
-        <div className="flex items-center gap-2">
-          <div className="flex">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                size={14}
-                className={i < review.rating ? 'fill-[#FD7702] text-[#FD7702]' : 'text-gray-300'}
-              />
-            ))}
+  <div className="mb-4 rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+    <div className="flex gap-4">
+      
+      {/* 1. Coluna da Esquerda: Avatar */}
+      <div className="flex-shrink-0">
+        {review.userAvatar ? (
+          <img
+            src={review.userAvatar}
+            alt={review.userName}
+            className="h-12 w-12 rounded-full bg-gray-200 object-cover"
+            onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+          />
+        ) : (
+          <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+            <User size={24} />
+          </div>
+        )}
+        {/* Fallback escondido para erro de imagem */}
+        <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 hidden">
+            <User size={24} />
+        </div>
+      </div>
+
+      {/* 2. Coluna da Direita: Todo o conteúdo */}
+      <div className="flex-1">
+        {/* Cabeçalho: Nome + Estrelas e Data */}
+        <div className="flex justify-between items-start">
+          <div>
+             <h4 className="text-sm font-bold text-gray-900">{review.userName}</h4>
+             
+             {/* Estrelas logo abaixo do nome */}
+             <div className="flex mt-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    size={14}
+                    className={i < review.rating ? 'fill-[#FD7702] text-[#FD7702]' : 'text-gray-300'}
+                  />
+                ))}
+             </div>
           </div>
           <span className="text-xs text-gray-400">{review.date}</span>
         </div>
+
+        {/* Texto da Avaliação */}
+        <p className="mt-3 text-sm leading-relaxed text-gray-600">
+            {review.text}
+        </p>
+        
+        {/* Imagens da Avaliação (Abaixo do texto) */}
+        {review.images && review.images.length > 0 && (
+          <div className="flex gap-3 mt-4 flex-wrap">
+            {review.images.map((img, index) => (
+              <img 
+                key={index} 
+                src={img} 
+                alt={`Foto ${index}`} 
+                className="h-20 w-20 rounded-lg border border-gray-200 object-cover cursor-pointer hover:opacity-95 shadow-sm"
+                onClick={() => window.open(img, '_blank')}
+              />
+            ))}
+          </div>
+        )}
       </div>
+
     </div>
-    <p className="mb-4 text-sm leading-relaxed text-gray-600">{review.text}</p>
-    {review.images && review.images.length > 0 && (
-      <div className="flex gap-2">
-        {review.images.map((img, index) => (
-          <img key={index} src={img} alt={`Foto ${index}`} className="h-16 w-16 rounded-lg border border-gray-200 object-cover" />
-        ))}
-      </div>
-    )}
   </div>
 );
 
-// exemplos de avaliações
-const mockReviews = [
-  { id: 1, userName: 'vitorbarros', userAvatar: 'https://i.imgur.com/rN4gXmB.png', date: '04/09/25', rating: 5, text: 'Bom custo-benefício...', images: ['https://i.imgur.com/v2JvP9Y.png'] },
-  { id: 2, userName: 'gabrielsalgado', userAvatar: 'https://i.imgur.com/9w2g5G9.png', date: '04/09/25', rating: 4, text: 'Cumpre o que promete...', images: ['https://i.imgur.com/W2Nl89d.png'] },
-  { id: 3, userName: 'joaopedro', userAvatar: 'https://i.imgur.com/rN4gXmB.png', date: '04/09/25', rating: 3, text: 'Esperava mais da bateria...', images: [] },
-];
-
 export default function TelaAvaliacoes() {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { produtoId } = useParams(); 
   const { user } = useAuth();
-  const [reviews, setReviews] = useState(mockReviews);
+  
+  const [reviews, setReviews] = useState([]);
   const [activeFilter, setActiveFilter] = useState('all');
-  const [filteredReviews, setFilteredReviews] = useState(mockReviews);
+  const [filteredReviews, setFilteredReviews] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // --- BUSCAR AVALIAÇÕES DA API ---
+  useEffect(() => {
+    const fetchReviews = async () => {
+      if (!produtoId) return;
+      
+      setIsLoading(true);
+      try {
+        const response = await api.get(`/evaluations/products/${produtoId}/`);
+        
+        // Proteção contra paginação
+        let dadosBackend = [];
+        if (Array.isArray(response.data)) {
+            dadosBackend = response.data;
+        } else if (response.data && Array.isArray(response.data.results)) {
+            dadosBackend = response.data.results;
+        }
+
+        // Mapeia os dados e busca foto do usuário se necessário
+        const reviewsFormatadas = await Promise.all(dadosBackend.map(async (item) => {
+            let avatarUrl = item.user?.profile_picture || item.user?.avatar;
+            let nomeUsuario = item.user?.full_name || "Usuário";
+            const userId = typeof item.user === 'object' ? item.user.id : item.user;
+
+            if (userId && !avatarUrl) {
+                try {
+                    const userDetails = await api.get(`/user/listar/usuarios/${userId}/`);
+                    avatarUrl = userDetails.data.profile_picture;
+                    nomeUsuario = userDetails.data.full_name;
+                } catch (err) {
+                    console.warn(`Erro user ${userId}`, err);
+                }
+            }
+
+            return {
+                id: item.id,
+                userName: nomeUsuario,
+                userAvatar: avatarUrl || null,
+                date: new Date(item.created_at).toLocaleDateString('pt-BR'),
+                rating: item.rating,
+                text: item.comment,
+                // Mapeia as fotos do array 'photo_urls'
+                images: item.photos ? item.photos.map(p => p.photo) : []
+            };
+        }));
+
+        setReviews(reviewsFormatadas);
+        setFilteredReviews(reviewsFormatadas); 
+      } catch (error) {
+        console.error("Erro ao buscar avaliações:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, [produtoId]);
+
+  // --- FILTRAGEM ---
   useEffect(() => {
     if (activeFilter === 'all') {
       setFilteredReviews(reviews);
@@ -74,14 +166,12 @@ export default function TelaAvaliacoes() {
     }
   }, [activeFilter, reviews]);
 
-  // calc dinamico pro valor da avaliação geral do produto
+  // Estatísticas
   const stats = useMemo(() => {
     const total = reviews.length;
     if (total === 0) return { average: '0,0', count: 0 };
-
     const sum = reviews.reduce((acc, curr) => acc + curr.rating, 0);
     const avg = (sum / total).toFixed(1).replace('.', ',');
-
     return { average: avg, count: total };
   }, [reviews]);
 
@@ -104,31 +194,43 @@ export default function TelaAvaliacoes() {
           </header>
 
           <div className="mx-auto max-w-4xl">
-            <section className="mb-8">
-              <div className="flex items-end gap-4 mb-6">
-                <div className="flex items-center gap-2">
-                  <span className="text-4xl font-extrabold text-gray-900">{stats.average}</span>
-                  <Star size={32} className="fill-[#FD7702] text-[#FD7702]" />
-                </div>
-                <span className="mb-1 text-sm text-gray-500">de 5 ({stats.count} avaliações)</span>
-              </div>
+            
+            {isLoading ? (
+                 <div className="flex justify-center py-10">
+                    <p className="text-gray-500 animate-pulse">Carregando avaliações...</p>
+                 </div>
+            ) : (
+                <>
+                    {/* Seção de Resumo e Filtros */}
+                    <section className="mb-8">
+                        <div className="flex items-end gap-4 mb-6">
+                            <div className="flex items-center gap-2">
+                                <span className="text-4xl font-extrabold text-gray-900">{stats.average}</span>
+                                <Star size={32} className="fill-[#FD7702] text-[#FD7702]" />
+                            </div>
+                            <span className="mb-1 text-sm text-gray-500">de 5 ({stats.count} avaliações)</span>
+                        </div>
 
-              <div className="flex flex-wrap gap-3">
-                <FilterButton label="Tudo" isActive={activeFilter === 'all'} onClick={() => setActiveFilter('all')} />
-                {[5, 4, 3, 2, 1].map((star) => (
-                  <FilterButton key={star} label={`${star} estrelas`} isActive={activeFilter === star} onClick={() => setActiveFilter(star)} />
-                ))}
-              </div>
-            </section>
-            <section className="space-y-4">
-              {filteredReviews.length > 0 ? (
-                filteredReviews.map((review) => <ReviewCard key={review.id} review={review} />)
-              ) : (
-                <div className="py-10 text-center text-gray-500 border border-dashed rounded-lg">
-                  <p>Nenhuma avaliação encontrada.</p>
-                </div>
-              )}
-            </section>
+                        <div className="flex flex-wrap gap-3">
+                            <FilterButton label="Tudo" isActive={activeFilter === 'all'} onClick={() => setActiveFilter('all')} />
+                            {[5, 4, 3, 2, 1].map((star) => (
+                                <FilterButton key={star} label={`${star} estrelas`} isActive={activeFilter === star} onClick={() => setActiveFilter(star)} />
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* Lista de Cards */}
+                    <section className="space-y-4">
+                        {filteredReviews.length > 0 ? (
+                            filteredReviews.map((review) => <ReviewCard key={review.id} review={review} />)
+                        ) : (
+                            <div className="py-10 text-center text-gray-500 border border-dashed rounded-lg">
+                                <p>Nenhuma avaliação encontrada para este filtro.</p>
+                            </div>
+                        )}
+                    </section>
+                </>
+            )}
           </div>
         </main>
       </div>

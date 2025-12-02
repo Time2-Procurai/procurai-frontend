@@ -10,7 +10,7 @@ import api from '../api/api';
 import {
   ChevronLeft, Star, Store, Map,
   Share2, MoreVertical, Heart, ThumbsDown, MessageCircle,
-  Trash2
+  Trash2, UserPlus, UserCheck 
 } from 'lucide-react';
 
 function PerfilEmpresa() {
@@ -26,12 +26,13 @@ function PerfilEmpresa() {
   const [abaAtiva, setAbaAtiva] = useState('Informações');
   const [lojaData, setLojaData] = useState(null);
 
-  // Estados Dinâmicos (Iniciam vazios)
+  // Estados Dinâmicos
   const [posts, setPosts] = useState([]);
   const [promos, setPromos] = useState([]);
   
-  // ID da comunidade para criar posts
+  // Estado para controle de comunidade e seguidores
   const [communityId, setCommunityId] = useState(null);
+  const [isFollowing, setIsFollowing] = useState(false); 
 
   const [menuAbertoId, setMenuAbertoId] = useState(null);
 
@@ -53,7 +54,7 @@ function PerfilEmpresa() {
           .join(', ');
 
         setLojaData({
-          nome: userData.full_name, // ou company_name se disponível
+          nome: userData.full_name, 
           categoria: userData.company_category || "Categoria não definida",
           rating: "4,9",
           status: "Aberto",
@@ -66,7 +67,7 @@ function PerfilEmpresa() {
           mapUrl: null,
         });
 
-        // 2. Buscar Produtos da Loja (Promoções)
+        // 2. Buscar Produtos da Loja
         try {
             const resProd = await api.get(`/products/store/${profileIdFromUrl}/`);
             setPromos(resProd.data.slice(0, 3));
@@ -76,25 +77,33 @@ function PerfilEmpresa() {
 
         // 3. Buscar Comunidade e Publicações
         try {
-            // Busca comunidade pelo ID do lojista
             const resComm = await api.get(`/community/lojista/${profileIdFromUrl}/`);
             if (resComm.data && resComm.data.id) {
                 const cId = resComm.data.id;
                 setCommunityId(cId);
 
+                // Verifica se o usuário já segue a comunidade
+                if (visitanteTipo === 'cliente') {
+                    try {
+                        const resFollow = await api.get(`/community/${cId}/esta-seguindo/`);
+                        setIsFollowing(resFollow.data.seguindo); 
+                    } catch (followErr) {
+                        console.warn("Erro ao verificar status de seguidor", followErr);
+                    }
+                }
+
                 // Busca publicações
                 const resPosts = await api.get(`/community/publicacoes/${cId}/listar/`);
                 
-                // Mapeia para o formato do frontend
                 const formattedPosts = resPosts.data.map(p => ({
                     id: p.id,
                     author: userData.full_name,
                     date: new Date(p.data_publicacao).toLocaleDateString('pt-BR'),
                     content: p.descricao,
                     tag: p.titulo || "Publicação",
-                    likes: 0, // Backend ainda não retorna contagem
-                    comments: 0, // Backend ainda não retorna contagem
-                    type: "text", // Por padrão texto, já que o back não suporta enquete nativa ainda
+                    likes: 0, 
+                    comments: 0, 
+                    type: "text", 
                     postImage: p.imagem
                 }));
                 setPosts(formattedPosts);
@@ -109,39 +118,48 @@ function PerfilEmpresa() {
     };
 
     fetchDadosLoja();
-  }, [profileIdFromUrl]);
+  }, [profileIdFromUrl, visitanteTipo]);
 
-  // --- PERSISTÊNCIA DE POSTS ---
+  // --- AÇÃO DE SEGUIR/DESSEGUIR ---
+  const handleToggleFollow = async () => {
+    if (!communityId) return;
+    
+    try {
+        await api.post(`/community/${profileIdFromUrl}/follow/`);
+        setIsFollowing(!isFollowing);
+
+    } catch (err) {
+        console.error("Erro ao seguir/desseguir:", err);
+        alert("Não foi possível realizar a ação. Tente novamente.");
+    }
+  };
+
+ 
+
   const handleAdicionarPost = async (dados) => {
     if (!communityId) return alert("Erro: Comunidade não encontrada.");
-
     try {
         const formData = new FormData();
         formData.append('titulo', dados.titulo || "Novo Post");
         formData.append('descricao', dados.descricao);
         formData.append('comunidade', communityId);
-
-        // Envia para a API
         const response = await api.post('/community/publicacoes/criar/', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
-
-        const newPostData = response.data;
+        const newPostApi = response.data;
         const newPost = {
-            id: newPostData.id,
+            id: newPostApi.id,
             author: lojaData.nome,
-            date: new Date(newPostData.data_publicacao).toLocaleDateString('pt-BR'),
-            content: newPostData.descricao,
-            tag: newPostData.titulo,
+            date: new Date(newPostApi.data_publicacao).toLocaleDateString('pt-BR'),
+            content: newPostApi.descricao,
+            tag: newPostApi.titulo,
             likes: 0,
             comments: 0,
             type: "text",
-            postImage: newPostData.imagem
+            postImage: newPostApi.imagem
         };
-
         setPosts([newPost, ...posts]);
         setModalPostAberto(false);
-
     } catch (err) {
         console.error("Erro ao criar post:", err);
         alert("Erro ao publicar.");
@@ -149,8 +167,6 @@ function PerfilEmpresa() {
   };
 
   const handleAdicionarEnquete = (dadosEnquete) => {
-    // OBS: Como o backend 'Publicacao' ainda não tem campos para enquete (opções, votos),
-    // mantivemos apenas no estado local por enquanto.
     const novoPostEnquete = {
       id: Date.now(),
       author: lojaData.nome,
@@ -161,15 +177,12 @@ function PerfilEmpresa() {
       likes: 0,
       comments: 0
     };
-    
     setPosts([novoPostEnquete, ...posts]);
     setModalEnqueteAberto(false);
-    // alert("Enquete publicada com sucesso! (Apenas visualização local)"); 
   };
 
   const handleDeletarPost = (id) => {
     if (window.confirm("Tem certeza que deseja excluir esta publicação?")) {
-      // Futuramente: await api.delete(`/community/publicacoes/${id}/`);
       setPosts(posts.filter((post) => post.id !== id));
       setMenuAbertoId(null);
     }
@@ -298,12 +311,43 @@ function PerfilEmpresa() {
                 </div>
               </div>
 
-              <div className="mt-4 flex justify-end">
-                <div className="flex items-center space-x-1.5">
+              {/* --- ÁREA DO STATUS E BOTÃO SEGUIR --- */}
+              {/* Mudança: 'justify-end' removido, 'flex items-center' adicionado para layout padrão (esquerda-direita) */}
+              <div className="mt-4 flex items-center">
+                
+                {/* BOTÃO SEGUIR (Só para clientes) */}
+                {!isOwner && visitanteTipo === 'cliente' && communityId && (
+                    <button
+                        onClick={handleToggleFollow}
+                        className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold transition-colors shadow-sm cursor-pointer ${
+                            isFollowing 
+                            ? 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200' 
+                            : 'bg-[#FD7702] text-white border border-[#FD7702] hover:bg-[#e66a00]'
+                        }`}
+                    >
+                        {isFollowing ? (
+                            <>
+                                <UserCheck size={16} />
+                                Seguindo
+                            </>
+                        ) : (
+                            <>
+                                <UserPlus size={16} />
+                                Seguir
+                            </>
+                        )}
+                    </button>
+                )}
+
+                {/* STATUS DA LOJA (Aberto/Fechado) */}
+                {/* Adicionado 'ml-auto' para forçar este elemento para a direita extrema */}
+                <div className="flex items-center space-x-1.5 ml-auto">
                   <Store size={20} className="text-gray-700" />
                   <span className="font-medium text-gray-700">{lojaData.status}</span>
                 </div>
               </div>
+              {/* ----------------------------------- */}
+
             </div>
 
             {/* Navegação das Abas */}
@@ -370,8 +414,8 @@ function PerfilEmpresa() {
             {/* Aba Comunidade */}
             {abaAtiva === 'Comunidade' && (
               <div className="p-4 md:px-8 max-w-4xl mx-auto bg-gray-50 min-h-[400px]">
-
-                <div className="flex items-center justify-between mb-6 pt-4">
+                {/* Conteúdo da Comunidade omitido para brevidade (igual ao anterior) */}
+                 <div className="flex items-center justify-between mb-6 pt-4">
                   <h2 className="text-xl font-bold text-gray-900">Publicações</h2>
                   {isOwner && (
                     <div className="flex gap-3">
@@ -391,13 +435,10 @@ function PerfilEmpresa() {
                   )}
                 </div>
 
-                {/* Lista de Publicações */}
                 <div className="space-y-6 mb-12">
                   {posts.map((post) => (
                     <div 
                       key={post.id} 
-                      // --- REDIRECIONAMENTO ---
-                      // Clicar no post inteiro leva para os detalhes (se for texto ou imagem)
                       onClick={() => {
                          if (post.type !== 'enquete') {
                              navigate(`/post/${post.id}`);
@@ -406,7 +447,6 @@ function PerfilEmpresa() {
                       className={`bg-white rounded-xl border border-gray-200 p-5 shadow-sm relative transition-shadow 
                         ${post.type !== 'enquete' ? 'cursor-pointer hover:shadow-md' : ''}`}
                     >
-                      {/* Header Post */}
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 rounded-full overflow-hidden border border-gray-200">
@@ -431,7 +471,6 @@ function PerfilEmpresa() {
                           </div>
                         </div>
 
-                        {/* Ações Topo */}
                         <div className="flex items-center text-gray-400 gap-2" onClick={(e) => e.stopPropagation()}>
                           <button className="hover:text-gray-600 cursor-pointer p-1 rounded hover:bg-gray-100">
                             <Share2 size={18} />
@@ -444,7 +483,7 @@ function PerfilEmpresa() {
                               <MoreVertical size={18} />
                             </button>
                             {isOwner && menuAbertoId === post.id && (
-                              <div className="absolute right-0 top-6 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden">
+                              <div className="absolute right-0 top-6 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden animate-in fade-in zoom-in duration-100">
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -461,7 +500,6 @@ function PerfilEmpresa() {
                         </div>
                       </div>
 
-                      {/* Conteúdo Condicional (Post Texto ou Enquete) */}
                       {post.type === 'enquete' ? (
                         <div className="mb-4 w-full" onClick={(e) => e.stopPropagation()}>
                            <EnquetePost 
@@ -485,7 +523,6 @@ function PerfilEmpresa() {
 
                       <hr className="border-gray-100 mb-3" />
                       
-                      {/* Ações Rodapé */}
                       <div className="flex items-center gap-6" onClick={(e) => e.stopPropagation()}>
                         <button className="flex items-center gap-1.5 text-gray-500 hover:text-red-500 transition group cursor-pointer">
                           <Heart size={20} className="group-hover:fill-current" />
@@ -503,15 +540,14 @@ function PerfilEmpresa() {
                   ))}
                 </div>
 
-                {/* Seção Promoções */}
                 <div className="mb-10">
                   <hr className="border-gray-200 mb-8" />
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-bold text-gray-900">Meus produtos em promoção</h2>
                     {isOwner && (
                       <button 
-                         onClick={() => navigate(`/produtos/${profileIdFromUrl}`)}
-                         className="cursor-pointer px-4 py-1.5 text-sm font-semibold text-[#FD7702] border border-[#FD7702] rounded-full hover:bg-orange-50 transition active:scale-95"
+                        onClick={() => navigate(`/produtos/${profileIdFromUrl}`)}
+                        className="cursor-pointer px-4 py-1.5 text-sm font-semibold text-[#FD7702] border border-[#FD7702] rounded-full hover:bg-orange-50 transition active:scale-95"
                       >
                         Gerenciar
                       </button>
@@ -527,7 +563,11 @@ function PerfilEmpresa() {
                         >
                           <div className="h-48 bg-white p-4 flex items-center justify-center relative">
                             {product.product_image ? (
-                              <img src={product.product_image} alt={product.name} className="max-h-full max-w-full object-contain" />
+                              <img
+                                src={product.product_image}
+                                alt={product.name}
+                                className="max-h-full max-w-full object-contain"
+                              />
                             ) : (
                               <Store size={48} className="text-gray-400" />
                             )}
@@ -541,7 +581,9 @@ function PerfilEmpresa() {
                                 R$ {parseFloat(product.price).toFixed(2).replace('.', ',')}
                               </span>
                               {product.is_negotiable && (
-                                <span className="text-[#FD7702] font-bold text-xs uppercase">Negociável</span>
+                                <span className="text-[#FD7702] font-bold text-xs uppercase">
+                                  Negociável
+                                </span>
                               )}
                             </div>
                           </div>
@@ -549,10 +591,9 @@ function PerfilEmpresa() {
                       ))}
                     </div>
                   ) : (
-                     <p className="text-gray-500 text-center py-4">Nenhum produto cadastrado.</p>
+                    <p className="text-gray-500 text-center py-4">Nenhum produto cadastrado.</p>
                   )}
                 </div>
-
               </div>
             )}
 
