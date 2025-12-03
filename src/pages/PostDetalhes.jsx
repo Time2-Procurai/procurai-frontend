@@ -85,36 +85,39 @@ function PostDetalhes() {
   };
 
   // --- 3. CURTIR / DESCURTIR (AJUSTADO) ---
-  const handleCurtir = async () => {
-    try {
-      await api.post(`/community/publicacoes/${postId}/curtir/`);
-      
-      // Removemos o alert e atualizamos o contador visualmente
-      setPost(prev => ({
-        ...prev,
-        likes: (prev?.likes || 0) + 1
-      }));
+const handleCurtir = async () => {
+  // 🔥 Bloqueia se já curtiu
+  if (post.user_has_liked) return;
 
-    } catch (err) {
-      console.error("Erro ao curtir:", err);
-      // Opcional: Se o erro for "Já curtiu", não faz nada ou avisa sutilmente
-    }
-  };
+  try {
+    await api.post(`/community/publicacoes/${postId}/curtir/`);
 
-  const handleDescurtir = async () => {
-    try {
-      await api.post(`/community/publicacoes/${postId}/descurtir/`);
-      
-      // Removemos o alert e atualizamos o contador visualmente
-      setPost(prev => ({
-        ...prev,
-        likes: Math.max((prev?.likes || 0) - 1, 0) // Evita números negativos
-      }));
+    setPost(prev => ({
+      ...prev,
+      user_has_liked: true,
+      likes: prev.likes + 1,
+    }));
+  } catch (err) {
+    console.error("Erro ao curtir:", err);
+  }
+};
 
-    } catch (err) {
-      console.error("Erro ao descurtir:", err);
-    }
-  };
+const handleDescurtir = async () => {
+  // 🔥 Bloqueia se NÃO curtiu ainda
+  if (!post.user_has_liked) return;
+
+  try {
+    await api.post(`/community/publicacoes/${postId}/descurtir/`);
+
+    setPost(prev => ({
+      ...prev,
+      user_has_liked: false,
+      likes: Math.max(prev.likes - 1, 0),
+    }));
+  } catch (err) {
+    console.error("Erro ao descurtir:", err);
+  }
+};
 
   // Helpers de formatação
   const formatDate = (dateString) => {
@@ -237,22 +240,31 @@ function PostDetalhes() {
               <div className="flex items-center gap-4 border-t border-gray-100 pt-4">
                 
                 {/* --- BOTÃO CURTIR (COM CONTADOR) --- */}
-                <button 
-                    onClick={handleCurtir}
-                    className="text-gray-600 hover:text-red-500 transition flex items-center gap-1"
+                <button
+                  onClick={post.user_has_liked ? handleDescurtir : handleCurtir}
+                  className={`transition flex items-center gap-1 ${
+                    post.user_has_liked
+                      ? "text-red-500"
+                      : "text-gray-600 hover:text-red-500"
+                  }`}
                 >
-                  <Heart size={24} />
-                  <span className="text-sm font-medium">{post?.likes || 0}</span>
+                  <Heart
+                    size={24}
+                    fill={post.user_has_liked ? "red" : "none"}
+                    stroke={post.user_has_liked ? "red" : "currentColor"}
+                  />
+                  <span>{post.likes}</span>
                 </button>
 
-                {/* --- BOTÃO DESCURTIR --- */}
+
+                {/* --- BOTÃO DESCURTIR --- 
                 <button 
                     onClick={handleDescurtir}
                     className="text-gray-600 hover:text-gray-900 transition"
                     title="Remover curtida"
                 >
                   <ThumbsDown size={24} />
-                </button>
+                </button>*/}
 
                 <button className="text-gray-600 hover:text-blue-500 transition flex items-center gap-1">
                   <MessageCircle size={24} />
