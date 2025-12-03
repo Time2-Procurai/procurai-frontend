@@ -20,7 +20,7 @@ export default function ModalOpcoesProduto({ onClose, onExcluirClick, produtoId 
 
         <div className="flex flex-col gap-6">
           <Link
-            to={`/produto/${produtoId}/editar`}
+            to={`/produto/editar/${produtoId}`}
             className="flex items-center gap-3 text-lg font-medium text-gray-800 hover:text-[#FD7702]"
           >
             <Edit size={24} />

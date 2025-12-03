@@ -30,6 +30,7 @@ import PesquisaProduto from './pages/PesquisaProduto.jsx'
 import TelaPromocoes from './pages/TelaPromocoes.jsx';
 import TelaAdicionarPromocao from './pages/TelaAdicionarPromocao.jsx';
 import Notificacoes from './pages/Notificacoes.jsx';
+import TelaEditarProduto from './pages/TelaEditarProduto.jsx';
 
 function Home() {
   return (
@@ -85,6 +86,7 @@ function App() {
         <Route path="/promocoes/adicionar" element={<TelaAdicionarPromocao />} />
         <Route path='/produto/:produtoId/avaliacoes' element={<TelaAvaliacoes/>}/>
         <Route path="/notificacoes" element={<Notificacoes />} />
+        <Route path='/produto/editar/:produtoId' element={<TelaEditarProduto />} />
       </Routes>
 
     </AuthProvider>
