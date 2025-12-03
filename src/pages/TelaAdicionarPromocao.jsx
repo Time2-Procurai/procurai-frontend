@@ -13,26 +13,46 @@ function TelaAdicionarPromocao() {
   const [produtos, setProdutos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Estado para armazenar o ID da comunidade (necessário para criar o post)
+  const [communityId, setCommunityId] = useState(null);
+
   // Estados do Modal de Desconto
   const [produtoSelecionado, setProdutoSelecionado] = useState(null);
   const [porcentagemDesconto, setPorcentagemDesconto] = useState('');
-  const [isSaving, setIsSaving] = useState(false); // Estado de loading ao salvar
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    const fetchProdutos = async () => {
+    const fetchData = async () => {
       try {
+        // 1. Buscar Catálogo de Produtos
         const response = await api.get(`products/store/${lojistaId}/`);
         setProdutos(response.data);
+
+        // 2. Buscar ID da Comunidade (para poder postar a notificação)
+        try {
+            const resComm = await api.get(`/community/lojista/${lojistaId}/`);
+            if (resComm.data && resComm.data.id) {
+                setCommunityId(resComm.data.id);
+            }
+        } catch (commErr) {
+            console.warn("Lojista sem comunidade ou erro ao buscar:", commErr);
+        }
+
       } catch (err) {
-        console.error("Erro ao carregar catálogo:", err);
+        console.error("Erro ao carregar dados:", err);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchProdutos();
+    fetchData();
   }, [lojistaId]);
 
-  // --- FUNÇÃO PRINCIPAL: APLICA O DESCONTO NO BACKEND ---
+  // Helper de formatação (movido para fora ou declarado antes do uso no handle)
+  const formatValue = (val) => {
+     return parseFloat(val).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  };
+
+  // --- FUNÇÃO PRINCIPAL: APLICA O DESCONTO E NOTIFICA ---
   const handleSalvarPromocao = async () => {
     if (!produtoSelecionado || !porcentagemDesconto) return;
 
@@ -45,39 +65,55 @@ function TelaAdicionarPromocao() {
     setIsSaving(true);
 
     try {
-      // 1. Calcular o novo preço
+      // 1. Calcular os valores
       const precoAtual = parseFloat(produtoSelecionado.price);
       const valorDoDesconto = precoAtual * (desconto / 100);
       const novoPreco = precoAtual - valorDoDesconto;
 
-      // 2. Preparar o payload como FormData (CORREÇÃO PARA O ERRO 415)
-      // O backend espera multipart/form-data por causa do parser de imagens configurado na View
+      // 2. Atualizar Produto (PATCH)
       const formData = new FormData();
-      
-      formData.append('price', novoPreco.toFixed(2));
-      formData.append('old_price', precoAtual.toFixed(2)); // Salva o original
-      formData.append('is_promotion', 'true'); // Envia como string, o Django converte
+      formData.append('price', novoPreco.toFixed(2)); 
+      formData.append('old_price', precoAtual.toFixed(2)); 
+      formData.append('is_promotion', 'true'); 
 
-      // 3. Enviar para a API
-      // Não definimos 'Content-Type' manualmente, o axios faz isso ao ver o FormData
       const response = await api.patch(`/products/${produtoSelecionado.id}/`, formData);
 
-      // 4. Atualizar a lista localmente (para o usuário ver a mudança na hora)
+      // 3. Atualizar lista local
       setProdutos(prevProdutos => 
         prevProdutos.map(prod => 
           prod.id === produtoSelecionado.id ? response.data : prod
         )
       );
 
-      alert(`Sucesso! O preço caiu de R$ ${precoAtual.toFixed(2)} para R$ ${novoPreco.toFixed(2)}.`);
+      // --- 4. CRIAR POST AUTOMÁTICO NA COMUNIDADE (Gera Notificação) ---
+      if (communityId) {
+          try {
+              const postFormData = new FormData();
+              postFormData.append('titulo', '🔥 Oferta Relâmpago!');
+              postFormData.append('descricao', `O produto "${produtoSelecionado.name}" acabou de entrar em promoção! De ${formatValue(precoAtual)} por apenas ${formatValue(novoPreco)}. Venha conferir antes que acabe!`);
+              postFormData.append('comunidade', communityId);
+              
+              // Se quiser adicionar a foto do produto no post (opcional, depende se o backend aceita URL ou apenas arquivo)
+              // postFormData.append('imagem', ...); 
+
+              await api.post('/community/publicacoes/criar/', postFormData, {
+                  headers: { 'Content-Type': 'multipart/form-data' }
+              });
+              console.log("Post de notificação criado com sucesso.");
+          } catch (postErr) {
+              console.error("Erro ao criar post de notificação:", postErr);
+              // Não impedimos o sucesso da promoção se o post falhar
+          }
+      }
+
+      alert(`Promoção aplicada! O preço caiu de ${formatValue(precoAtual)} para ${formatValue(novoPreco)}.`);
       
-      // 5. Limpar e fechar modal
       setProdutoSelecionado(null);
       setPorcentagemDesconto('');
 
     } catch (error) {
       console.error("Erro ao aplicar promoção:", error);
-      alert("Erro ao aplicar promoção. Tente novamente.");
+      alert("Erro ao aplicar promoção no servidor.");
     } finally {
       setIsSaving(false);
     }
@@ -115,7 +151,6 @@ function TelaAdicionarPromocao() {
                     ${produto.is_promotion ? 'border-orange-300 ring-1 ring-orange-200' : 'border-gray-200'}`}
                 >
                   <div className="h-40 bg-gray-100 p-4 flex justify-center items-center relative">
-                    {/* Badge se já estiver em promoção */}
                     {produto.is_promotion && (
                         <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                             EM OFERTA
@@ -159,7 +194,7 @@ function TelaAdicionarPromocao() {
             porcentagem={porcentagemDesconto}
             setPorcentagem={setPorcentagemDesconto}
             onConfirm={handleSalvarPromocao}
-            isLoading={isSaving} // Passar estado de loading para o modal desabilitar botão
+            isLoading={isSaving}
           />
         </main>
       </div>

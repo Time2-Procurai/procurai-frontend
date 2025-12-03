@@ -93,7 +93,7 @@ export default function TelaProduto() {
 
         // 3. Busca Avaliações do Produto
         try {
-            const reviewsResponse = await api.get(`/evaluations/product/${produtoId}/`);
+            const reviewsResponse = await api.get(`/evaluations/products/${produtoId}/`);
             const reviewsData = reviewsResponse.data;
 
             // Busca foto do usuário da última avaliação se necessário
