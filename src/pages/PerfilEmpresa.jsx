@@ -54,7 +54,7 @@ function PerfilEmpresa() {
           .join(', ');
 
         setLojaData({
-          nome: userData.full_name, 
+          nome: userData.company_name, 
           categoria: userData.company_category || "Categoria não definida",
           rating: "4,9",
           status: "Aberto",

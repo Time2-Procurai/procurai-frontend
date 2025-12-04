@@ -6,6 +6,8 @@ const api = axios.create({
   //baseURL: "https://procurai.duckdns.org/api/", // url produção
 });
 
+const getBaseURL = "localhost:8080/"; // Função para obter a base URL
+
 // === INTERCEPTOR DE REQUISIÇÃO ===
 api.interceptors.request.use(
   (config) => {

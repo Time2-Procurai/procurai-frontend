@@ -73,7 +73,10 @@ function EditarPerfilLoja() {
 
         // Define a foto de perfil *existente*
         if (profile?.profile_picture) {
-          setProfileImagePreview(profile.profile_picture);
+          const urlBase = "http://localhost:8080/"
+          setProfileImagePreview(urlBase + profile.profile_picture);
+          //
+          
         }
       } catch (err) {
         console.error("Erro ao buscar dados do perfil:", err);

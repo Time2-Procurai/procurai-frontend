@@ -56,6 +56,8 @@ function BarraLateral() {
                 <span className="font-bold ml-2">Meu perfil</span>
               </button>
 
+             
+
               <button
                 onClick={() => navigate("/Notificacoes")}
                 className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer"
@@ -78,6 +80,14 @@ function BarraLateral() {
               >
                 <span className="text-lg">❤️</span>
                 <span className="font-bold ml-2">Favoritos</span>
+              </button>
+
+               <button
+                onClick={() => navigate("/perfil/cliente/" + localStorage.getItem('userId'))}
+                className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer"
+              >
+                <span className="text-lg">👥</span>
+                <span className="font-bold ml-2">Comunidades</span>
               </button>
 
               <button
@@ -107,6 +117,14 @@ function BarraLateral() {
               >
                 <span className="text-lg">👤</span>
                 <span className="font-bold ml-2">Meu perfil</span>
+              </button>
+
+              <button
+                onClick={() => navigate("/perfil/cliente/" + localStorage.getItem('userId'))}
+                className="flex items-center space-x-2 text-gray-700 hover:text-[#1A225F] hover:cursor-pointer"
+              >
+                <span className="text-lg">👤</span>
+                <span className="font-bold ml-2">Comunidades</span>
               </button>
 
               <button
