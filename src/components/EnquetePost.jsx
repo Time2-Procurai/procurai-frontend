@@ -1,67 +1,67 @@
 import React, { useState } from 'react';
 
-export default function EnquetePost({ question, options }) {
-  // Estado para controlar se o usuário já votou
-  const [votoUsuario, setVotoUsuario] = useState(null);
+export default function EnquetePost({ question, options, onVote, totalVotes: initialTotalVotes }) {
+  const [votedOption, setVotedOption] = useState(null);
   
-  const [contagemVotos, setContagemVotos] = useState(
-    new Array(options.length).fill(0) // Cria array [0, 0, 0...] baseado nas opções
-  );
+  // Calcula o total localmente para evitar divisão por zero ou undefined
+  const safeOptions = options || [];
+  const total = safeOptions.reduce((acc, op) => acc + (op.votes || 0), 0);
 
-  const totalVotos = contagemVotos.reduce((a, b) => a + b, 0);
-
-  const handleVotar = (index) => {
-    const novaContagem = [...contagemVotos];
-    novaContagem[index] += 1;
-    
-    setContagemVotos(novaContagem);
-    setVotoUsuario(index);
+  const handleVote = (optionId) => {
+    if (votedOption) return; // Já votou
+    setVotedOption(optionId);
+    if (onVote) onVote(optionId);
   };
 
   return (
     <div className="w-full">
-      <h3 className="font-bold text-lg text-gray-900 mb-3">{question}</h3>
+      <h3 className="font-bold text-gray-900 mb-3 text-base">{question}</h3>
       
-      <div className="flex flex-col gap-2">
-        {options.map((opcao, index) => {
-          if (!opcao) return null;
-          if (votoUsuario !== null) {
-            // Lógica da Porcentagem
-            const porcentagem = totalVotos === 0 ? 0 : Math.round((contagemVotos[index] / totalVotos) * 100);
-            const isSelected = votoUsuario === index;
+      <div className="space-y-2">
+        {safeOptions.map((option) => {
+          const votes = option.votes || 0;
+          const percentage = total > 0 ? Math.round((votes / total) * 100) : 0;
+          const isSelected = votedOption === option.id;
 
-            return (
-              <div key={index} className="relative h-10 w-full rounded-lg bg-gray-100 overflow-hidden border border-gray-200">
+          return (
+            <div 
+              key={option.id}
+              onClick={(e) => {
+                  e.stopPropagation(); // Impede abrir o post ao votar
+                  handleVote(option.id);
+              }}
+              className={`relative p-3 rounded-lg border cursor-pointer transition-all overflow-hidden ${
+                isSelected ? 'border-[#FD7702] bg-orange-50' : 'border-gray-200 hover:bg-gray-50'
+              }`}
+            >
+              {/* Barra de Progresso (Fundo) */}
+              {votedOption && (
                 <div 
-                  className={`absolute top-0 left-0 h-full transition-all duration-500 ${isSelected ? 'bg-[#FD7702]/30' : 'bg-gray-200'}`}
-                  style={{ width: `${porcentagem}%` }}
+                  className="absolute top-0 left-0 h-full bg-orange-100 transition-all duration-500 ease-out"
+                  style={{ width: `${percentage}%` }}
                 />
+              )}
+
+              {/* Conteúdo */}
+              <div className="relative flex justify-between items-center z-10">
+                <span className={`text-sm font-medium ${isSelected ? 'text-[#FD7702]' : 'text-gray-700'}`}>
+                  {option.text}
+                </span>
                 
-                <div className="absolute top-0 left-0 h-full w-full flex items-center justify-between px-3 z-10">
-                  <span className={`text-sm font-medium ${isSelected ? 'text-[#FD7702] font-bold' : 'text-gray-700'}`}>
-                    {opcao} {isSelected && '(Você)'}
+                {votedOption && (
+                  <span className="text-xs font-bold text-gray-500">
+                    {percentage}%
                   </span>
-                  <span className="text-sm font-bold text-gray-900">{porcentagem}%</span>
-                </div>
+                )}
               </div>
-            );
-          } else {
-            return (
-              <button 
-                key={index}
-                onClick={() => handleVotar(index)}
-                className="w-full text-left p-3 border border-gray-300 rounded-lg hover:bg-orange-50 hover:border-[#FD7702] transition text-sm text-gray-700 font-medium active:scale-[0.99]"
-              >
-                {opcao}
-              </button>
-            );
-          }
+            </div>
+          );
         })}
       </div>
-
-      <p className="text-xs text-gray-400 mt-3">
-        {totalVotos} votos • {votoUsuario !== null ? 'Voto computado' : 'Enquete aberta'}
-      </p>
+      
+      <div className="mt-3 text-xs text-gray-400 text-right">
+        {total} votos • {votedOption ? 'Voto registrado' : 'Clique para votar'}
+      </div>
     </div>
   );
 }

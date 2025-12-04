@@ -92,21 +92,62 @@ function PerfilEmpresa() {
                     }
                 }
 
-                // Busca publicações
+                // A. Busca publicações (Texto/Imagem)
                 const resPosts = await api.get(`/community/publicacoes/${cId}/listar/`);
-                
                 const formattedPosts = resPosts.data.map(p => ({
                     id: p.id,
+                    type: 'post',
                     author: userData.full_name,
+                    dateObj: new Date(p.data_publicacao),
                     date: new Date(p.data_publicacao).toLocaleDateString('pt-BR'),
                     content: p.descricao,
                     tag: p.titulo || "Publicação",
                     likes: 0, 
                     comments: 0, 
-                    type: "text", 
                     postImage: p.imagem
                 }));
-                setPosts(formattedPosts);
+
+                // B. Busca Enquetes
+            const resEnquetes = await api.get(`/community/enquetes/?comunidade=${cId}`);
+
+            const formattedEnquetes = resEnquetes.data.map(e => {
+                const total = e.total_votos || 0;
+
+                return {
+                    id: e.id,
+                    type: 'enquete',
+                    author: userData.full_name,
+
+                    dateObj: new Date(e.data_criacao),
+                    date: new Date(e.data_criacao).toLocaleDateString('pt-BR'),
+
+                    question: e.pergunta,
+
+                    options: e.opcoes
+                        ? e.opcoes.map(op => {
+                            const percent = total > 0 ? (op.votos / total) * 100 : 0;
+                            return {
+                                id: op.id,
+                                text: op.texto,
+                                votes: op.votos,
+                                percent: percent.toFixed(1),      // exemplo: "42.5"
+                                barWidth: `${percent}%`           // exemplo: "42%"
+                            };
+                        })
+                        : [],
+
+                    totalVotes: total,
+                    likes: 0,
+                    comments: 0
+                };
+            });
+
+            // Mescla e ordena por data (mais recente primeiro)
+            const mixedFeed = [...formattedPosts, ...formattedEnquetes].sort(
+                (a, b) => b.dateObj - a.dateObj
+            );
+
+            setPosts(mixedFeed);
             }
         } catch (err) {
             console.log("Comunidade não encontrada ou erro:", err);
@@ -125,7 +166,7 @@ function PerfilEmpresa() {
     if (!communityId) return;
     
     try {
-        await api.post(`/community/${profileIdFromUrl}/follow/`);
+        await api.post(`/community/${communityId}/follow/`);
         setIsFollowing(!isFollowing);
 
     } catch (err) {
@@ -133,8 +174,6 @@ function PerfilEmpresa() {
         alert("Não foi possível realizar a ação. Tente novamente.");
     }
   };
-
- 
 
   const handleAdicionarPost = async (dados) => {
     if (!communityId) return alert("Erro: Comunidade não encontrada.");
@@ -149,15 +188,17 @@ function PerfilEmpresa() {
         const newPostApi = response.data;
         const newPost = {
             id: newPostApi.id,
+            type: 'post',
             author: lojaData.nome,
+            dateObj: new Date(newPostApi.data_publicacao),
             date: new Date(newPostApi.data_publicacao).toLocaleDateString('pt-BR'),
             content: newPostApi.descricao,
             tag: newPostApi.titulo,
             likes: 0,
             comments: 0,
-            type: "text",
             postImage: newPostApi.imagem
         };
+        // Adiciona no topo da lista
         setPosts([newPost, ...posts]);
         setModalPostAberto(false);
     } catch (err) {
@@ -166,19 +207,48 @@ function PerfilEmpresa() {
     }
   };
 
-  const handleAdicionarEnquete = (dadosEnquete) => {
-    const novoPostEnquete = {
-      id: Date.now(),
-      author: lojaData.nome,
-      date: "Agora",
-      type: "enquete", 
-      question: dadosEnquete.pergunta, 
-      options: dadosEnquete.opcoes,    
-      likes: 0,
-      comments: 0
-    };
-    setPosts([novoPostEnquete, ...posts]);
-    setModalEnqueteAberto(false);
+  // --- FUNÇÃO CORRIGIDA PARA PERSISTIR ENQUETE ---
+  const handleAdicionarEnquete = async (dadosEnquete) => {
+    if (!communityId) return alert("Erro: Comunidade não encontrada.");
+
+    try {
+      // O backend espera: { "pergunta": "...", "opcoes": ["A", "B"] }
+      const payload = {
+        pergunta: dadosEnquete.pergunta,
+        opcoes: dadosEnquete.opcoes // Array de strings
+      };
+
+      // Chama a API
+      const response = await api.post('/community/enquetes/', payload);
+      const novaEnqueteApi = response.data;
+
+      // Formata para exibir na tela sem precisar recarregar
+      const novaEnqueteVisual = {
+        id: novaEnqueteApi.id,
+        type: 'enquete',
+        author: lojaData.nome,
+        dateObj: new Date(novaEnqueteApi.data_criacao),
+        date: new Date(novaEnqueteApi.data_criacao).toLocaleDateString('pt-BR'),
+        question: novaEnqueteApi.pergunta,
+        // O backend retorna opções com ID e Votos
+        options: novaEnqueteApi.opcoes.map(op => ({
+           id: op.id,
+           text: op.texto,
+           votes: op.votos
+        })),
+        totalVotes: 0,
+        likes: 0,
+        comments: 0
+      };
+
+      setPosts([novaEnqueteVisual, ...posts]);
+      setModalEnqueteAberto(false);
+      alert("Enquete publicada com sucesso!");
+
+    } catch (err) {
+      console.error("Erro ao criar enquete:", err);
+      alert("Erro ao criar enquete. Tente novamente.");
+    }
   };
 
   const handleDeletarPost = (id) => {
@@ -195,6 +265,18 @@ function PerfilEmpresa() {
     } else {
       setMenuAbertoId(id);
     }
+  };
+
+  // Função para votar (Opcional, para conectar o componente EnquetePost)
+  const handleVotarEnquete = async (enqueteId, opcaoId) => {
+      try {
+          await api.post(`/community/enquetes/${enqueteId}/votar/`, { opcao_id: opcaoId });
+          alert("Voto computado!");
+          // O ideal seria recarregar a enquete para atualizar os votos
+      } catch (err) {
+          console.error("Erro ao votar:", err);
+          alert(err.response?.data?.message || "Erro ao votar.");
+      }
   };
 
   const abaAtivaClass = "whitespace-nowrap border-b-2 border-orange-500 py-4 px-1 text-base font-semibold text-orange-500";
@@ -311,43 +393,44 @@ function PerfilEmpresa() {
                 </div>
               </div>
 
-              {/* --- ÁREA DO STATUS E BOTÃO SEGUIR --- */}
-              {/* Mudança: 'justify-end' removido, 'flex items-center' adicionado para layout padrão (esquerda-direita) */}
-              <div className="mt-4 flex items-center">
+              {/* --- ÁREA DO STATUS E BOTÃO SEGUIR (AJUSTADA) --- */}
+              <div className="mt-4 flex items-center justify-between px-4"> 
                 
-                {/* BOTÃO SEGUIR (Só para clientes) */}
-                {!isOwner && visitanteTipo === 'cliente' && communityId && (
-                    <button
-                        onClick={handleToggleFollow}
-                        className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold transition-colors shadow-sm cursor-pointer ${
-                            isFollowing 
-                            ? 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200' 
-                            : 'bg-[#FD7702] text-white border border-[#FD7702] hover:bg-[#e66a00]'
-                        }`}
-                    >
-                        {isFollowing ? (
-                            <>
-                                <UserCheck size={16} />
-                                Seguindo
-                            </>
-                        ) : (
-                            <>
-                                <UserPlus size={16} />
-                                Seguir
-                            </>
-                        )}
-                    </button>
-                )}
-
-                {/* STATUS DA LOJA (Aberto/Fechado) */}
-                {/* Adicionado 'ml-auto' para forçar este elemento para a direita extrema */}
-                <div className="flex items-center space-x-1.5 ml-auto">
-                  <Store size={20} className="text-gray-700" />
-                  <span className="font-medium text-gray-700">{lojaData.status}</span>
+                {/* BOTÃO SEGUIR (lado esquerdo) */}
+                <div className="flex-1 flex justify-start"> 
+                  {!isOwner && visitanteTipo === 'cliente' && communityId && (
+                      <button
+                          onClick={handleToggleFollow}
+                          className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold transition-colors shadow-sm cursor-pointer ${
+                              isFollowing 
+                              ? 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200' 
+                              : 'bg-[#FD7702] text-white border border-[#FD7702] hover:bg-[#e66a00]'
+                          }`}
+                      >
+                          {isFollowing ? (
+                              <>
+                                  <UserCheck size={16} />
+                                  Seguindo
+                              </>
+                          ) : (
+                              <>
+                                  <UserPlus size={16} />
+                                  Seguir
+                              </>
+                          )}
+                      </button>
+                  )}
                 </div>
-              </div>
-              {/* ----------------------------------- */}
 
+                {/* STATUS DA LOJA (lado direito) */}
+                <div className="flex-1 flex justify-end"> 
+                  <div className="flex items-center space-x-1.5 ml-auto">
+                    <Store size={20} className="text-gray-700" />
+                    <span className="font-medium text-gray-700">{lojaData.status}</span>
+                  </div>
+                </div>
+
+              </div>
             </div>
 
             {/* Navegação das Abas */}
@@ -414,7 +497,6 @@ function PerfilEmpresa() {
             {/* Aba Comunidade */}
             {abaAtiva === 'Comunidade' && (
               <div className="p-4 md:px-8 max-w-4xl mx-auto bg-gray-50 min-h-[400px]">
-                {/* Conteúdo da Comunidade omitido para brevidade (igual ao anterior) */}
                  <div className="flex items-center justify-between mb-6 pt-4">
                   <h2 className="text-xl font-bold text-gray-900">Publicações</h2>
                   {isOwner && (
@@ -438,7 +520,7 @@ function PerfilEmpresa() {
                 <div className="space-y-6 mb-12">
                   {posts.map((post) => (
                     <div 
-                      key={post.id} 
+                      key={`${post.type}-${post.id}`} 
                       onClick={() => {
                          if (post.type !== 'enquete') {
                              navigate(`/post/${post.id}`);
@@ -500,11 +582,13 @@ function PerfilEmpresa() {
                         </div>
                       </div>
 
+                      {/* Renderização Condicional: Enquete ou Post Texto */}
                       {post.type === 'enquete' ? (
                         <div className="mb-4 w-full" onClick={(e) => e.stopPropagation()}>
                            <EnquetePost 
                              question={post.question}
                              options={post.options}
+                             onVote={(opId) => handleVotarEnquete(post.id, opId)} // Passando a função de voto
                            />
                         </div>
                       ) : (
