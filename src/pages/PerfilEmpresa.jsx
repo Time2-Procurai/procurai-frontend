@@ -554,10 +554,7 @@ function PerfilEmpresa() {
                         </div>
 
                         <div className="flex items-center text-gray-400 gap-2" onClick={(e) => e.stopPropagation()}>
-                          <button className="hover:text-gray-600 cursor-pointer p-1 rounded hover:bg-gray-100">
-                            <Share2 size={18} />
-                          </button>
-                          <div className="relative">
+                          <div className="relative">                   
                             <button
                               onClick={(e) => toggleMenu(post.id, e)}
                               className="hover:text-gray-600 cursor-pointer p-1 rounded hover:bg-gray-100"
@@ -611,9 +608,6 @@ function PerfilEmpresa() {
                         <button className="flex items-center gap-1.5 text-gray-500 hover:text-red-500 transition group cursor-pointer">
                           <Heart size={20} className="group-hover:fill-current" />
                           <span className="text-xs">{post.likes}</span>
-                        </button>
-                        <button className="flex items-center gap-1.5 text-gray-500 hover:text-gray-800 transition cursor-pointer">
-                          <ThumbsDown size={20} />
                         </button>
                         <button className="flex items-center gap-1.5 text-gray-500 hover:text-blue-500 transition cursor-pointer">
                           <MessageCircle size={20} />

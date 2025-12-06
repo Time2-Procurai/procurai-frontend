@@ -263,7 +263,7 @@ export default function TelaProduto() {
           visible={showFeedback}
           type={feedbackType}
           onClose={() => setShowFeedback(false)}
-          onAction={() => navigate(`/favoritos`)} 
+          onAction={() => navigate(`/favoritos/` + localStorage.getItem('userId'))} 
         />
 
         <div className="flex flex-1 overflow-hidden">
