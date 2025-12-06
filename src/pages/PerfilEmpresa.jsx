@@ -163,10 +163,10 @@ function PerfilEmpresa() {
 
   // --- AÇÃO DE SEGUIR/DESSEGUIR ---
   const handleToggleFollow = async () => {
-    if (!communityId) return;
+    if (!profileIdFromUrl) return;
     
     try {
-        await api.post(`/community/${communityId}/follow/`);
+        await api.post(`/community/${profileIdFromUrl}/follow/`);
         setIsFollowing(!isFollowing);
 
     } catch (err) {
