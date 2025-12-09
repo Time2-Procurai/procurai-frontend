@@ -160,8 +160,8 @@ function FeedPageCliente() {
                       </div>
                     )}
 
-                    <h3 className="font-semibold text-gray-800 truncate" title={loja.full_name}>
-                      {loja.full_name}
+                    <h3 className="font-semibold text-gray-800 truncate" title={loja.company_name}>
+                      {loja.company_name}
                     </h3>
                     <p className="text-sm text-gray-500 mb-4 truncate">
                       {loja.company_category || "Geral"}
