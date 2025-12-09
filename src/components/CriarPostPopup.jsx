@@ -46,18 +46,21 @@ const CriarPostPopup = ({ isOpen, onClose, userAvatar, userName, onPublicar }) =
       onPublicar({
         titulo,
         descricao,
-        imagem: imagemPreview 
+        // --- CORREÇÃO AQUI ---
+        // Antes estava: imagem: imagemPreview (Isso é apenas o link visual, o backend não aceita)
+        // O correto é: imagem: arquivoImagem (Isso é o arquivo binário real)
+        imagem: arquivoImagem 
       });
     }
 
-    // Limpa tudo
+    // Limpa tudo...
     setTitulo('');
     setDescricao('');
     setImagemPreview(null);
     setArquivoImagem(null);
-    setShowEmojiPicker(false); // Garante que fecha o emoji
+    setShowEmojiPicker(false);
     onClose();
-  };
+};
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">

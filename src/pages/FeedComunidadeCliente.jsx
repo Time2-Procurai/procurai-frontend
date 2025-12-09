@@ -46,7 +46,7 @@ export default function FeedComunidadeCliente() {
         const formattedPosts = postsFiltrados.map(p => ({
             id: p.id,
             type: 'text',
-            author: p.autor_nome || "Usuário",
+            author: communityData.criador_nome || "Usuário",
             avatar: p.imagem_capa || communityData.imagem_capa, // Foto do criador como fallback
             // Guardamos dateObj para ordenar depois
             dateObj: new Date(p.data_publicacao),
@@ -173,7 +173,8 @@ export default function FeedComunidadeCliente() {
         }
 
         const response = await api.post('/community/publicacoes/criar/', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
+            headers: { 'Content-Type': 'multipart/form-data' },
+            'Content-Type': 'multipart/form-data'
         });
 
         const newPostApi = response.data;
@@ -246,14 +247,23 @@ export default function FeedComunidadeCliente() {
     setMenuAbertoId(menuAbertoId === postId ? null : postId);
   };
 
-  const handleDeletarPost = async (postId) => {
-    if (!window.confirm("Excluir publicação?")) return;
+  const handleDeletarPost = async (postParaDeletar) => {
+    if (!window.confirm("Tem certeza que deseja excluir esta publicação?")) return;
+
+    const postsAntigos = [...posts];
+    setPosts(prevPosts => prevPosts.filter(p => p.id !== postParaDeletar.id));
+    setMenuAbertoId(null);
+
     try {
-        await api.delete(`/community/publicacoes/${postId}/`); 
-        setPosts(posts.filter(p => p.id !== postId));
+        const endpoint = postParaDeletar.type === 'enquete' 
+            ? `/community/enquetes/${postParaDeletar.id}/` 
+            : `/community/publicacoes/${postParaDeletar.id}/`;
+
+        await api.delete(endpoint);
     } catch (error) {
         console.error("Erro ao excluir:", error);
         alert("Não foi possível excluir.");
+        setPosts(postsAntigos);
     }
   };
 
@@ -404,7 +414,10 @@ export default function FeedComunidadeCliente() {
                         </button>
                         {menuAbertoId === post.id && (
                           <div className="absolute right-0 top-8 bg-white shadow-lg border rounded-lg py-2 w-32 z-10 animate-in fade-in zoom-in duration-100">
-                            <button onClick={() => handleDeletarPost(post.id)} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+                            <button 
+                              onClick={() => handleDeletarPost(post)} 
+                              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                            >
                               <Trash2 size={16} /> Excluir
                             </button>
                           </div>

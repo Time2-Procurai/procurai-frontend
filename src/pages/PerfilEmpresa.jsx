@@ -236,16 +236,26 @@ function PerfilEmpresa() {
 
   const handleAdicionarPost = async (dados) => {
     if (!communityId) return alert("Erro: Comunidade não encontrada.");
+    
     try {
       const formData = new FormData();
       formData.append('titulo', dados.titulo || "Novo Post");
       formData.append('descricao', dados.descricao);
-      formData.append('comunidade', communityId);
+      formData.append('comunidade', communityId); // ID da comunidade da loja
+      
+      // --- CORREÇÃO AQUI ---
+      // Agora que o modal manda o arquivo 'File', precisamos anexá-lo
+      if (dados.imagem) {
+        formData.append('imagem', dados.imagem); 
+      }
+
       const response = await api.post('/community/publicacoes/criar/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
+      
       const newPostApi = response.data;
       
+      // Atualização Visual
       const newPost = {
         id: newPostApi.id,
         type: 'post',
@@ -256,14 +266,16 @@ function PerfilEmpresa() {
         tag: newPostApi.titulo,
         likes: 0,
         comments: 0,
-        postImage: newPostApi.imagem
+        // O backend retorna a URL da imagem salva
+        postImage: newPostApi.imagem 
       };
       
       setPosts([newPost, ...posts]);
       setModalPostAberto(false);
+
     } catch (err) {
       console.error("Erro ao criar post:", err);
-      alert("Erro ao publicar.");
+      alert("Erro ao publicar. Tente novamente.");
     }
   };
 
