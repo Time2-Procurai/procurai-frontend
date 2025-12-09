@@ -123,6 +123,7 @@ function EditarPerfilLoja() {
 
     if (profileImageFile) {
       submissionData.append("profile_picture", profileImageFile);
+      submissionData.append("cover_picture", profileImageFile);
     }
 
     try {
