@@ -112,12 +112,7 @@ function CatalogoEmpresa() {
 
                   {isOwner && (
                     <div className="absolute top-2 right-2 z-10">
-                      <button
-                        onClick={(e) => handleProductMenuClick(e, produto.id)}
-                        className="p-1 rounded-full bg-white/80 text-gray-700 hover:bg-gray-100 transition shadow-md"
-                      >
-                        <MoreVertical size={20} />
-                      </button>
+                      
                     </div>
                   )}
 

@@ -17,10 +17,10 @@ const BackArrowIcon = () => (
 
 const categoriesOptions = [
   { key: 'Construção', name: 'Construção' },
-  { key: 'ROUP', name: 'Roupas e Acessórios' },
-  { key: 'ELET', name: 'Eletrônicos' },
-  { key: 'COSM', name: 'Cosméticos' },
-  { key: 'REST', name: 'Restaurantes' },
+  { key: 'Roupas e Acessórios', name: 'Roupas e Acessórios' },
+  { key: 'Eletrônicos', name: 'Eletrônicos' },
+  { key: 'Cosméticos', name: 'Cosméticos' },
+  { key: 'Restaurantes', name: 'Restaurantes' },
   { key: 'Saúde', name: 'Saúde' }
 ];
 

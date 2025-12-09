@@ -11,6 +11,36 @@ import ModalOpcoesProduto from '../components/ModalOpcoesProduto';
 import ModalExcluirProduto from '../components/ModalExcluirProduto';
 import FeedbackFav from '../components/FeedbackFav';
 
+// --- 1. ADICIONE O MAPEAMENTO DE CATEGORIAS AQUI ---
+  const categoryChoices = [
+    { key: "eletronicos", label: "Eletrônicos" },
+    { key: "vestuario", label: "Vestuário" },
+    { key: "alimentos_bebidas", label: "Alimentos e Bebidas" },
+    { key: "moveis_decoracao", label: "Móveis e Decoração" },
+    { key: "livros_midia", label: "Livros e Mídia" },
+    { key: "esportes_lazer", label: "Esportes e Lazer" },
+    { key: "beleza_cuidados", label: "Beleza e Cuidados Pessoais" },
+    { key: "automoveis_veiculos", label: "Automóveis e Veículos" },
+    { key: "imoveis", label: "Imóveis" },
+    { key: "servicos_profissionais", label: "Serviços Profissionais" },
+    { key: "saude_bem_estar", label: "Saúde e Bem-estar" },
+    { key: "educacao_cursos", label: "Educação e Cursos" },
+    { key: "pets_animais", label: "Pets e Animais" },
+    { key: "ferramentas_construcao", label: "Ferramentas e Construção" },
+    { key: "arte_artesanato", label: "Arte e Artesanato" },
+    { key: "brinquedos_jogos", label: "Brinquedos e Jogos" },
+    { key: "joias_acessorios", label: "Jóias e Acessórios" },
+    { key: "informatica", label: "Informática" },
+    { key: "telefonia", label: "Telefonia" },
+    { key: "eletrodomesticos", label: "Eletrodomésticos" },
+    { key: "outros", label: "Outros" },
+  ];
+
+const getCategoryLabel = (key) => {
+    const found = categoryChoices.find(item => item.key === key);
+    return found ? found.label : key; // Se não achar, mostra a chave mesmo
+  };
+
 // Componente de Estrelas (Visual)
 const RatingStars = ({ rating, size = 16 }) => {
   const starsToDisplay = Math.round(rating || 0);
@@ -303,7 +333,10 @@ export default function TelaProduto() {
               <div className="flex-1">
                 <section className="mb-4">
                   <h1 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h1>
-                  <p className="text-xs text-gray-500 mb-1">Categoria: {product.category_name}</p>
+                  <p className="text-xs text-gray-500 mb-1">
+                    Categoria: {getCategoryLabel(product.category_name)}
+                  </p>
+                  {/* -------------------------------- */}
 
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-extrabold text-[#FD7702]">
@@ -404,7 +437,10 @@ export default function TelaProduto() {
                 </Link>
 
                 {isCliente && (
-                  <button className="px-4 py-2 bg-[#FD7702] text-white rounded-lg text-sm font-semibold hover:bg-[#e66a00] transition-colors flex items-center gap-2">
+                  <button 
+                    onClick={() => navigate(`/perfil/empresa/${seller.id}`, { state: { initialTab: 'Comunidade' } })} 
+                    className="px-4 py-2 bg-[#FD7702] text-white rounded-lg text-sm font-semibold hover:bg-[#e66a00] transition-colors flex items-center gap-2 cursor-pointer"
+                  >
                     <MessageCircle size={16} />
                     Entrar na comunidade
                   </button>

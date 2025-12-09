@@ -98,7 +98,7 @@ function ResultadosBusca() {
                         {empresa.profile_picture ? (
                           <img
                             src={empresa.profile_picture}
-                            alt={empresa.full_name}
+                            alt={empresa.company_name}
                             className="w-24 h-24 rounded-full mx-auto mb-4 object-cover border border-gray-100"
                           />
                         ) : (
@@ -106,7 +106,7 @@ function ResultadosBusca() {
                             <Store size={40} className="text-gray-400" />
                           </div>
                         )}
-                        <h3 className="font-semibold text-gray-800 truncate">{empresa.full_name}</h3>
+                        <h3 className="font-semibold text-gray-800 truncate">{empresa.company_name}</h3>
                         <p className="text-sm text-gray-500 mb-4 truncate">{empresa.company_category || "Loja"}</p>
                         <button className="w-full border border-[#FD7702] text-[#FD7702] text-sm font-medium py-1.5 rounded-full hover:bg-[#FD7702] hover:text-white transition-colors">
                           Visitar
