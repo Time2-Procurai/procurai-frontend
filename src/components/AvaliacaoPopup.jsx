@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import api from '../api/api';
 import { Star, X, Camera } from 'lucide-react';
 
-// Componente de Estrelas (copiado da sua TelaProduto)
 const RatingStarsInput = ({ rating, setRating }) => {
   const [hoverRating, setHoverRating] = useState(0);
   return (
@@ -31,38 +30,32 @@ const RatingStarsInput = ({ rating, setRating }) => {
   );
 };
 
-// O Popup
-function AvaliacaoPopup({ aberto, onFechar, storeId }) {
+// RECEBENDO A PROP onSuccess
+function AvaliacaoPopup({ aberto, onFechar, storeId, onSuccess }) {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-  const [photos, setPhotos] = useState([]); // Guarda os File objects
-  const [photoPreviews, setPhotoPreviews] = useState([]); // Guarda as URLs de preview
+  const [photos, setPhotos] = useState([]);
+  const [photoPreviews, setPhotoPreviews] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
 
   if (!aberto) return null;
 
-  // Lida com a seleção de arquivos
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
-    // Limita a 4 fotos
     const newFiles = files.slice(0, 4 - photos.length);
-
     const updatedFiles = [...photos, ...newFiles];
     setPhotos(updatedFiles);
-
     const newPreviews = updatedFiles.map(file => URL.createObjectURL(file));
     setPhotoPreviews(newPreviews);
   };
 
-  // Remove uma foto do preview
   const removePhoto = (index) => {
     setPhotos(prev => prev.filter((_, i) => i !== index));
     setPhotoPreviews(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Envia o formulário
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (rating === 0) {
@@ -74,29 +67,29 @@ function AvaliacaoPopup({ aberto, onFechar, storeId }) {
     setError(null);
 
     const formData = new FormData();
-    formData.append('store', storeId); // O ID da loja que está sendo avaliada
+    formData.append('store', storeId);
     formData.append('rating', rating);
     formData.append('comment', comment);
 
-    // Adiciona cada arquivo de foto ao FormData
-    // O nome 'uploaded_photos' deve bater com o serializer
     photos.forEach((photo) => {
       formData.append('uploaded_photos', photo);
     });
 
     try {
-      // Usa a rota da sua StoreEvaluationView
       await api.post(`/evaluations/stores/${storeId}/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      // Sucesso
       setIsLoading(false);
-      onFechar(); // Fecha o modal
-      // Opcional: mostrar um alerta de sucesso
+      onFechar();
       alert("Avaliação enviada com sucesso!");
+
+      // CHAMA O CALLBACK PARA ATUALIZAR A PÁGINA PAI
+      if (onSuccess) {
+        onSuccess();
+      }
 
     } catch (err) {
       console.error("Erro ao enviar avaliação:", err);
@@ -118,13 +111,11 @@ function AvaliacaoPopup({ aberto, onFechar, storeId }) {
         <h2 className="text-xl font-bold text-gray-900 mb-4">Avaliar a loja</h2>
 
         <form onSubmit={handleSubmit}>
-          {/* 1. Seleção de Estrelas */}
           <div className="mb-4">
             <label className="block text-sm font-semibold text-gray-700 mb-2">Sua nota</label>
             <RatingStarsInput rating={rating} setRating={setRating} />
           </div>
 
-          {/* 2. Comentário */}
           <div className="mb-4">
             <label htmlFor="comment" className="block text-sm font-semibold text-gray-700 mb-2">
               Comentário (opcional)
@@ -138,13 +129,11 @@ function AvaliacaoPopup({ aberto, onFechar, storeId }) {
             />
           </div>
 
-          {/* 3. Upload de Fotos */}
           <div className="mb-4">
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Fotos (opcional)
             </label>
             <div className="flex gap-2">
-              {/* Previews das fotos */}
               {photoPreviews.map((preview, index) => (
                 <div key={index} className="relative w-20 h-20">
                   <img src={preview} alt="Preview" className="w-full h-full object-cover rounded-md" />
@@ -158,7 +147,6 @@ function AvaliacaoPopup({ aberto, onFechar, storeId }) {
                 </div>
               ))}
 
-              {/* Botão de Adicionar */}
               {photos.length < 4 && (
                 <button
                   type="button"
@@ -180,7 +168,6 @@ function AvaliacaoPopup({ aberto, onFechar, storeId }) {
             />
           </div>
 
-          {/* Erro e Botão de Envio */}
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
           <button
