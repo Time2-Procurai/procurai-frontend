@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import BarraPesquisa from '../components/BarraPesquisa';
 import BarraLateral from '../components/BarraLateral';
-import api from '../api/api'; // Importar API
+import api from '../api/api';
 import {
-  ChevronLeft, Store, Heart, ThumbsDown, MessageCircle, Share2,
-  Send, MoreVertical, Smile
+  ChevronLeft, Store, Heart, MessageCircle, Share2,
+  Send, MoreVertical, Smile, User
 } from 'lucide-react';
 
 function PostDetalhes() {
@@ -14,7 +14,7 @@ function PostDetalhes() {
 
   // Estados
   const [post, setPost] = useState(null);
-  const [authorData, setAuthorData] = useState(null); // Dados do autor (nome, foto)
+  const [authorData, setAuthorData] = useState(null);
   const [commentsList, setCommentsList] = useState([]);
   
   const [loading, setLoading] = useState(true);
@@ -23,7 +23,7 @@ function PostDetalhes() {
   const [novoComentario, setNovoComentario] = useState("");
   const [enviandoComentario, setEnviandoComentario] = useState(false);
 
-  // --- 1. BUSCAR DADOS (Post + Autor + Comentários) ---
+  // --- 1. BUSCAR DADOS ---
   useEffect(() => {
     const fetchAllData = async () => {
       setLoading(true);
@@ -33,7 +33,7 @@ function PostDetalhes() {
         const postData = responsePost.data;
         setPost(postData);
 
-        // B. Buscar dados do Autor (Lojista)
+        // B. Buscar dados do Autor do Post (Lojista ou Cliente)
         if (postData.autor) {
            try {
              const responseAutor = await api.get(`/user/listar/usuarios/${postData.autor}/`);
@@ -60,6 +60,24 @@ function PostDetalhes() {
     }
   }, [postId]);
 
+  // --- HELPER: Define qual nome mostrar (Post Principal) ---
+  const getMainAuthorName = () => {
+    if (!authorData) return "Carregando...";
+    
+    // Se for lojista, tenta pegar o nome da empresa
+    if (authorData.is_lojista && authorData.lojista_profile?.company_name) {
+        return authorData.lojista_profile.company_name;
+    }
+    // Caso contrário, usa o nome completo
+    return authorData.full_name || authorData.username;
+  };
+
+  const getMainAuthorImage = () => {
+     if (!authorData) return null;
+     if (authorData.is_lojista) return authorData.profile_picture;
+     return authorData.profile_picture; // Ajuste conforme seu JSON de user
+  }
+
   // --- 2. ENVIAR COMENTÁRIO ---
   const handleEnviarComentario = async (e) => {
     e.preventDefault();
@@ -84,42 +102,23 @@ function PostDetalhes() {
     }
   };
 
-  // --- 3. CURTIR / DESCURTIR (AJUSTADO) ---
-const handleCurtir = async () => {
-  // 🔥 Bloqueia se já curtiu
-  if (post.user_has_liked) return;
+  // --- 3. CURTIR / DESCURTIR ---
+  const handleCurtir = async () => {
+    if (post.user_has_liked) return;
+    try {
+      await api.post(`/community/publicacoes/${postId}/curtir/`);
+      setPost(prev => ({ ...prev, user_has_liked: true, likes: prev.likes + 1 }));
+    } catch (err) { console.error(err); }
+  };
 
-  try {
-    await api.post(`/community/publicacoes/${postId}/curtir/`);
+  const handleDescurtir = async () => {
+    if (!post.user_has_liked) return;
+    try {
+      await api.post(`/community/publicacoes/${postId}/descurtir/`);
+      setPost(prev => ({ ...prev, user_has_liked: false, likes: Math.max(prev.likes - 1, 0) }));
+    } catch (err) { console.error(err); }
+  };
 
-    setPost(prev => ({
-      ...prev,
-      user_has_liked: true,
-      likes: prev.likes + 1,
-    }));
-  } catch (err) {
-    console.error("Erro ao curtir:", err);
-  }
-};
-
-const handleDescurtir = async () => {
-  // 🔥 Bloqueia se NÃO curtiu ainda
-  if (!post.user_has_liked) return;
-
-  try {
-    await api.post(`/community/publicacoes/${postId}/descurtir/`);
-
-    setPost(prev => ({
-      ...prev,
-      user_has_liked: false,
-      likes: Math.max(prev.likes - 1, 0),
-    }));
-  } catch (err) {
-    console.error("Erro ao descurtir:", err);
-  }
-};
-
-  // Helpers de formatação
   const formatDate = (dateString) => {
     if (!dateString) return "";
     return new Date(dateString).toLocaleDateString('pt-BR', {
@@ -155,6 +154,8 @@ const handleDescurtir = async () => {
       );
   }
 
+  const authorImage = getMainAuthorImage();
+
   return (
     <div className="h-screen text-gray-800 flex flex-col min-w-[1024px] bg-gray-50">
       <BarraPesquisa />
@@ -173,7 +174,7 @@ const handleDescurtir = async () => {
               <ChevronLeft size={32} />
             </button>
             <h1 className="text-2xl font-bold text-gray-900">
-              Publicação de {authorData?.full_name || "..."}
+              Publicação de {getMainAuthorName()}
             </h1>
           </div>
 
@@ -182,33 +183,30 @@ const handleDescurtir = async () => {
             {/* --- CARD DO POST --- */}
             <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm relative">
 
-              {/* Ícone de Compartilhar (Topo Direito) */}
               <button className="absolute top-6 right-6 text-gray-500 hover:text-gray-800 transition">
                 <Share2 size={24} />
               </button>
 
-              {/* Header do Autor */}
+              {/* Header do Autor (POST PRINCIPAL) */}
               <div className="flex items-start gap-4 mb-4">
-                {/* Avatar */}
                 <div
                   className="h-14 w-14 rounded-full overflow-hidden border border-gray-200 bg-gray-100 flex items-center justify-center cursor-pointer flex-shrink-0"
                   onClick={() => navigate(`/perfil/empresa/${post.autor}`)}
                 >
-                  {authorData?.profile_picture ? (
-                    <img src={authorData.profile_picture} alt="Avatar" className="h-full w-full object-cover" />
+                  {authorImage ? (
+                    <img src={authorImage} alt="Avatar" className="h-full w-full object-cover" />
                   ) : (
                     <Store size={28} className="text-gray-500" />
                   )}
                 </div>
 
-                {/* Nome e Data */}
                 <div className="mt-1">
                   <div className="flex items-center gap-2">
                     <h3
                       className="font-bold text-gray-900 text-base cursor-pointer hover:underline"
                       onClick={() => navigate(`/perfil/empresa/${post.autor}`)}
                     >
-                      {authorData?.full_name || "Carregando..."}
+                      {getMainAuthorName()}
                     </h3>
                     <span className="text-sm text-gray-500">{formatDate(post.data_publicacao)}</span>
                   </div>
@@ -220,12 +218,10 @@ const handleDescurtir = async () => {
                 </div>
               </div>
 
-              {/* Conteúdo do Texto */}
               <p className="text-sm text-gray-800 leading-relaxed mb-6 text-justify whitespace-pre-wrap">
                 {post.descricao}
               </p>
               
-              {/* Imagem do Post (Se houver) */}
               {post.imagem && (
                 <div className="w-full mb-6 rounded-lg overflow-hidden">
                     <img 
@@ -236,16 +232,11 @@ const handleDescurtir = async () => {
                 </div>
                )}
 
-              {/* Ações (Like, Dislike, Comentário) */}
               <div className="flex items-center gap-4 border-t border-gray-100 pt-4">
-                
-                {/* --- BOTÃO CURTIR (COM CONTADOR) --- */}
                 <button
                   onClick={post.user_has_liked ? handleDescurtir : handleCurtir}
                   className={`transition flex items-center gap-1 ${
-                    post.user_has_liked
-                      ? "text-red-500"
-                      : "text-gray-600 hover:text-red-500"
+                    post.user_has_liked ? "text-red-500" : "text-gray-600 hover:text-red-500"
                   }`}
                 >
                   <Heart
@@ -255,16 +246,6 @@ const handleDescurtir = async () => {
                   />
                   <span>{post.likes}</span>
                 </button>
-
-
-                {/* --- BOTÃO DESCURTIR --- 
-                <button 
-                    onClick={handleDescurtir}
-                    className="text-gray-600 hover:text-gray-900 transition"
-                    title="Remover curtida"
-                >
-                  <ThumbsDown size={24} />
-                </button>*/}
 
                 <button className="text-gray-600 hover:text-blue-500 transition flex items-center gap-1">
                   <MessageCircle size={24} />
@@ -292,7 +273,6 @@ const handleDescurtir = async () => {
               </button>
             </form>
 
-            {/* --- TÍTULO DA SEÇÃO --- */}
             <h3 className="text-lg font-semibold text-gray-800 mt-8 mb-4">Comentários ({commentsList.length})</h3>
 
             {/* --- LISTA DE COMENTÁRIOS --- */}
@@ -305,15 +285,22 @@ const handleDescurtir = async () => {
                     
                     {/* Avatar do Comentário */}
                     <div className="h-10 w-10 rounded-full bg-[#FDF6EC] border border-orange-100 flex-shrink-0 flex items-center justify-center overflow-hidden">
-                        <span className="font-bold text-[#FD7702] text-lg">
-                            <Store size={18}/>
-                        </span>
+                        {comment.autor_foto ? (
+                            <img src={comment.autor_foto} alt="Avatar" className="h-full w-full object-cover" />
+                        ) : (
+                            <span className="text-[#FD7702]">
+                                <User size={18}/>
+                            </span>
+                        )}
                     </div>
 
                     {/* Conteúdo do Comentário */}
                     <div className="flex-1 pr-8">
                         <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-gray-900 text-sm">Usuário #{comment.autor}</span>
+                            {/* NOME DO AUTOR DO COMENTÁRIO */}
+                            <span className="font-bold text-gray-900 text-sm">
+                                {comment.autor_nome || `Usuário #${comment.autor_id || '?'}`}
+                            </span>
                             <span className="text-xs text-gray-400">• {formatDate(comment.data)}</span>
                         </div>
                         <p className="text-sm text-gray-700 leading-relaxed">
@@ -321,7 +308,6 @@ const handleDescurtir = async () => {
                         </p>
                     </div>
 
-                    {/* Opções (Três pontinhos) */}
                     <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-1">
                         <MoreVertical size={18} />
                     </button>

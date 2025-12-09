@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link, useParams } from 'react-router-dom';
+import { useNavigate, Link, useParams, useLocation } from 'react-router-dom';
 import BarraPesquisa from '../components/BarraPesquisa';
 import BarraLateral from '../components/BarraLateral';
 import AvaliacaoPopup from "../components/AvaliacaoPopup";
@@ -9,13 +9,14 @@ import EnquetePost from '../components/EnquetePost';
 import api from '../api/api';
 import {
   ChevronLeft, Star, Store, Map,
-  Share2, MoreVertical, Heart, ThumbsDown, MessageCircle,
+  MoreVertical, Heart, MessageCircle,
   Trash2, UserPlus, UserCheck
 } from 'lucide-react';
 
 function PerfilEmpresa() {
   const navigate = useNavigate();
   const { userId: profileIdFromUrl } = useParams();
+  const location = useLocation();
   const visitanteTipo = localStorage.getItem('userRole');
   const visitanteId = localStorage.getItem('userId');
 
@@ -23,14 +24,12 @@ function PerfilEmpresa() {
   const [modalPostAberto, setModalPostAberto] = useState(false);
   const [modalEnqueteAberto, setModalEnqueteAberto] = useState(false);
 
-  const [abaAtiva, setAbaAtiva] = useState('Informações');
+  const [abaAtiva, setAbaAtiva] = useState(location.state?.initialTab || 'Informações');
   const [lojaData, setLojaData] = useState(null);
 
-  // Estados Dinâmicos
   const [posts, setPosts] = useState([]);
   const [promos, setPromos] = useState([]);
 
-  // Estado para controle de comunidade e seguidores
   const [communityId, setCommunityId] = useState(null);
   const [isFollowing, setIsFollowing] = useState(false);
 
@@ -94,6 +93,7 @@ function PerfilEmpresa() {
 
             // A. Busca publicações (Texto/Imagem)
             const resPosts = await api.get(`/community/publicacoes/${cId}/listar/`);
+            
             const formattedPosts = resPosts.data.map(p => ({
               id: p.id,
               type: 'post',
@@ -102,8 +102,16 @@ function PerfilEmpresa() {
               date: new Date(p.data_publicacao).toLocaleDateString('pt-BR'),
               content: p.descricao,
               tag: p.titulo || "Publicação",
-              likes: 0,
-              comments: 0,
+              
+              // --- CORREÇÃO PRINCIPAL ---
+              // Agora confiamos no campo total_comentarios enviado pelo Serializer
+              likes: p.likes || 0,
+              user_has_liked: p.user_has_liked || false, 
+              comments: (p.total_comentarios !== undefined && p.total_comentarios !== null) 
+                        ? p.total_comentarios 
+                        : 0,
+              // --------------------------
+              
               postImage: p.imagem
             }));
 
@@ -111,33 +119,44 @@ function PerfilEmpresa() {
             const resEnquetes = await api.get(`/community/enquetes/?comunidade=${cId}`);
 
             const formattedEnquetes = resEnquetes.data.map(e => {
-              const total = e.total_votos || 0;
+              // 1. CORREÇÃO: Tenta ler 'votos' (se renomeado) OU 'votos_count' (nome do model)
+              const totalCalculado = e.opcoes 
+                ? e.opcoes.reduce((acc, op) => {
+                    // Pega o valor numérico, verificando as duas possibilidades de chave
+                    const qtd = parseInt(op.votos) || parseInt(op.votos_count) || 0;
+                    return acc + qtd;
+                  }, 0) 
+                : 0;
 
               return {
                 id: e.id,
                 type: 'enquete',
                 author: userData.full_name,
-
                 dateObj: new Date(e.data_criacao),
                 date: new Date(e.data_criacao).toLocaleDateString('pt-BR'),
-
                 question: e.pergunta,
-
+                
+                // 2. Mapeia as opções usando o total calculado
                 options: e.opcoes
                   ? e.opcoes.map(op => {
-                    const percent = total > 0 ? (op.votos / total) * 100 : 0;
+                    // Mesma verificação dupla aqui
+                    const votosOpcao = parseInt(op.votos) || parseInt(op.votos_count) || 0;
+                    
+                    // Evita divisão por zero
+                    const percentNum = totalCalculado > 0 ? (votosOpcao / totalCalculado) * 100 : 0;
+                    
                     return {
                       id: op.id,
                       text: op.texto,
-                      votes: op.votos,
-                      percent: percent.toFixed(1),      // exemplo: "42.5"
-                      barWidth: `${percent}%`           // exemplo: "42%"
+                      votes: votosOpcao,
+                      percent: percentNum.toFixed(1), // Ex: "50.0"
+                      barWidth: `${percentNum}%`      // Ex: "50%"
                     };
                   })
                   : [],
-
-                totalVotes: total,
-                likes: 0,
+                
+                totalVotes: totalCalculado,
+                likes: e.likes || 0,
                 comments: 0
               };
             });
@@ -175,6 +194,37 @@ function PerfilEmpresa() {
     }
   };
 
+  const handleToggleLike = async (post, e) => {
+    e.stopPropagation(); // IMPORTANTE: Impede que abra o detalhe do post ao clicar no coração
+
+    const jaCurtiu = post.user_has_liked;
+
+    // 1. Atualização Otimista: Atualiza a UI imediatamente antes da API responder
+    setPosts(prevPosts => prevPosts.map(p => {
+      // Encontra o post clicado na lista
+      if (p.id === post.id) {
+        return {
+          ...p,
+          user_has_liked: !jaCurtiu, // Inverte o status
+          likes: jaCurtiu ? Math.max(p.likes - 1, 0) : p.likes + 1 // Atualiza o contador
+        };
+      }
+      return p; // Retorna os outros posts sem alteração
+    }));
+
+    // 2. Chama a API em background
+    try {
+      if (jaCurtiu) {
+        await api.post(`/community/publicacoes/${post.id}/descurtir/`);
+      } else {
+        await api.post(`/community/publicacoes/${post.id}/curtir/`);
+      }
+    } catch (err) {
+      console.error("Erro ao curtir/descurtir:", err);
+      // Opcional: Aqui você poderia reverter o estado caso a API falhe
+    }
+  };
+
   const handleAdicionarPost = async (dados) => {
     if (!communityId) return alert("Erro: Comunidade não encontrada.");
     try {
@@ -186,6 +236,8 @@ function PerfilEmpresa() {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       const newPostApi = response.data;
+      
+      // Adiciona o post novo na lista local
       const newPost = {
         id: newPostApi.id,
         type: 'post',
@@ -198,7 +250,7 @@ function PerfilEmpresa() {
         comments: 0,
         postImage: newPostApi.imagem
       };
-      // Adiciona no topo da lista
+      
       setPosts([newPost, ...posts]);
       setModalPostAberto(false);
     } catch (err) {
@@ -207,22 +259,18 @@ function PerfilEmpresa() {
     }
   };
 
-  // --- FUNÇÃO CORRIGIDA PARA PERSISTIR ENQUETE ---
   const handleAdicionarEnquete = async (dadosEnquete) => {
     if (!communityId) return alert("Erro: Comunidade não encontrada.");
 
     try {
-      // O backend espera: { "pergunta": "...", "opcoes": ["A", "B"] }
       const payload = {
         pergunta: dadosEnquete.pergunta,
-        opcoes: dadosEnquete.opcoes // Array de strings
+        opcoes: dadosEnquete.opcoes 
       };
 
-      // Chama a API
       const response = await api.post('/community/enquetes/', payload);
       const novaEnqueteApi = response.data;
 
-      // Formata para exibir na tela sem precisar recarregar
       const novaEnqueteVisual = {
         id: novaEnqueteApi.id,
         type: 'enquete',
@@ -230,7 +278,6 @@ function PerfilEmpresa() {
         dateObj: new Date(novaEnqueteApi.data_criacao),
         date: new Date(novaEnqueteApi.data_criacao).toLocaleDateString('pt-BR'),
         question: novaEnqueteApi.pergunta,
-        // O backend retorna opções com ID e Votos
         options: novaEnqueteApi.opcoes.map(op => ({
           id: op.id,
           text: op.texto,
@@ -267,15 +314,69 @@ function PerfilEmpresa() {
     }
   };
 
-  // Função para votar (Opcional, para conectar o componente EnquetePost)
-  const handleVotarEnquete = async (enqueteId, opcaoId) => {
+const handleVotarEnquete = async (enqueteId, opcaoId) => {
     try {
+      // 1. Envia o voto
       await api.post(`/community/enquetes/${enqueteId}/votar/`, { opcao_id: opcaoId });
-      alert("Voto computado!");
-      // O ideal seria recarregar a enquete para atualizar os votos
+
+      // 2. Atualiza visualmente (Lógica Otimista/Manual para ver a barra na hora)
+      setPosts(prevPosts => prevPosts.map(post => {
+        if (post.id === enqueteId && post.type === 'enquete') {
+          
+          // Tenta ler o total atual (blindado contra nulos)
+          const totalAtual = post.totalVotes || 0; 
+          const novoTotal = totalAtual + 1;
+
+          const novasOpcoes = post.options.map(op => {
+            // Se for a opção clicada, +1, senão mantém
+            const novosVotos = op.id === opcaoId ? (op.votes + 1) : op.votes;
+            
+            // Recalcula porcentagem
+            const percent = novoTotal > 0 ? (novosVotos / novoTotal) * 100 : 0;
+
+            return {
+              ...op,
+              votes: novosVotos,
+              percent: percent.toFixed(1),
+              barWidth: `${percent}%`
+            };
+          });
+
+          return {
+            ...post,
+            options: novasOpcoes,
+            totalVotes: novoTotal,
+            user_has_voted: true // Marca visualmente que votou
+          };
+        }
+        return post;
+      }));
+
+      // alert("Voto computado!"); // Pode remover se quiser, pois a barra já mexe
+
     } catch (err) {
       console.error("Erro ao votar:", err);
-      alert(err.response?.data?.message || "Erro ao votar.");
+
+      // --- AQUI ESTÁ A MUDANÇA ---
+      if (err.response && err.response.status === 400) {
+        // Transforma o erro (objeto ou array) em string minúscula para facilitar a busca
+        const erroString = JSON.stringify(err.response.data).toLowerCase();
+
+        // Verifica palavras-chave comuns do Django para duplicidade
+        if (erroString.includes("unique") || erroString.includes("já votou")) {
+             alert("Você já votou nesta enquete!");
+        } 
+        // Verifica se a enquete foi fechada (validação do seu model)
+        else if (erroString.includes("encerrada") || erroString.includes("ativa")) {
+             alert("Esta enquete já foi encerrada.");
+        } 
+        else {
+             // Erro genérico
+             alert("Não foi possível computar seu voto.");
+        }
+      } else {
+        alert("Erro de conexão ao tentar votar.");
+      }
     }
   };
 
@@ -393,10 +494,8 @@ function PerfilEmpresa() {
                 </div>
               </div>
 
-              {/* --- ÁREA DO STATUS E BOTÃO SEGUIR (AJUSTADA) --- */}
+              {/* STATUS E SEGUIR */}
               <div className="mt-4 flex items-center justify-between px-4">
-
-                {/* BOTÃO SEGUIR (lado esquerdo) */}
                 <div className="flex-1 flex justify-start">
                   {!isOwner && visitanteTipo === 'cliente' && communityId && (
                     <button
@@ -421,14 +520,12 @@ function PerfilEmpresa() {
                   )}
                 </div>
 
-                {/* STATUS DA LOJA (lado direito) */}
                 <div className="flex-1 flex justify-end">
                   <div className="flex items-center space-x-1.5 ml-auto">
                     <Store size={20} className="text-gray-700" />
                     <span className="font-medium text-gray-700">{lojaData.status}</span>
                   </div>
                 </div>
-
               </div>
             </div>
 
@@ -456,7 +553,7 @@ function PerfilEmpresa() {
               </nav>
             </div>
 
-            {/* Aba Informações */}
+            {/* Conteúdo da Aba Informações */}
             {abaAtiva === 'Informações' && (
               <div className="p-4">
                 <div className="rounded-xl border border-gray-200 p-5 shadow-sm">
@@ -493,7 +590,7 @@ function PerfilEmpresa() {
               </div>
             )}
 
-            {/* Aba Comunidade */}
+            {/* Conteúdo da Aba Comunidade */}
             {abaAtiva === 'Comunidade' && (
               <div className="p-4 md:px-8 max-w-4xl mx-auto bg-gray-50 min-h-[400px]">
                 <div className="flex items-center justify-between mb-6 pt-4">
@@ -528,6 +625,7 @@ function PerfilEmpresa() {
                       className={`bg-white rounded-xl border border-gray-200 p-5 shadow-sm relative transition-shadow 
                         ${post.type !== 'enquete' ? 'cursor-pointer hover:shadow-md' : ''}`}
                     >
+                      {/* Cabeçalho do Post */}
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 rounded-full overflow-hidden border border-gray-200">
@@ -552,6 +650,7 @@ function PerfilEmpresa() {
                           </div>
                         </div>
 
+                        {/* Menu de Opções (Delete) */}
                         <div className="flex items-center text-gray-400 gap-2" onClick={(e) => e.stopPropagation()}>
                           <div className="relative">
                             {isOwner && (
@@ -580,13 +679,13 @@ function PerfilEmpresa() {
                         </div>
                       </div>
 
-                      {/* Renderização Condicional: Enquete ou Post Texto */}
+                      {/* Conteúdo */}
                       {post.type === 'enquete' ? (
                         <div className="mb-4 w-full" onClick={(e) => e.stopPropagation()}>
                           <EnquetePost
                             question={post.question}
                             options={post.options}
-                            onVote={(opId) => handleVotarEnquete(post.id, opId)} // Passando a função de voto
+                            onVote={(opId) => handleVotarEnquete(post.id, opId)}
                           />
                         </div>
                       ) : (
@@ -605,15 +704,33 @@ function PerfilEmpresa() {
 
                       <hr className="border-gray-100 mb-3" />
 
+                      {/* Ações (Like / Comentário) */}
                       <div className="flex items-center gap-6" onClick={(e) => e.stopPropagation()}>
-                        <button className="flex items-center gap-1.5 text-gray-500 hover:text-red-500 transition group cursor-pointer">
-                          <Heart size={20} className="group-hover:fill-current" />
+                        
+                        <button 
+                          onClick={(e) => handleToggleLike(post, e)} // Chama a nova função passando o post e o evento
+                          className={`flex items-center gap-1.5 transition group cursor-pointer 
+                            ${post.user_has_liked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}
+                        >
+                          <Heart 
+                            size={20} 
+                            // Se já curtiu, preenche (fill). Se não, preenche apenas ao passar o mouse (group-hover)
+                            className={post.user_has_liked ? "fill-current" : "group-hover:fill-current"} 
+                          />
                           <span className="text-xs">{post.likes}</span>
                         </button>
-                        <button className="flex items-center gap-1.5 text-gray-500 hover:text-blue-500 transition cursor-pointer">
-                          <MessageCircle size={20} />
-                          <span className="text-xs">{post.comments}</span>
-                        </button>
+
+                        {/* Botão de Comentários (Já estava correto, mantém assim) */}
+                       {post.type !== 'enquete' && (
+                          <button 
+                            onClick={() => navigate(`/post/${post.id}`)} 
+                            className="flex items-center gap-1.5 text-gray-500 hover:text-blue-500 transition cursor-pointer"
+                          >
+                            <MessageCircle size={20} />
+                            <span className="text-xs">{post.comments}</span>
+                          </button>
+                        )}
+                        
                       </div>
                     </div>
                   ))}
