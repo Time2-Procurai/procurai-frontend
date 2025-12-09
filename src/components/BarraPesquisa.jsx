@@ -13,12 +13,10 @@ function BarraPesquisa() {
     } else if (tipoUsuario === "lojista") {
       navigate("/feedempresa/" + localStorage.getItem('userId'));
     } else {
-      navigate("/"); // fallback, caso não haja tipo definido
+      navigate("/"); // fallback
     }
   }
 
-
-  {/* testando uma funcao para barra de pesquisa */ }
   function handleKeyDown(e) {
     if (e.key === "Enter" && query.trim() !== "") {
       navigate(`/search?query=${encodeURIComponent(query)}`);
@@ -36,8 +34,9 @@ function BarraPesquisa() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Busque por empresas, produtos, clientes e categorias"
-        className="w-300 bg-gray-100 text-gray-700 rounded-[20px] px-8 py-2 ml-18"
+        // Ajustei o texto para refletir a nova busca
+        placeholder="Busque por empresas, produtos e comunidades..."
+        className="w-300 bg-gray-100 text-gray-700 rounded-[20px] px-8 py-2 ml-18 focus:outline-none focus:ring-2 focus:ring-[#FD7702]"
       />
     </div>
   )
