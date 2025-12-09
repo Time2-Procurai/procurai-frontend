@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link, useParams, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, use } from 'react';
+import { useNavigate, Link, useParams } from 'react-router-dom';
 import BarraPesquisa from '../components/BarraPesquisa';
 import BarraLateral from '../components/BarraLateral';
 import AvaliacaoPopup from "../components/AvaliacaoPopup";
@@ -47,6 +47,21 @@ function PerfilEmpresa() {
         const response = await api.get(`/user/listar/usuarios/${profileIdFromUrl}/`);
         const userData = response.data;
 
+        // 2. Buscar Avaliações da Loja
+        const evaluationsResponse = await api.get(`/evaluations/stores/${profileIdFromUrl}/`);
+        const evaluations = evaluationsResponse.data;
+
+        // Calcula a média das avaliações
+        let avgRating = "Não foi avaliada ainda";
+        if (evaluations.length > 0) {
+        const sum = evaluations.reduce((acc, curr) => acc + curr.rating, 0);
+        avgRating = (sum / evaluations.length).toFixed(1);
+        }
+
+
+
+
+
         const { street, number, neighborhood, city, complement } = userData;
         const enderecoCompleto = [street, number, neighborhood, city, complement]
           .filter(Boolean)
@@ -55,7 +70,7 @@ function PerfilEmpresa() {
         setLojaData({
           nome: userData.company_name,
           categoria: userData.company_category || "Categoria não definida",
-          rating: "4,9",
+          rating: avgRating,
           status: "Aberto",
           descricao: userData.description || "Sem descrição disponível.",
           horario: userData.operating_hours || "Horário não informado.",

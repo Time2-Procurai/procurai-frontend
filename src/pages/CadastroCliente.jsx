@@ -126,6 +126,8 @@ const CadastroClientePage = () => {
 
       console.log("Resposta da API:", response.data);
 
+      //Mostrando que o cliente foi cadastrado com sucesso
+      alert("Cliente cadastrado com sucesso!");
 
       sessionStorage.removeItem("user_id");
       navigate('/login');
