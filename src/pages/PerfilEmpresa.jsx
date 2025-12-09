@@ -1,5 +1,5 @@
-import React, { useState, useEffect, use } from 'react';
-import { useNavigate, Link, useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useParams, useLocation } from 'react-router-dom';
 import BarraPesquisa from '../components/BarraPesquisa';
 import BarraLateral from '../components/BarraLateral';
 import AvaliacaoPopup from "../components/AvaliacaoPopup";
@@ -16,7 +16,7 @@ import {
 function PerfilEmpresa() {
   const navigate = useNavigate();
   const { userId: profileIdFromUrl } = useParams();
-  const location = useLocation();
+  const location = useLocation(); // Agora funciona pois foi importado
   const visitanteTipo = localStorage.getItem('userRole');
   const visitanteId = localStorage.getItem('userId');
 
@@ -47,20 +47,24 @@ function PerfilEmpresa() {
         const response = await api.get(`/user/listar/usuarios/${profileIdFromUrl}/`);
         const userData = response.data;
 
-        // 2. Buscar Avaliações da Loja
-        const evaluationsResponse = await api.get(`/evaluations/stores/${profileIdFromUrl}/`);
-        const evaluations = evaluationsResponse.data;
-
-        // Calcula a média das avaliações
+        // 2. Buscar Avaliações da Loja (COM PROTEÇÃO TRY/CATCH)
+        let evaluations = [];
         let avgRating = "Não foi avaliada ainda";
-        if (evaluations.length > 0) {
-        const sum = evaluations.reduce((acc, curr) => acc + curr.rating, 0);
-        avgRating = (sum / evaluations.length).toFixed(1);
+
+        try {
+            const evaluationsResponse = await api.get(`/evaluations/stores/${profileIdFromUrl}/`);
+            // Garante que é array mesmo se vier null ou undefined
+            evaluations = evaluationsResponse.data || []; 
+        } catch (error) {
+            console.warn("Loja sem avaliações ou erro na API:", error);
+            evaluations = []; // Segue a vida com array vazio
         }
 
-
-
-
+        // Calcula a média das avaliações com segurança
+        if (Array.isArray(evaluations) && evaluations.length > 0) {
+            const sum = evaluations.reduce((acc, curr) => acc + Number(curr.rating), 0);
+            avgRating = (sum / evaluations.length).toFixed(1);
+        }
 
         const { street, number, neighborhood, city, complement } = userData;
         const enderecoCompleto = [street, number, neighborhood, city, complement]
@@ -81,7 +85,7 @@ function PerfilEmpresa() {
           mapUrl: null,
         });
 
-        // 2. Buscar Produtos da Loja
+        // 3. Buscar Produtos da Loja
         try {
           const resProd = await api.get(`/products/store/${profileIdFromUrl}/`);
           setPromos(resProd.data.slice(0, 3));
@@ -89,7 +93,7 @@ function PerfilEmpresa() {
           console.error("Erro ao buscar produtos:", err);
         }
 
-        // 3. Buscar Comunidade e Publicações
+        // 4. Buscar Comunidade e Publicações
         try {
           const resComm = await api.get(`/community/lojista/${profileIdFromUrl}/`);
           if (resComm.data && resComm.data.id) {
@@ -117,16 +121,11 @@ function PerfilEmpresa() {
               date: new Date(p.data_publicacao).toLocaleDateString('pt-BR'),
               content: p.descricao,
               tag: p.titulo || "Publicação",
-              
-              // --- CORREÇÃO PRINCIPAL ---
-              // Agora confiamos no campo total_comentarios enviado pelo Serializer
               likes: p.likes || 0,
               user_has_liked: p.user_has_liked || false, 
               comments: (p.total_comentarios !== undefined && p.total_comentarios !== null) 
                         ? p.total_comentarios 
                         : 0,
-              // --------------------------
-              
               postImage: p.imagem
             }));
 
@@ -134,8 +133,7 @@ function PerfilEmpresa() {
             const resEnquetes = await api.get(`/community/enquetes/?comunidade=${cId}`);
 
             const formattedEnquetes = resEnquetes.data.map(e => {
-              // 1. Calcula o total somando manualmente as opções (para garantir que a matemática bata)
-              // Verifica se o backend mandou como 'votos' ou 'votos_count'
+              // Calcula o total somando manualmente as opções
               const totalCalculado = e.opcoes 
                 ? e.opcoes.reduce((acc, op) => {
                     const qtd = parseInt(op.votos) || parseInt(op.votos_count) || 0;
@@ -151,20 +149,19 @@ function PerfilEmpresa() {
                 date: new Date(e.data_criacao).toLocaleDateString('pt-BR'),
                 question: e.pergunta,
                 
-                // 2. Formata as opções com os valores visuais (percentual e largura da barra)
                 options: e.opcoes
                   ? e.opcoes.map(op => {
                     const votosOpcao = parseInt(op.votos) || parseInt(op.votos_count) || 0;
                     
-                    // Calcula porcentagem (evita divisão por zero)
+                    // Calcula porcentagem
                     const percentNum = totalCalculado > 0 ? (votosOpcao / totalCalculado) * 100 : 0;
                     
                     return {
                       id: op.id,
                       text: op.texto,
-                      votes: votosOpcao,              // Quantidade numérica (ex: 10)
-                      percent: percentNum.toFixed(1), // Texto formatado (ex: "50.0")
-                      barWidth: `${percentNum}%`      // CSS Width (ex: "50%")
+                      votes: votosOpcao,
+                      percent: percentNum.toFixed(1),
+                      barWidth: `${percentNum}%`
                     };
                   })
                   : [],
@@ -175,7 +172,7 @@ function PerfilEmpresa() {
               };
             });
 
-            // Mescla e ordena por data (mais recente primeiro)
+            // Mescla e ordena por data
             const mixedFeed = [...formattedPosts, ...formattedEnquetes].sort(
               (a, b) => b.dateObj - a.dateObj
             );
@@ -209,24 +206,23 @@ function PerfilEmpresa() {
   };
 
   const handleToggleLike = async (post, e) => {
-    e.stopPropagation(); // IMPORTANTE: Impede que abra o detalhe do post ao clicar no coração
+    e.stopPropagation();
 
     const jaCurtiu = post.user_has_liked;
 
-    // 1. Atualização Otimista: Atualiza a UI imediatamente antes da API responder
+    // 1. Atualização Otimista
     setPosts(prevPosts => prevPosts.map(p => {
-      // Encontra o post clicado na lista
       if (p.id === post.id) {
         return {
           ...p,
-          user_has_liked: !jaCurtiu, // Inverte o status
-          likes: jaCurtiu ? Math.max(p.likes - 1, 0) : p.likes + 1 // Atualiza o contador
+          user_has_liked: !jaCurtiu,
+          likes: jaCurtiu ? Math.max(p.likes - 1, 0) : p.likes + 1
         };
       }
-      return p; // Retorna os outros posts sem alteração
+      return p;
     }));
 
-    // 2. Chama a API em background
+    // 2. Chama a API
     try {
       if (jaCurtiu) {
         await api.post(`/community/publicacoes/${post.id}/descurtir/`);
@@ -235,7 +231,6 @@ function PerfilEmpresa() {
       }
     } catch (err) {
       console.error("Erro ao curtir/descurtir:", err);
-      // Opcional: Aqui você poderia reverter o estado caso a API falhe
     }
   };
 
@@ -251,7 +246,6 @@ function PerfilEmpresa() {
       });
       const newPostApi = response.data;
       
-      // Adiciona o post novo na lista local
       const newPost = {
         id: newPostApi.id,
         type: 'post',
@@ -328,24 +322,20 @@ function PerfilEmpresa() {
     }
   };
 
-const handleVotarEnquete = async (enqueteId, opcaoId) => {
+  const handleVotarEnquete = async (enqueteId, opcaoId) => {
     try {
       // 1. Envia o voto
       await api.post(`/community/enquetes/${enqueteId}/votar/`, { opcao_id: opcaoId });
 
-      // 2. Atualiza visualmente (Lógica Otimista/Manual para ver a barra na hora)
+      // 2. Atualiza visualmente
       setPosts(prevPosts => prevPosts.map(post => {
         if (post.id === enqueteId && post.type === 'enquete') {
           
-          // Tenta ler o total atual (blindado contra nulos)
           const totalAtual = post.totalVotes || 0; 
           const novoTotal = totalAtual + 1;
 
           const novasOpcoes = post.options.map(op => {
-            // Se for a opção clicada, +1, senão mantém
             const novosVotos = op.id === opcaoId ? (op.votes + 1) : op.votes;
-            
-            // Recalcula porcentagem
             const percent = novoTotal > 0 ? (novosVotos / novoTotal) * 100 : 0;
 
             return {
@@ -360,32 +350,25 @@ const handleVotarEnquete = async (enqueteId, opcaoId) => {
             ...post,
             options: novasOpcoes,
             totalVotes: novoTotal,
-            user_has_voted: true // Marca visualmente que votou
+            user_has_voted: true
           };
         }
         return post;
       }));
 
-      // alert("Voto computado!"); // Pode remover se quiser, pois a barra já mexe
-
     } catch (err) {
       console.error("Erro ao votar:", err);
 
-      // --- AQUI ESTÁ A MUDANÇA ---
       if (err.response && err.response.status === 400) {
-        // Transforma o erro (objeto ou array) em string minúscula para facilitar a busca
         const erroString = JSON.stringify(err.response.data).toLowerCase();
 
-        // Verifica palavras-chave comuns do Django para duplicidade
         if (erroString.includes("unique") || erroString.includes("já votou")) {
              alert("Você já votou nesta enquete!");
         } 
-        // Verifica se a enquete foi fechada (validação do seu model)
         else if (erroString.includes("encerrada") || erroString.includes("ativa")) {
              alert("Esta enquete já foi encerrada.");
         } 
         else {
-             // Erro genérico
              alert("Não foi possível computar seu voto.");
         }
       } else {
@@ -722,20 +705,18 @@ const handleVotarEnquete = async (enqueteId, opcaoId) => {
                       <div className="flex items-center gap-6" onClick={(e) => e.stopPropagation()}>
                         
                         <button 
-                          onClick={(e) => handleToggleLike(post, e)} // Chama a nova função passando o post e o evento
+                          onClick={(e) => handleToggleLike(post, e)} 
                           className={`flex items-center gap-1.5 transition group cursor-pointer 
                             ${post.user_has_liked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}
                         >
                           <Heart 
                             size={20} 
-                            // Se já curtiu, preenche (fill). Se não, preenche apenas ao passar o mouse (group-hover)
                             className={post.user_has_liked ? "fill-current" : "group-hover:fill-current"} 
                           />
                           <span className="text-xs">{post.likes}</span>
                         </button>
 
-                        {/* Botão de Comentários (Já estava correto, mantém assim) */}
-                       {post.type !== 'enquete' && (
+                        {post.type !== 'enquete' && (
                           <button 
                             onClick={() => navigate(`/post/${post.id}`)} 
                             className="flex items-center gap-1.5 text-gray-500 hover:text-blue-500 transition cursor-pointer"
