@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom'; 
-import { ChevronLeft, MoreVertical, Edit2, Trash2, X, Loader2, Image as ImageIcon } from 'lucide-react';
+import { ChevronLeft, MoreVertical, Loader2, Image as ImageIcon } from 'lucide-react';
 import BarraLateral from '../components/BarraLateral';
 import BarraPesquisa from '../components/BarraPesquisa';
+import api from '../api/api'; // 1. Importar API
 
-// Imports dos Modais (Certifique-se que os arquivos existem na pasta components)
+// Imports dos Modais
 import ModalOpcoesComunidade from '../components/ModalOpcoesComunidade';
 import ModalExcluirComunidade from '../components/ModalExcluirComunidade';
 
@@ -19,28 +20,27 @@ export default function CommunidadesCliente() {
   const [modalExcluirAberto, setModalExcluirAberto] = useState(false);
   const [comunidadeSelecionada, setComunidadeSelecionada] = useState(null);
 
+  // --- 2. BUSCAR DADOS DA API ---
   useEffect(() => {
     const fetchComunidades = async () => {
       setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      const dadosSalvos = localStorage.getItem('minhas_comunidades');
-      
-      if (dadosSalvos) {
-        setComunidades(JSON.parse(dadosSalvos));
-      } else {
-        const mocksIniciais = [
-          { id: 1, nome: 'Exemplo: Construção Civil', imagem: null },
-        ];
-        setComunidades(mocksIniciais);
+      try {
+        // Chama a rota de listagem do ViewSet
+        const response = await api.get('/customer-community/comunidades/');
+        
+        // O endpoint retorna todas. Filtramos no front apenas as que o usuário criou.
+        // O serializer já manda o campo 'is_criador' boolean.
+        const minhasComunidades = response.data.filter(c => c.is_criador);
+        
+        setComunidades(minhasComunidades);
+      } catch (error) {
+        console.error("Erro ao buscar comunidades:", error);
+      } finally {
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
     };
 
-    if (userId) { 
-        fetchComunidades();
-    }
+    fetchComunidades();
   }, [userId]);
 
   const handleEntrarNaComunidade = (idComunidade) => {
@@ -58,20 +58,31 @@ export default function CommunidadesCliente() {
     setModalExcluirAberto(true); 
   };
 
-  const confirmarExclusao = () => {
+  // --- 3. EXCLUIR VIA API ---
+  const confirmarExclusao = async () => {
     if (!comunidadeSelecionada) return;
-    const novaLista = comunidades.filter(c => c.id !== comunidadeSelecionada.id);
-    setComunidades(novaLista);
-    localStorage.setItem('minhas_comunidades', JSON.stringify(novaLista));
-    setModalExcluirAberto(false);
-    setComunidadeSelecionada(null);
+
+    try {
+      await api.delete(`/customer-community/comunidades/${comunidadeSelecionada.id}/`);
+      
+      // Atualiza a lista local removendo o item excluído
+      const novaLista = comunidades.filter(c => c.id !== comunidadeSelecionada.id);
+      setComunidades(novaLista);
+      
+      setModalExcluirAberto(false);
+      setComunidadeSelecionada(null);
+      alert("Comunidade excluída com sucesso.");
+    } catch (error) {
+      console.error("Erro ao excluir:", error);
+      alert("Erro ao excluir comunidade. Tente novamente.");
+    }
   };
 
-  // --- AQUI ESTÁ A MUDANÇA ---
   const handleEditar = () => {
     if (comunidadeSelecionada) {
-      setModalOpcoesAberto(false); // Fecha o modal primeiro
-      navigate(`/editarComunidade/${comunidadeSelecionada.id}`); // Vai para a tela de edição
+      setModalOpcoesAberto(false);
+      // Ajuste a rota conforme suas rotas de edição
+      navigate(`/editarComunidade/${comunidadeSelecionada.id}`); 
     }
   };
 
@@ -93,7 +104,7 @@ export default function CommunidadesCliente() {
             </div>
 
             <button
-              onClick={() => navigate('/criarComunidade/cliente')}
+              onClick={() => navigate('/criarComunidade/cliente')} // Certifique-se que essa rota leva ao componente CriarComunidadeCliente
               className="mb-8 px-6 py-2 border-2 border-[#FD7702] text-[#FD7702] font-bold rounded-full hover:bg-orange-50 transition-colors"
             >
               Crie uma nova comunidade
@@ -117,9 +128,10 @@ export default function CommunidadesCliente() {
                   >
                     
                     <div className="h-48 bg-white flex items-center justify-center p-4 relative border-b border-gray-100">
-                      {item.imagem ? (
+                      {/* 4. AJUSTE: O campo no serializer é 'imagem_capa', não 'imagem' */}
+                      {item.imagem_capa ? (
                         <img 
-                          src={item.imagem} 
+                          src={item.imagem_capa} 
                           alt={item.nome} 
                           className="max-h-full max-w-full object-contain" 
                         />
@@ -132,9 +144,16 @@ export default function CommunidadesCliente() {
                     </div>
                     
                     <div className="bg-gray-100 p-4 flex items-center justify-between mt-auto group-hover:bg-gray-50 transition-colors">
-                      <span className="font-bold text-gray-900 truncate pr-2">
-                        {item.nome}
-                      </span>
+                      <div className="flex flex-col overflow-hidden pr-2">
+                        <span className="font-bold text-gray-900 truncate">
+                          {item.nome}
+                        </span>
+                        {/* Mostra a categoria pequena abaixo do nome */}
+                        <span className="text-xs text-gray-500 capitalize">
+                          {item.categoria}
+                        </span>
+                      </div>
+                      
                       <button 
                         onClick={(e) => abrirOpcoes(e, item)} 
                         className="p-1 hover:bg-gray-200 rounded-full transition-colors text-gray-600 flex-shrink-0"
@@ -151,7 +170,6 @@ export default function CommunidadesCliente() {
         </main>
       </div>
 
-      {/* MODAIS COMPONENTIZADOS */}
       <ModalOpcoesComunidade 
         isOpen={modalOpcoesAberto}
         onClose={() => setModalOpcoesAberto(false)}

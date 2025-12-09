@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import BarraLateral from '../components/BarraLateral'; 
 import BarraPesquisa from '../components/BarraPesquisa'; 
 import { ChevronLeft, Image as ImageIcon, Loader2 } from 'lucide-react';
+import api from '../api/api'; // Importe sua instância do Axios configurada
 
 export default function CriarComunidadeCliente() {
   const navigate = useNavigate();
@@ -11,19 +12,20 @@ export default function CriarComunidadeCliente() {
   const [communityName, setCommunityName] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
-  const [coverPhoto, setCoverPhoto] = useState(null); 
-  const [coverFile, setCoverFile] = useState(null);   
+  const [coverPhoto, setCoverPhoto] = useState(null); // URL para preview
+  const [coverFile, setCoverFile] = useState(null);   // Arquivo (File Object) para envio
 
   const [isLoading, setIsLoading] = useState(false);
   const [isFormDirty, setIsFormDirty] = useState(false); 
 
+  // 1. AJUSTE: As categorias devem bater com o 'models.py' do Django
   const categories = [
-    "Construção Civil",
-    "Marcenaria",
-    "Jardinagem",
-    "Decoração",
-    "Ferramentas",
-    "Outros"
+    { value: 'esportes', label: 'Esportes' },
+    { value: 'bairro', label: 'Bairro' },
+    { value: 'musica', label: 'Música' },
+    { value: 'jogos', label: 'Jogos' },
+    { value: 'educacao', label: 'Educação' },
+    { value: 'outros', label: 'Outros' }
   ];
 
   useEffect(() => {
@@ -45,23 +47,13 @@ export default function CriarComunidadeCliente() {
   const handlePhotoUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      setCoverPhoto(URL.createObjectURL(file)); 
-      setCoverFile(file); 
+      setCoverPhoto(URL.createObjectURL(file)); // Preview visual
+      setCoverFile(file); // Arquivo real para o FormData
     }
   };
 
-  // Função auxiliar para converter imagem em texto (Base64) para salvar no LocalStorage
-  const convertToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
-    });
-  };
-
   const handleSubmit = async () => {
-    // 1. VALIDAÇÃO
+    // VALIDAÇÃO
     if (!communityName.trim() || !category || !description.trim()) {
       alert("Por favor, preencha todos os campos obrigatórios.");
       return;
@@ -70,44 +62,40 @@ export default function CriarComunidadeCliente() {
     try {
       setIsLoading(true);
 
-      // --- SIMULAÇÃO DE BACK-END COM LOCALSTORAGE ---
+      // 2. AJUSTE: Usar FormData para envio de arquivos + texto
+      const dataToSend = new FormData();
       
-      // 1. Converte a imagem (se tiver)
-      let imageBase64 = null;
+      // Mapeamento: Chave do Backend -> Estado do React
+      dataToSend.append('nome', communityName);
+      dataToSend.append('categoria', category);
+      dataToSend.append('descricao', description);
+      
       if (coverFile) {
-        imageBase64 = await convertToBase64(coverFile);
+        dataToSend.append('imagem_capa', coverFile); // Nome exato do campo no models.py
       }
 
-      // 2. Cria o objeto da nova comunidade
-      const novaComunidade = {
-        id: Date.now(), // ID único baseado no tempo
-        ownerId: userId,
-        nome: communityName,
-        category: category,
-        description: description,
-        imagem: imageBase64 // Salva a imagem como texto
-      };
+      // 3. AJUSTE: Envio para a API (Endpoint do ViewSet)
+      // Certifique-se que o prefixo '/customer-community' está no urls.py principal
+      const response = await api.post('/customer-community/comunidades/', dataToSend, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
 
-      // 3. Pega o que já existe no navegador
-      const comunidadesSalvas = JSON.parse(localStorage.getItem('minhas_comunidades') || '[]');
+      console.log("Comunidade criada:", response.data);
       
-      // 4. Adiciona a nova e salva de volta
-      const listaAtualizada = [...comunidadesSalvas, novaComunidade];
-      localStorage.setItem('minhas_comunidades', JSON.stringify(listaAtualizada));
-
-      // 5. Simula um delay de rede (pra ver o loading)
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // --- FIM DA SIMULAÇÃO ---
-
       setIsFormDirty(false); 
       
-      // --- CORREÇÃO AQUI: ADICIONADO O ID NA URL ---
+      // Navega para a lista de comunidades ou para o detalhe da nova
       navigate(`/minhasComunidades/${userId}`); 
 
     } catch (error) {
       console.error("Erro ao criar comunidade:", error);
-      alert("Ocorreu um erro ao criar a comunidade.");
+      
+      // Tratamento de erro vindo do Django
+      const errorMsg = error.response?.data 
+        ? JSON.stringify(error.response.data) 
+        : "Ocorreu um erro ao criar a comunidade.";
+      
+      alert(errorMsg);
     } finally {
       setIsLoading(false);
     }
@@ -187,8 +175,11 @@ export default function CriarComunidadeCliente() {
                     style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: `right 0.75rem center`, backgroundRepeat: `no-repeat`, backgroundSize: `1.5em 1.5em`, paddingRight: '2.5rem' }}
                   >
                     <option value="" disabled hidden>Escolha uma categoria</option>
-                    {categories.map((cat, index) => (
-                      <option key={index} value={cat} className="text-gray-700">{cat}</option>
+                    {/* Renderizando as opções corretas do Backend */}
+                    {categories.map((cat) => (
+                      <option key={cat.value} value={cat.value} className="text-gray-700">
+                        {cat.label}
+                      </option>
                     ))}
                   </select>
                 </div>

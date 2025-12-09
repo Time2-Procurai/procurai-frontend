@@ -1,57 +1,52 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import BarraLateral from '../components/BarraLateral'; 
 import BarraPesquisa from '../components/BarraPesquisa'; 
 import { ChevronLeft, Image as ImageIcon, Loader2 } from 'lucide-react';
-// import api from '../api/api'; 
+import api from '../api/api'; 
 
 export default function EditarComunidade() {
   const navigate = useNavigate();
-  const { comunidadeId } = useParams(); // Pega o ID da URL
+  const { comunidadeId } = useParams();
+  const fileInputRef = useRef(null);
   
   // Estados do formulário
   const [communityName, setCommunityName] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   
-  // Imagem: coverPhoto é para visualização, coverFile é para envio (novo upload)
+  // Imagem: coverPhoto é para visualização (URL), coverFile é para envio (File)
   const [coverPhoto, setCoverPhoto] = useState(null); 
   const [coverFile, setCoverFile] = useState(null);   
 
-  const [isLoading, setIsLoading] = useState(true); // Começa carregando para buscar dados
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [isFormDirty, setIsFormDirty] = useState(false); 
 
+  // Mesmas opções do CriarComunidadeCliente e do Model
   const categories = [
-    "Construção Civil",
-    "Marcenaria",
-    "Jardinagem",
-    "Decoração",
-    "Ferramentas",
-    "Outros"
+    "esportes", "bairro", "musica", "jogos", "educacao", "outros"
   ];
 
-  // --- 1. CARREGAR DADOS INICIAIS ---
+  // --- 1. CARREGAR DADOS DA API (GET) ---
   useEffect(() => {
     const carregarDados = async () => {
-      // Simula delay de API
-      await new Promise(r => setTimeout(r, 500));
+      try {
+        const response = await api.get(`/customer-community/comunidades/${comunidadeId}/`);
+        const dados = response.data;
 
-      // Busca no LocalStorage
-      const comunidadesSalvas = JSON.parse(localStorage.getItem('minhas_comunidades') || '[]');
-      
-      // Encontra a comunidade pelo ID (convertendo para número se necessário)
-      const comunidadeAlvo = comunidadesSalvas.find(c => c.id == comunidadeId);
-
-      if (comunidadeAlvo) {
-        setCommunityName(comunidadeAlvo.nome);
-        setCategory(comunidadeAlvo.category);
-        setDescription(comunidadeAlvo.description);
-        setCoverPhoto(comunidadeAlvo.imagem); // Já está em Base64 ou URL
-      } else {
-        alert("Comunidade não encontrada!");
+        setCommunityName(dados.nome);
+        setCategory(dados.categoria);
+        setDescription(dados.descricao);
+        setCoverPhoto(dados.imagem_capa); // URL da imagem atual
+        
+      } catch (error) {
+        console.error("Erro ao carregar comunidade:", error);
+        alert("Erro ao carregar os dados da comunidade.");
         navigate(-1);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     if (comunidadeId) {
@@ -59,17 +54,22 @@ export default function EditarComunidade() {
     }
   }, [comunidadeId, navigate]);
 
-  // Monitora alterações para aviso de saída
+  // Monitora alterações
   useEffect(() => {
-    if (!isLoading) { // Só monitora depois que carregou os dados iniciais
+    if (!isLoading) {
        setIsFormDirty(true);
     }
   }, [communityName, category, description, coverFile]);
 
   const handleGoBack = () => {
-    // Lógica simples: se o form estiver "sujo", avisa. 
-    // (Pode refinar comparando com valores iniciais, mas isso já resolve)
+    if (isFormDirty) {
+        // Lógica opcional de confirmação se quiser manter
+    }
     navigate(-1);
+  };
+
+  const handleImageClick = () => {
+    fileInputRef.current.click();
   };
 
   const handlePhotoUpload = (event) => {
@@ -80,15 +80,7 @@ export default function EditarComunidade() {
     }
   };
 
-  const convertToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
-    });
-  };
-
+  // --- 2. SALVAR ALTERAÇÕES NA API (PATCH) ---
   const handleSave = async () => {
     if (!communityName.trim() || !category || !description.trim()) {
       alert("Por favor, preencha todos os campos obrigatórios.");
@@ -96,35 +88,22 @@ export default function EditarComunidade() {
     }
 
     try {
-      setIsLoading(true);
+      setIsSaving(true);
 
-      // --- ATUALIZAÇÃO NO LOCALSTORAGE ---
-      const comunidadesSalvas = JSON.parse(localStorage.getItem('minhas_comunidades') || '[]');
+      const dataToSend = new FormData();
+      dataToSend.append('nome', communityName);
+      dataToSend.append('categoria', category);
+      dataToSend.append('descricao', description);
       
-      // Prepara a imagem: se tem arquivo novo, converte. Se não, mantém a antiga (coverPhoto)
-      let imagemFinal = coverPhoto; 
+      // Só envia a imagem se o usuário tiver selecionado uma nova
       if (coverFile) {
-        imagemFinal = await convertToBase64(coverFile);
+        dataToSend.append('imagem_capa', coverFile);
       }
 
-      // Cria a nova lista atualizando apenas o item correto
-      const listaAtualizada = comunidadesSalvas.map(c => {
-        if (c.id == comunidadeId) {
-          return {
-            ...c, // Mantém ID, ownerId, etc.
-            nome: communityName,
-            category: category,
-            description: description,
-            imagem: imagemFinal
-          };
-        }
-        return c;
+      // PATCH para atualizar apenas os campos enviados
+      await api.patch(`/customer-community/comunidades/${comunidadeId}/`, dataToSend, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
-
-      localStorage.setItem('minhas_comunidades', JSON.stringify(listaAtualizada));
-      
-      // Simula delay
-      await new Promise(r => setTimeout(r, 800));
 
       setIsFormDirty(false); 
       alert("Alterações salvas com sucesso!");
@@ -132,9 +111,9 @@ export default function EditarComunidade() {
 
     } catch (error) {
       console.error("Erro ao salvar:", error);
-      alert("Erro ao salvar alterações.");
+      alert("Erro ao salvar alterações. Tente novamente.");
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
 
@@ -158,8 +137,7 @@ export default function EditarComunidade() {
               <h1 className="text-2xl font-bold text-gray-900">Editar comunidade</h1>
             </div>
 
-            {/* Se estiver carregando os dados iniciais, mostra loading no centro */}
-            {isLoading && !communityName ? (
+            {isLoading ? (
                <div className="flex justify-center py-20">
                  <Loader2 className="animate-spin text-[#FD7702]" size={40} />
                </div>
@@ -168,7 +146,10 @@ export default function EditarComunidade() {
                 
                 <div className="mb-8">
                   <label htmlFor="cover-photo-upload" className="block cursor-pointer">
-                    <div className={`w-full h-64 rounded-lg bg-gray-300 flex flex-col items-center justify-center text-gray-600 hover:bg-gray-400 transition-colors relative overflow-hidden ${!coverPhoto ? 'border-2 border-dashed border-gray-400' : ''}`}>
+                    <div 
+                        onClick={handleImageClick}
+                        className={`w-full h-64 rounded-lg bg-gray-300 flex flex-col items-center justify-center text-gray-600 hover:bg-gray-400 transition-colors relative overflow-hidden ${!coverPhoto ? 'border-2 border-dashed border-gray-400' : ''}`}
+                    >
                       {coverPhoto ? (
                         <img src={coverPhoto} alt="Capa da Comunidade" className="w-full h-full object-cover" />
                       ) : (
@@ -182,6 +163,7 @@ export default function EditarComunidade() {
                     <input 
                       id="cover-photo-upload" 
                       type="file" 
+                      ref={fileInputRef}
                       accept="image/*" 
                       className="hidden" 
                       onChange={handlePhotoUpload}
@@ -196,7 +178,7 @@ export default function EditarComunidade() {
                       type="text"
                       value={communityName}
                       onChange={(e) => setCommunityName(e.target.value)}
-                      disabled={isLoading}
+                      disabled={isSaving}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#FD7702] focus:ring-1 focus:ring-[#FD7702] transition-all disabled:bg-gray-100"
                     />
                   </div>
@@ -206,8 +188,8 @@ export default function EditarComunidade() {
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
-                      disabled={isLoading}
-                      className="w-full p-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-[#FD7702] disabled:bg-gray-100"
+                      disabled={isSaving}
+                      className="w-full p-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-[#FD7702] disabled:bg-gray-100 uppercase"
                     >
                       <option value="" disabled hidden>Escolha uma categoria</option>
                       {categories.map((cat, index) => <option key={index} value={cat}>{cat}</option>)}
@@ -221,7 +203,7 @@ export default function EditarComunidade() {
                     rows="6"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    disabled={isLoading}
+                    disabled={isSaving}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#FD7702] disabled:bg-gray-100 resize-none"
                   ></textarea>
                 </div>
@@ -229,10 +211,10 @@ export default function EditarComunidade() {
                 <div className="flex justify-center">
                   <button
                     onClick={handleSave}
-                    disabled={isLoading}
-                    className={`bg-[#FD7702] text-white font-bold py-3 px-12 rounded-lg hover:bg-[#e66a00] transition-colors shadow-md w-full md:w-auto text-center flex items-center justify-center gap-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    disabled={isSaving}
+                    className={`bg-[#FD7702] text-white font-bold py-3 px-12 rounded-lg hover:bg-[#e66a00] transition-colors shadow-md w-full md:w-auto text-center flex items-center justify-center gap-2 ${isSaving ? 'opacity-70 cursor-not-allowed' : ''}`}
                   >
-                    {isLoading ? (
+                    {isSaving ? (
                       <>
                         <Loader2 className="animate-spin" size={20} />
                         Salvando...

@@ -12,7 +12,6 @@ function PostDetalhes() {
   const navigate = useNavigate();
   const { postId } = useParams();
 
-  // Estados
   const [post, setPost] = useState(null);
   const [authorData, setAuthorData] = useState(null);
   const [commentsList, setCommentsList] = useState([]);
@@ -23,17 +22,14 @@ function PostDetalhes() {
   const [novoComentario, setNovoComentario] = useState("");
   const [enviandoComentario, setEnviandoComentario] = useState(false);
 
-  // --- 1. BUSCAR DADOS ---
   useEffect(() => {
     const fetchAllData = async () => {
       setLoading(true);
       try {
-        // A. Buscar detalhes do post
         const responsePost = await api.get(`/community/publicacoes/${postId}/`);
         const postData = responsePost.data;
         setPost(postData);
 
-        // B. Buscar dados do Autor do Post (Lojista ou Cliente)
         if (postData.autor) {
            try {
              const responseAutor = await api.get(`/user/listar/usuarios/${postData.autor}/`);
@@ -43,7 +39,6 @@ function PostDetalhes() {
            }
         }
 
-        // C. Buscar Comentários
         const responseComments = await api.get(`/community/publicacoes/${postId}/comentarios/`);
         setCommentsList(responseComments.data);
 
@@ -55,30 +50,31 @@ function PostDetalhes() {
       }
     };
 
-    if (postId) {
-        fetchAllData();
-    }
+    if (postId) fetchAllData();
   }, [postId]);
 
-  // --- HELPER: Define qual nome mostrar (Post Principal) ---
+  const handleAuthorClick = () => {
+    if (authorData?.is_lojista) {
+        navigate(`/perfil/empresa/${post.autor}`);
+    } else {
+        console.log("Perfil de usuário comum clicado");
+    }
+  };
+
   const getMainAuthorName = () => {
     if (!authorData) return "Carregando...";
-    
-    // Se for lojista, tenta pegar o nome da empresa
     if (authorData.is_lojista && authorData.lojista_profile?.company_name) {
         return authorData.lojista_profile.company_name;
     }
-    // Caso contrário, usa o nome completo
-    return authorData.full_name || authorData.username;
+    return authorData.full_name || authorData.username || "Usuário";
   };
 
   const getMainAuthorImage = () => {
      if (!authorData) return null;
-     if (authorData.is_lojista) return authorData.profile_picture;
-     return authorData.profile_picture; // Ajuste conforme seu JSON de user
+     if (authorData.is_lojista) return authorData.lojista_profile?.profile_picture;
+     return authorData.cliente_profile?.profile_picture; 
   }
 
-  // --- 2. ENVIAR COMENTÁRIO ---
   const handleEnviarComentario = async (e) => {
     e.preventDefault();
     if (!novoComentario.trim()) return;
@@ -89,8 +85,15 @@ function PostDetalhes() {
         texto: novoComentario
       });
 
-      // Adiciona o novo comentário à lista
-      const novoCommentObj = response.data;
+      // Adiciona campos do autor atual para exibir a foto/nome imediatamente sem refresh
+      // (Assumindo que o back retorna dados básicos ou você pega do localStorage/Context)
+      const novoCommentObj = {
+          ...response.data,
+          // Fallback visual temporário até o refresh
+          autor_nome: "Você", 
+          autor_foto: null 
+      };
+      
       setCommentsList(prev => [...prev, novoCommentObj]);
       setNovoComentario("");
 
@@ -102,7 +105,6 @@ function PostDetalhes() {
     }
   };
 
-  // --- 3. CURTIR / DESCURTIR ---
   const handleCurtir = async () => {
     if (post.user_has_liked) return;
     try {
@@ -140,6 +142,7 @@ function PostDetalhes() {
     );
   }
 
+  // BLINDAGEM: Se der erro ou se post for null, mostra mensagem em vez de quebrar
   if (error || !post) {
     return (
         <div className="h-screen text-gray-800 flex flex-col min-w-[1024px]">
@@ -155,63 +158,50 @@ function PostDetalhes() {
   }
 
   const authorImage = getMainAuthorImage();
+  const authorCursor = authorData?.is_lojista ? 'cursor-pointer hover:underline' : 'cursor-default';
 
   return (
     <div className="h-screen text-gray-800 flex flex-col min-w-[1024px] bg-gray-50">
       <BarraPesquisa />
-
       <div className="flex flex-1 overflow-hidden">
         <BarraLateral />
-
         <main className="flex-1 overflow-y-auto p-6 md:p-8">
 
-          {/* Cabeçalho da Página */}
           <div className="flex items-center gap-3 mb-6 max-w-4xl mx-auto">
-            <button
-              onClick={() => navigate(-1)}
-              className="p-1 rounded-full hover:bg-gray-200 text-gray-800 transition"
-            >
+            <button onClick={() => navigate(-1)} className="p-1 rounded-full hover:bg-gray-200 transition">
               <ChevronLeft size={32} />
             </button>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Publicação de {getMainAuthorName()}
-            </h1>
+            <h1 className="text-2xl font-bold text-gray-900">Publicação</h1>
           </div>
 
           <div className="max-w-4xl mx-auto space-y-6">
-
-            {/* --- CARD DO POST --- */}
+            
             <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm relative">
-
-              <button className="absolute top-6 right-6 text-gray-500 hover:text-gray-800 transition">
-                <Share2 size={24} />
-              </button>
-
-              {/* Header do Autor (POST PRINCIPAL) */}
+              
               <div className="flex items-start gap-4 mb-4">
-                <div
-                  className="h-14 w-14 rounded-full overflow-hidden border border-gray-200 bg-gray-100 flex items-center justify-center cursor-pointer flex-shrink-0"
-                  onClick={() => navigate(`/perfil/empresa/${post.autor}`)}
+                <div 
+                  className={`h-14 w-14 rounded-full overflow-hidden border border-gray-200 bg-gray-100 flex items-center justify-center flex-shrink-0 ${authorCursor}`}
+                  onClick={handleAuthorClick}
                 >
                   {authorImage ? (
                     <img src={authorImage} alt="Avatar" className="h-full w-full object-cover" />
                   ) : (
-                    <Store size={28} className="text-gray-500" />
+                    <User size={28} className="text-gray-500" />
                   )}
                 </div>
 
                 <div className="mt-1">
                   <div className="flex items-center gap-2">
-                    <h3
-                      className="font-bold text-gray-900 text-base cursor-pointer hover:underline"
-                      onClick={() => navigate(`/perfil/empresa/${post.autor}`)}
+                    <h3 
+                      className={`font-bold text-gray-900 text-base ${authorCursor}`}
+                      onClick={handleAuthorClick}
                     >
                       {getMainAuthorName()}
                     </h3>
                     <span className="text-sm text-gray-500">{formatDate(post.data_publicacao)}</span>
                   </div>
                   {post.titulo && (
-                    <span className="inline-block mt-1 px-2 py-0.5 rounded-md border border-orange-200 bg-orange-50 text-[#FD7702] text-[10px] font-bold uppercase tracking-wide">
+                    <span className="inline-block mt-1 px-2 py-0.5 rounded-md border border-orange-200 bg-orange-50 text-[#FD7702] text-[10px] font-bold uppercase">
                       {post.titulo}
                     </span>
                   )}
@@ -224,37 +214,25 @@ function PostDetalhes() {
               
               {post.imagem && (
                 <div className="w-full mb-6 rounded-lg overflow-hidden">
-                    <img 
-                    src={post.imagem} 
-                    alt="Imagem da publicação" 
-                    className="w-full h-auto object-cover max-h-[500px]"
-                    />
+                    <img src={post.imagem} alt="Post" className="w-full h-auto object-cover max-h-[500px]" />
                 </div>
                )}
 
               <div className="flex items-center gap-4 border-t border-gray-100 pt-4">
                 <button
                   onClick={post.user_has_liked ? handleDescurtir : handleCurtir}
-                  className={`transition flex items-center gap-1 ${
-                    post.user_has_liked ? "text-red-500" : "text-gray-600 hover:text-red-500"
-                  }`}
+                  className={`transition flex items-center gap-1 ${post.user_has_liked ? "text-red-500" : "text-gray-600 hover:text-red-500"}`}
                 >
-                  <Heart
-                    size={24}
-                    fill={post.user_has_liked ? "red" : "none"}
-                    stroke={post.user_has_liked ? "red" : "currentColor"}
-                  />
+                  <Heart size={24} fill={post.user_has_liked ? "red" : "none"} stroke={post.user_has_liked ? "red" : "currentColor"} />
                   <span>{post.likes}</span>
                 </button>
-
-                <button className="text-gray-600 hover:text-blue-500 transition flex items-center gap-1">
+                <div className="text-gray-600 flex items-center gap-1">
                   <MessageCircle size={24} />
                   <span className="text-sm font-medium">{commentsList.length}</span>
-                </button>
+                </div>
               </div>
             </div>
 
-            {/* --- INPUT DE COMENTÁRIO --- */}
             <form onSubmit={handleEnviarComentario} className="relative">
               <input
                 type="text"
@@ -275,7 +253,6 @@ function PostDetalhes() {
 
             <h3 className="text-lg font-semibold text-gray-800 mt-8 mb-4">Comentários ({commentsList.length})</h3>
 
-            {/* --- LISTA DE COMENTÁRIOS --- */}
             <div className="space-y-4 pb-10">
               {commentsList.length === 0 ? (
                  <p className="text-gray-500 text-center py-4">Seja o primeiro a comentar!</p>
@@ -283,7 +260,6 @@ function PostDetalhes() {
                 commentsList.map((comment) => (
                     <div key={comment.id} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex gap-4 relative">
                     
-                    {/* Avatar do Comentário */}
                     <div className="h-10 w-10 rounded-full bg-[#FDF6EC] border border-orange-100 flex-shrink-0 flex items-center justify-center overflow-hidden">
                         {comment.autor_foto ? (
                             <img src={comment.autor_foto} alt="Avatar" className="h-full w-full object-cover" />
@@ -294,12 +270,11 @@ function PostDetalhes() {
                         )}
                     </div>
 
-                    {/* Conteúdo do Comentário */}
                     <div className="flex-1 pr-8">
                         <div className="flex items-center gap-2 mb-1">
-                            {/* NOME DO AUTOR DO COMENTÁRIO */}
                             <span className="font-bold text-gray-900 text-sm">
-                                {comment.autor_nome || `Usuário #${comment.autor_id || '?'}`}
+                                {/* Prioridade: 1. Nome formatado pelo Back, 2. Objeto Autor, 3. Fallback para ID */}
+                                {comment.autor_nome || comment.autor?.full_name || `Usuário #${comment.autor_id || comment.autor || '?'}`}
                             </span>
                             <span className="text-xs text-gray-400">• {formatDate(comment.data)}</span>
                         </div>

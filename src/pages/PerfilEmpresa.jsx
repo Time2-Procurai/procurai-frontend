@@ -119,10 +119,10 @@ function PerfilEmpresa() {
             const resEnquetes = await api.get(`/community/enquetes/?comunidade=${cId}`);
 
             const formattedEnquetes = resEnquetes.data.map(e => {
-              // 1. CORREÇÃO: Tenta ler 'votos' (se renomeado) OU 'votos_count' (nome do model)
+              // 1. Calcula o total somando manualmente as opções (para garantir que a matemática bata)
+              // Verifica se o backend mandou como 'votos' ou 'votos_count'
               const totalCalculado = e.opcoes 
                 ? e.opcoes.reduce((acc, op) => {
-                    // Pega o valor numérico, verificando as duas possibilidades de chave
                     const qtd = parseInt(op.votos) || parseInt(op.votos_count) || 0;
                     return acc + qtd;
                   }, 0) 
@@ -136,21 +136,20 @@ function PerfilEmpresa() {
                 date: new Date(e.data_criacao).toLocaleDateString('pt-BR'),
                 question: e.pergunta,
                 
-                // 2. Mapeia as opções usando o total calculado
+                // 2. Formata as opções com os valores visuais (percentual e largura da barra)
                 options: e.opcoes
                   ? e.opcoes.map(op => {
-                    // Mesma verificação dupla aqui
                     const votosOpcao = parseInt(op.votos) || parseInt(op.votos_count) || 0;
                     
-                    // Evita divisão por zero
+                    // Calcula porcentagem (evita divisão por zero)
                     const percentNum = totalCalculado > 0 ? (votosOpcao / totalCalculado) * 100 : 0;
                     
                     return {
                       id: op.id,
                       text: op.texto,
-                      votes: votosOpcao,
-                      percent: percentNum.toFixed(1), // Ex: "50.0"
-                      barWidth: `${percentNum}%`      // Ex: "50%"
+                      votes: votosOpcao,              // Quantidade numérica (ex: 10)
+                      percent: percentNum.toFixed(1), // Texto formatado (ex: "50.0")
+                      barWidth: `${percentNum}%`      // CSS Width (ex: "50%")
                     };
                   })
                   : [],
