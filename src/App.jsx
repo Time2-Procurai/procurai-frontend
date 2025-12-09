@@ -16,7 +16,6 @@ import AdicionarProduto from './pages/AdicionarProduto.jsx';
 import EditarPerfilLoja from './pages/EditarPerfilLoja.jsx';
 import EditarPerfilCliente from './pages/EditarPerfilCliente.jsx';
 import { AuthProvider } from './context/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
 import TelaProduto from './pages/TelaProduto.jsx';
 import ResultadosBusca from './pages/ResultadosBusca.jsx';
 import EsqueciSenha from './pages/EsqueciSenha.jsx';
@@ -31,6 +30,11 @@ import TelaPromocoes from './pages/TelaPromocoes.jsx';
 import TelaAdicionarPromocao from './pages/TelaAdicionarPromocao.jsx';
 import Notificacoes from './pages/Notificacoes.jsx';
 import TelaEditarProduto from './pages/TelaEditarProduto.jsx';
+import CriarComunidadeCliente from './pages/CriarComunidadeCliente.jsx';
+import CommunidadesCliente from './pages/ComunidadesCliente.jsx';
+import FeedComunidadeCliente from './pages/FeedComunidadeCliente.jsx';
+import EditarComunidade from './pages/EditarComunidade.jsx';
+
 
 
 function Home() {
@@ -88,6 +92,10 @@ function App() {
         <Route path='/produto/:produtoId/avaliacoes' element={<TelaAvaliacoes/>}/>
         <Route path="/notificacoes" element={<Notificacoes />} />
         <Route path='/produto/editar/:produtoId' element={<TelaEditarProduto />} />
+        <Route path='/criarComunidade/cliente' element={<CriarComunidadeCliente/>}/>
+        <Route path='/minhasComunidades/:userId' element={<CommunidadesCliente/>}/>
+        <Route path='/comunidade/:id' element={<FeedComunidadeCliente/>}/>
+        <Route path='/editarComunidade/:comunidadeId' element={<EditarComunidade/>} />
         
       </Routes>
 
