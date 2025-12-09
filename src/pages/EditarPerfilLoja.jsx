@@ -4,10 +4,11 @@ import BarraPesquisa from "../components/BarraPesquisa";
 import BarraLateral from "../components/BarraLateral";
 import UploadFoto from "../components/UploadFoto";
 import api from "../api/api";
-import { ChevronLeft, Star, Store, Map } from 'lucide-react';
+import { ChevronLeft, Star, Store, Map } from "lucide-react";
 
 function EditarPerfilLoja() {
   const navigate = useNavigate();
+  const fileInputRef = React.useRef(null);
 
   // Estado único com todos os dados da loja
   const [dados, setDados] = useState({
@@ -26,8 +27,8 @@ function EditarPerfilLoja() {
   });
 
   // Foto de perfil da loja
-  const [profileImageFile, setprofileImageFile] = useState(null);
-  const [profileImagePreview, setprofileImagePreview] = useState(null);
+  const [profileImageFile, setProfileImageFile] = useState(null);
+  const [profileImagePreview, setProfileImagePreview] = useState(null);
 
   // Função genérica para lidar com mudanças nos inputs
   const handleChange = (e) => {
@@ -35,15 +36,22 @@ function EditarPerfilLoja() {
     setDados({ ...dados, [name]: value });
   };
 
+  const handleImageContainerClick = () => {
+    fileInputRef.current.click();
+  };
+
   // Upload da foto de perfil
-  const handleFotoPerfil = (file) => {
-    setProfileImageFile(file);
-    setProfileImagePreview(URL.createObjectURL(file));
+  const handleFotoPerfil = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfileImageFile(file);
+      setProfileImagePreview(URL.createObjectURL(file));
+    }
   };
 
   // Estados de Controle
   const [isFetching, setIsFetching] = useState(true); // Para o carregamento inicial
-  const [isLoading, setIsLoading] = useState(false);   // Para o envio (submit)
+  const [isLoading, setIsLoading] = useState(false); // Para o envio (submit)
   const [error, setError] = useState(null);
 
   // useEffect: Buscar dados atuais da loja
@@ -73,10 +81,12 @@ function EditarPerfilLoja() {
 
         // Define a foto de perfil *existente*
         if (profile?.profile_picture) {
-          const urlBase = "http://localhost:8080/"
-          setProfileImagePreview(urlBase + profile.profile_picture);
-          //
-          
+          const urlBase = "http://localhost:8080/";
+          const imgUrl = profile.profile_picture.startsWith("http")
+            ? profile.profile_picture
+            : urlBase + profile.profile_picture;
+          setProfileImagePreview(imgUrl);
+          console.log("URL da imagem de perfil:", imgUrl);
         }
       } catch (err) {
         console.error("Erro ao buscar dados do perfil:", err);
@@ -98,7 +108,8 @@ function EditarPerfilLoja() {
 
     if (dados.nomeLoja) submissionData.append("company_name", dados.nomeLoja);
     if (dados.tipoLoja) submissionData.append("company_type", dados.tipoLoja);
-    if (dados.categoria) submissionData.append("company_category", dados.categoria);
+    if (dados.categoria)
+      submissionData.append("company_category", dados.categoria);
     if (dados.descricao) submissionData.append("description", dados.descricao);
     if (dados.horario) submissionData.append("operating_hours", dados.horario);
 
@@ -107,32 +118,26 @@ function EditarPerfilLoja() {
     if (dados.numero) submissionData.append("number", dados.numero);
     if (dados.cidade) submissionData.append("city", dados.cidade);
     if (dados.bairro) submissionData.append("neighborhood", dados.bairro);
-    if (dados.complemento) submissionData.append("complement", dados.complemento);
+    if (dados.complemento)
+      submissionData.append("complement", dados.complemento);
 
     if (profileImageFile) {
       submissionData.append("profile_picture", profileImageFile);
     }
 
     try {
-
-      await api.patch(
-        `/user/profile/`,
-        submissionData, {
+      await api.patch("/user/profile/", submissionData, {
         headers: { "Content-Type": "multipart/form-data" },
-      }
-      );
+      });
 
       alert("Perfil atualizado com sucesso!");
       navigate(-1);
-
     } catch (error) {
       console.error("Erro ao atualizar o perfil da loja:", error);
       alert("Erro ao atualizar o perfil. Tente novamente.");
-
     } finally {
       setIsLoading(false);
     }
-
   };
 
   return (
@@ -143,7 +148,6 @@ function EditarPerfilLoja() {
       <div className="flex flex-1 overflow-hidden">
         {/* Menu lateral */}
         <BarraLateral />
-
 
         {/* Conteúdo principal */}
         <div className="relative flex flex-col flex-1 items-center py-8 overflow-y-auto">
@@ -159,16 +163,54 @@ function EditarPerfilLoja() {
 
           {/* Área de upload da capa + foto */}
           <div className="relative w-full max-w-4xl mb-8">
+            {/* Banner/Capa - NÃO clicável */}
             <div className="w-full h-40 bg-gray-200 rounded-xl mb-4 mt-8">
-              {profileImageFile ? (
-                <img src={profileImagePreview} className="w-full h-full object-cover" />
+              {profileImagePreview ? (
+                <img
+                  src={profileImagePreview}
+                  className="w-full h-full object-cover rounded-xl"
+                  alt="Preview da loja"
+                />
               ) : (
                 <p className="text-center text-gray-500 py-16">Foto da Loja</p>
               )}
             </div>
+
+            {/* Avatar pequeno - CLICÁVEL */}
             <div className="absolute -bottom-8 left-8">
-              <UploadFoto />
+              <div
+                className="relative w-28 h-28 cursor-pointer group"
+                onClick={handleImageContainerClick}
+              >
+                <div className="w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
+                  {profileImagePreview ? (
+                    <img
+                      src={profileImagePreview}
+                      alt="Avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Store size={48} className="text-gray-500" />
+                  )}
+
+                  {/* Overlay ao passar o mouse */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 flex items-center justify-center rounded-full transition">
+                    <span className="text-white text-xs font-bold opacity-0 group-hover:opacity-100">
+                      Alterar
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* Input hidden - controlado pelo ref */}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFotoPerfil}
+              ref={fileInputRef}
+              className="hidden"
+            />
           </div>
 
           {/* Formulário */}
