@@ -44,6 +44,14 @@ function CatalogoEmpresa() {
     alert(`Opções para o produto ${produtoId}:\n- Editar\n- Excluir`);
   };
 
+  // Função auxiliar para formatar preço (igual à da tela de produto)
+  const formatPrice = (value) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(parseFloat(value));
+  };
+
   if (isLoading) {
     return (
       <div className="h-screen text-gray-800 flex flex-col min-w-[1024px]">
@@ -132,11 +140,13 @@ function CatalogoEmpresa() {
                     <h2 className="text-sm font-medium text-gray-800 mb-1 truncate">
                       {produto.name}
                     </h2>
-                    {/* --- CORREÇÃO AQUI --- */}
+                    
+                    {/* --- CORREÇÃO APLICADA AQUI --- */}
                     <p className="text-gray-700 font-semibold">
-                      R$ {parseFloat(produto.price).toFixed(2).replace('.', ',')}
+                      {formatPrice(produto.price)}
                     </p>
                     {/* --- FIM DA CORREÇÃO --- */}
+                    
                     {produto.is_negotiable && (
                       <p className="text-green-600 font-semibold text-sm mt-1">
                         Preço negociável
