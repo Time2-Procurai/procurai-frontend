@@ -352,12 +352,12 @@ export default function FeedComunidadeCliente() {
           <div className="max-w-4xl mx-auto px-6 pb-12 mt-8">
             
             <div className="flex flex-wrap items-center justify-between gap-4 mb-8 border-b border-gray-200 pb-6">
-              <div>
+              {/* <div>
                 <span className="text-lg font-bold text-gray-900">Membros</span>
                 <span className="ml-2 text-lg font-medium text-gray-600">
                     {Array.isArray(comunidade.seguidores) ? comunidade.seguidores.length : 0}
                 </span>
-              </div>
+              </div> */}
 
               <div className="flex gap-3">
                 <button 
@@ -479,9 +479,9 @@ export default function FeedComunidadeCliente() {
                           </button>
                       )}
                       
-                      <button className="flex items-center gap-1.5 text-gray-500 hover:text-gray-800 transition-colors ml-auto">
+                      {/* <button className="flex items-center gap-1.5 text-gray-500 hover:text-gray-800 transition-colors ml-auto">
                         <Share2 size={18} />
-                      </button>
+                      </button> */}
                     </div>
 
                   </div>
