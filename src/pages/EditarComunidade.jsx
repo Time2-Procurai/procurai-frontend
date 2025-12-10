@@ -130,9 +130,9 @@ export default function EditarComunidade() {
             <div className="flex items-center gap-2 mb-6">
               <button 
                 onClick={handleGoBack} 
-                className="p-1 rounded-full hover:bg-gray-200 transition-colors"
+                className="cursor-pointer p-1 rounded-full transition-colors"
               >
-                <ChevronLeft size={24} className="text-gray-700" />
+                <ChevronLeft size={24} className="cursor-pointer mr-3 text-gray-900 hover:text-[#FD7702] transition-colors" />
               </button>
               <h1 className="text-2xl font-bold text-gray-900">Editar comunidade</h1>
             </div>
@@ -212,7 +212,7 @@ export default function EditarComunidade() {
                   <button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className={`bg-[#FD7702] text-white font-bold py-3 px-12 rounded-lg hover:bg-[#e66a00] transition-colors shadow-md w-full md:w-auto text-center flex items-center justify-center gap-2 ${isSaving ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    className={`cursor-pointer bg-[#FD7702] text-white font-bold py-3 px-12 rounded-lg hover:bg-[#e66a00] transition-colors shadow-md w-full md:w-auto text-center flex items-center justify-center gap-2 ${isSaving ? 'opacity-70 cursor-not-allowed' : ''}`}
                   >
                     {isSaving ? (
                       <>

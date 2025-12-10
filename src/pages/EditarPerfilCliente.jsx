@@ -158,7 +158,7 @@ function EditarPerfilCliente() {
             onClick={() => navigate(-1)}
             className="absolute top-6 left-6 text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
           >
-            <ChevronLeft size={28} />
+            <ChevronLeft size={28} className="cursor-pointer mr-3 text-gray-900 hover:text-[#FD7702] transition-colors" />
           </button>
 
           <div className="w-full max-w-xl mx-auto">

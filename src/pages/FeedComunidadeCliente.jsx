@@ -300,7 +300,7 @@ export default function FeedComunidadeCliente() {
   if (!comunidade) return (
     <div className="h-screen bg-white flex flex-col items-center justify-center text-gray-500">
         <p>Comunidade não encontrada.</p>
-        <button onClick={() => navigate(-1)} className="mt-4 text-[#FD7702] underline">Voltar</button>
+      <button onClick={() => navigate(-1)} className="cursor-pointer mt-4 text-[#FD7702] underline">Voltar</button>
     </div>
   );
 
@@ -317,9 +317,9 @@ export default function FeedComunidadeCliente() {
           <div className="relative">
             <button 
               onClick={() => navigate(-1)} 
-              className="absolute top-4 left-4 z-20 p-1 text-gray-700 bg-white/50 hover:bg-white rounded-full transition-colors shadow-sm"
+              className="cursor-pointer absolute top-4 left-4 z-20 p-1 text-gray-700 rounded-full transition-colors"
             >
-              <ChevronLeft size={32} />
+              <ChevronLeft size={32} className="cursor-pointer mr-3 text-gray-900 hover:text-[#FD7702] transition-colors"/>
             </button>
 
             {/* Banner */}
@@ -362,13 +362,13 @@ export default function FeedComunidadeCliente() {
               <div className="flex gap-3">
                 <button 
                   onClick={() => setModalPostAberto(true)} 
-                  className="px-5 py-2 border-2 border-[#FD7702] text-[#FD7702] font-bold rounded-full hover:bg-orange-50 transition-colors text-sm"
+                  className="cursor-pointer px-5 py-2 border-2 border-[#FD7702] text-[#FD7702] font-bold rounded-full hover:bg-orange-50 transition-colors text-sm"
                 >
                   Criar publicação
                 </button>
                 <button 
                   onClick={() => setModalEnqueteAberto(true)} 
-                  className="px-5 py-2 bg-[#FD7702] text-white font-bold rounded-full hover:bg-[#e66a00] transition-colors text-sm shadow-md"
+                  className="cursor-pointer px-5 py-2 bg-[#FD7702] text-white font-bold rounded-full hover:bg-[#e66a00] transition-colors text-sm shadow-md"
                 >
                   Criar enquete
                 </button>
@@ -409,14 +409,14 @@ export default function FeedComunidadeCliente() {
                       </div>
 
                       <div className="relative" onClick={(e) => e.stopPropagation()}>
-                        <button onClick={() => toggleMenu(post.id)} className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100">
+                        <button onClick={() => toggleMenu(post.id)} className="cursor-pointer text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100">
                           <MoreVertical size={20} />
                         </button>
                         {menuAbertoId === post.id && (
                           <div className="absolute right-0 top-8 bg-white shadow-lg border rounded-lg py-2 w-32 z-10 animate-in fade-in zoom-in duration-100">
                             <button 
                               onClick={() => handleDeletarPost(post)} 
-                              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                              className="cursor-pointer w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                             >
                               <Trash2 size={16} /> Excluir
                             </button>

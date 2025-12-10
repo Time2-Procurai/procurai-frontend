@@ -16,7 +16,7 @@ export default function ModalOpcoesComunidade({ isOpen, onClose, onEdit, onDelet
         
         <button 
           onClick={onClose} 
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition-colors"
+          className="cursor-pointer absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition-colors"
         >
           <X size={24} />
         </button>
@@ -25,7 +25,7 @@ export default function ModalOpcoesComunidade({ isOpen, onClose, onEdit, onDelet
           <button 
             onClick={onEdit} 
             // Adicionado w-full para o botão ocupar toda a largura
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left w-full"
+            className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left w-full"
           >
             <Edit2 size={20} className="text-gray-700" />
             <span className="font-bold text-gray-900">Editar informações da comunidade</span>
@@ -34,7 +34,7 @@ export default function ModalOpcoesComunidade({ isOpen, onClose, onEdit, onDelet
           <button 
             onClick={onDelete} 
             // Adicionado w-full para o botão ocupar toda a largura
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 transition-colors text-left group w-full"
+            className="cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 transition-colors text-left group w-full"
           >
             <Trash2 size={20} className="text-gray-700 group-hover:text-red-600" />
             <span className="font-bold text-gray-900 group-hover:text-red-600">Excluir comunidade</span>

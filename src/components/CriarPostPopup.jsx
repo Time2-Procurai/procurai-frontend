@@ -110,7 +110,7 @@ const CriarPostPopup = ({ isOpen, onClose, userAvatar, userName, onPublicar }) =
               <img src={imagemPreview} alt="Preview" className="w-full h-auto max-h-60 object-cover rounded-lg border border-gray-200" />
               <button 
                 onClick={removerImagem}
-                className="absolute top-2 right-2 bg-black/70 hover:bg-black text-white p-1.5 rounded-full transition"
+                className="cursor-pointer absolute top-2 right-2 bg-black/70 hover:bg-black text-white p-1.5 rounded-full transition"
               >
                 <X size={16} />
               </button>

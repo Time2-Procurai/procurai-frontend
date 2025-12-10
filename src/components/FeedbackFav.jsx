@@ -32,7 +32,7 @@ export default function FeedbackFav({
             <div className="h-4 w-px bg-gray-300 mx-1"></div>
             <button
               onClick={onAction}
-              className="text-[#FD7702] font-bold text-sm hover:underline hover:bg-[#FD7702]/10 px-2 py-1 rounded transition-colors uppercase"
+              className="cursor-pointer text-[#FD7702] font-bold text-sm hover:underline hover:bg-[#FD7702]/10 px-2 py-1 rounded transition-colors uppercase"
             >
               {actionLabel}
             </button>
@@ -41,7 +41,7 @@ export default function FeedbackFav({
 
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-700 ml-2 transition-colors"
+          className="cursor-pointer text-gray-400 hover:text-gray-700 ml-2 transition-colors"
         >
           <X size={18} />
         </button>

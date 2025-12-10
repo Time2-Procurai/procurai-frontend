@@ -25,13 +25,13 @@ export default function ModalConfirmacaoFav({
           <div className="flex w-full gap-3">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors"
+              className="cursor-pointer flex-1 px-4 py-2 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors"
             >
               {cancelText}
             </button>
             <button
               onClick={onConfirm}
-              className="flex-1 px-4 py-2 bg-[#FD7702] text-white font-semibold rounded-lg hover:bg-orange-600 transition-colors shadow-md"
+              className="cursor-pointer flex-1 px-4 py-2 bg-[#FD7702] text-white font-semibold rounded-lg hover:bg-orange-600 transition-colors shadow-md"
             >
               {confirmText}
             </button>

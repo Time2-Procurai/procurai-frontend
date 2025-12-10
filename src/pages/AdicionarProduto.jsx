@@ -129,7 +129,7 @@ function AdicionarProduto() {
             onClick={() => navigate('/perfil/empresa/' + localStorage.getItem('userId'))}
             className="hover:cursor-pointer text-black p-2 pr-4 transition hover:opacity-80"
           >
-            <ChevronLeft size={28} />
+            <ChevronLeft size={28} className="cursor-pointer mr-3 text-gray-900 hover:text-[#FD7702] transition-colors" />
           </button>
           <h1 className="text-xl font-semibold">Adicionar produto</h1>
         </div>

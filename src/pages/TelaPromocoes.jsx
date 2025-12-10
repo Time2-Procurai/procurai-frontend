@@ -120,9 +120,9 @@ function TelaPromocoes() {
                        navigate(`/perfil/empresa/${paramId}`);
                     }
                   }}
-                  className="p-2 rounded-full hover:bg-gray-200 text-gray-700 transition cursor-pointer"
+                  className="p-2 rounded-full text-gray-700 transition cursor-pointer"
                 >
-                  <ChevronLeft size={28} />
+                      <ChevronLeft size={28} className="cursor-pointer mr-3 text-gray-900 hover:text-[#FD7702] transition-colors" />
                 </button>
                 <h1 className="text-2xl font-bold text-gray-900">
                   {isOwner ? "Minhas Promoções Ativas" : (isCliente ? "Promoções" : "Ofertas Especiais")}

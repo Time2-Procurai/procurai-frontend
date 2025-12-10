@@ -30,7 +30,7 @@ const ModalDefinirPromocao = ({
         {/* Botão Fechar */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+          className="cursor-pointer absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
         >
           <X size={24} />
         </button>

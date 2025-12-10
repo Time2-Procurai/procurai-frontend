@@ -157,7 +157,7 @@ function EditarPerfilLoja() {
             onClick={() => navigate(-1)}
             className="absolute top-6 left-6 text-black p-2 hover:opacity-80 rounded-full cursor-pointer z-20"
           >
-            <ChevronLeft size={28} />
+            <ChevronLeft size={28} className="cursor-pointer mr-3 text-gray-900 hover:text-[#FD7702] transition-colors" />
           </button>
 
           <h1 className="text-2xl font-semibold">Editar o perfil da loja</h1>

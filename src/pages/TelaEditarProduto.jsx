@@ -151,7 +151,7 @@ function TelaEditarProduto() {
             onClick={() => navigate(-1)}
             className="hover:cursor-pointer text-black p-2 pr-4 transition hover:opacity-80"
           >
-            <ChevronLeft size={28} />
+            <ChevronLeft size={28} className="cursor-pointer mr-3 text-gray-900 hover:text-[#FD7702] transition-colors"/>
           </button>
           <h1 className="text-xl font-semibold">Editar Produto</h1>
         </div>
@@ -176,7 +176,7 @@ function TelaEditarProduto() {
                     <button
                         type="button"
                         onClick={handleRemoveNewImage}
-                        className="absolute top-1 right-1 bg-white rounded-full p-1 shadow text-red-500 hover:bg-red-100"
+                        className="cursor-pointer absolute top-1 right-1 bg-white rounded-full p-1 shadow text-red-500 hover:bg-red-100"
                     >
                         <X size={16} />
                     </button>
@@ -277,7 +277,7 @@ function TelaEditarProduto() {
             <button
               type="submit"
               disabled={isSaving}
-              className="bg-[#FD7702] text-white font-semibold px-10 py-3 rounded-md hover:cursor-pointer hover:opacity-90 transition disabled:bg-orange-300"
+              className="cursor-pointer bg-[#FD7702] text-white font-semibold px-10 py-3 rounded-md hover:cursor-pointer hover:opacity-90 transition disabled:bg-orange-300"
             >
               {isSaving ? "Salvando..." : "Salvar Alterações"}
             </button>

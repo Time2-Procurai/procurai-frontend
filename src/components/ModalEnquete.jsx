@@ -56,7 +56,7 @@ export default function ModalEnquete({ isOpen, onClose, userName, userAvatar, on
         <button 
           onClick={onClose}
           type="button"
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition-colors z-10"
+          className="cursor-pointer absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition-colors z-10"
         >
           <X size={24} />
         </button>
@@ -109,7 +109,7 @@ export default function ModalEnquete({ isOpen, onClose, userName, userAvatar, on
               <button 
                 type="button"
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                className={`transition-colors p-2 rounded-full ${showEmojiPicker ? 'bg-orange-50 text-[#FD7702]' : 'text-gray-500 hover:text-[#FD7702]'}`}
+                className={`cursor-pointer transition-colors p-2 rounded-full ${showEmojiPicker ? 'bg-orange-50 text-[#FD7702]' : 'text-gray-500 hover:text-[#FD7702]'}`}
               >
                 <Smile size={28} />
               </button>
@@ -128,7 +128,7 @@ export default function ModalEnquete({ isOpen, onClose, userName, userAvatar, on
 
             <button
               onClick={handleSubmit}
-              className="bg-[#FD7702] text-white font-bold py-3 px-8 rounded-full hover:bg-[#e66a00] transition-colors shadow-md"
+              className="cursor-pointer bg-[#FD7702] text-white font-bold py-3 px-8 rounded-full hover:bg-[#e66a00] transition-colors shadow-md"
             >
               Criar enquete
             </button>

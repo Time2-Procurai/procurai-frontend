@@ -68,6 +68,19 @@ export default function TelaFavoritos() {
     fetchFavoritos();
   }, [navigate]);
 
+  // Recupera o tipo de usuário salvo no login
+  const userRole = localStorage.getItem("userRole");
+
+  // Função para voltar para o feed correto
+  const handleVoltar = () => {
+    if (userRole === "cliente") {
+      navigate("/FeedCliente/" + localStorage.getItem('userId'));
+    } else {
+      navigate("/FeedEmpresa/" + localStorage.getItem('userId'));
+    }
+  };
+
+
   const handleTrashClick = (productId) => {
     setItemToDelete(productId);
     setShowModal(true);
@@ -122,14 +135,14 @@ export default function TelaFavoritos() {
 
             <header className="flex items-center justify-between mb-6">
               <div className="flex items-center">
-                <button onClick={() => navigate(-1)} className="mr-3 text-gray-900 hover:text-[#FD7702] transition-colors">
-                    <ChevronLeft size={28} />
+                <button onClick={handleVoltar} className="cursor-pointer mr-3 text-gray-900 hover:text-[#FD7702] transition-colors">
+                  <ChevronLeft size={28} className="cursor-pointer mr-3 text-gray-900 hover:text-[#FD7702] transition-colors" />
                 </button>
                 <h1 className="text-2xl font-bold text-gray-900">Produtos favoritos</h1>
               </div>
               
               {/* Botão de recarregar manual para teste */}
-              <button onClick={fetchFavoritos} className="p-2 text-gray-500 hover:text-[#FD7702] transition" title="Recarregar lista">
+              <button onClick={fetchFavoritos} className="cursor-pointer p-2 text-gray-500 hover:text-[#FD7702] transition" title="Recarregar lista">
                 <RefreshCw size={20} />
               </button>
             </header>
@@ -184,7 +197,7 @@ export default function TelaFavoritos() {
                                 e.stopPropagation();
                                 handleTrashClick(produto.id);
                             }}
-                            className="absolute bottom-0 right-4 translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full border border-orange-400 bg-white text-gray-600 hover:bg-red-50 hover:border-red-500 hover:text-red-500 transition-all shadow-sm z-10"
+                            className="cursor-pointer absolute bottom-0 right-4 translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full border border-orange-400 bg-white text-gray-600 hover:bg-red-50 hover:border-red-500 hover:text-red-500 transition-all shadow-sm z-10"
                           >
                             <Trash2 size={20} />
                           </button>
@@ -213,7 +226,7 @@ export default function TelaFavoritos() {
                     <p className="text-sm text-gray-400 mb-6">Explore o catálogo e salve o que mais gostar!</p>
                     <button 
                         onClick={() => navigate('/search')}
-                        className="px-6 py-2 bg-[#FD7702] text-white rounded-full font-bold hover:opacity-90 transition"
+                        className="cursor-pointer px-6 py-2 bg-[#FD7702] text-white rounded-full font-bold hover:opacity-90 transition"
                     >
                         Explorar produtos
                     </button>

@@ -131,14 +131,14 @@ function FiltroLateral({ onFilterChange }) {
       {/* Botões */}
       <button
         onClick={aplicar}
-        className="w-full bg-[#FD7702] text-white py-2 rounded mt-2"
+        className="cursor-pointer w-full bg-[#FD7702] text-white py-2 rounded mt-2"
       >
         Aplicar
       </button>
 
       <button
         onClick={limpar}
-        className="w-full border border-gray-400 py-2 rounded mt-1"
+        className="cursor-pointer w-full border border-gray-400 py-2 rounded mt-1"
       >
         Limpar
       </button>

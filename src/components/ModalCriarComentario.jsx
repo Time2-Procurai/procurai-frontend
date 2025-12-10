@@ -8,7 +8,7 @@ export default function ModalCriarComentario({ onClose }) {
         {/* Botão de Fechar */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 text-xl font-bold text-gray-700 hover:text-black"
+          className="cursor-pointer absolute right-4 top-4 text-xl font-bold text-gray-700 hover:text-black"
         >
           ×
         </button>
@@ -32,11 +32,11 @@ export default function ModalCriarComentario({ onClose }) {
         {/* Rodapé */}
         <div className="flex justify-between items-center mt-5">
           <div className="flex gap-4 text-xl text-gray-600">
-            <button>📷</button>
-            <button>🙂</button>
+            <button className="cursor-pointer">📷</button>
+            <button className="cursor-pointer">🙂</button>
           </div>
 
-          <button className="bg-orange-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-orange-600">
+          <button className="cursor-pointer bg-orange-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-orange-600">
             Publicar
           </button>
         </div>

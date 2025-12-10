@@ -98,7 +98,7 @@ const CadastroEmpresaPage2 = () => {
         <div className="relative flex justify-center items-center mb-8">
           <button
             onClick={() => navigate('/cadastro/empresa')}
-            className="absolute left-0 text-gray-600 hover:text-gray-900 transition-colors"
+            className="cursor-pointer absolute left-0 text-gray-600 hover:text-gray-900 transition-colors"
           >
             <BackArrowIcon />
           </button>

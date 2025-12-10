@@ -103,7 +103,7 @@ function AvaliacaoPopup({ aberto, onFechar, storeId, onSuccess }) {
       <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg relative">
         <button
           onClick={onFechar}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"
+          className="cursor-pointer absolute top-4 right-4 text-gray-400 hover:text-gray-700"
         >
           <X size={24} />
         </button>
@@ -140,7 +140,7 @@ function AvaliacaoPopup({ aberto, onFechar, storeId, onSuccess }) {
                   <button
                     type="button"
                     onClick={() => removePhoto(index)}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"
+                    className="cursor-pointer absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"
                   >
                     <X size={14} />
                   </button>
@@ -151,7 +151,7 @@ function AvaliacaoPopup({ aberto, onFechar, storeId, onSuccess }) {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current.click()}
-                  className="w-20 h-20 border-2 border-dashed border-gray-300 rounded-md flex flex-col items-center justify-center text-gray-500 hover:bg-gray-50"
+                  className="cursor-pointer w-20 h-20 border-2 border-dashed border-gray-300 rounded-md flex flex-col items-center justify-center text-gray-500 hover:bg-gray-50"
                 >
                   <Camera size={24} />
                   <span className="text-xs mt-1">Adicionar</span>
@@ -173,7 +173,7 @@ function AvaliacaoPopup({ aberto, onFechar, storeId, onSuccess }) {
           <button
             type="submit"
             disabled={isLoading || rating === 0}
-            className="w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="cursor-pointer w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             {isLoading ? "Enviando..." : "Enviar Avaliação"}
           </button>

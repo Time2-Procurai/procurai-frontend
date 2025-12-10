@@ -168,8 +168,8 @@ function PostDetalhes() {
         <main className="flex-1 overflow-y-auto p-6 md:p-8">
 
           <div className="flex items-center gap-3 mb-6 max-w-4xl mx-auto">
-            <button onClick={() => navigate(-1)} className="p-1 rounded-full hover:bg-gray-200 transition">
-              <ChevronLeft size={32} />
+            <button onClick={() => navigate(-1)} className="cursor-pointer p-1 rounded-full transition">
+              <ChevronLeft size={32} className="cursor-pointer mr-3 text-gray-900 hover:text-[#FD7702] transition-colors" />
             </button>
             <h1 className="text-2xl font-bold text-gray-900">Publicação</h1>
           </div>
@@ -221,12 +221,12 @@ function PostDetalhes() {
               <div className="flex items-center gap-4 border-t border-gray-100 pt-4">
                 <button
                   onClick={post.user_has_liked ? handleDescurtir : handleCurtir}
-                  className={`transition flex items-center gap-1 ${post.user_has_liked ? "text-red-500" : "text-gray-600 hover:text-red-500"}`}
+                  className={`cursor-pointer transition flex items-center gap-1 ${post.user_has_liked ? "text-red-500" : "text-gray-600 hover:text-red-500"}`}
                 >
                   <Heart size={24} fill={post.user_has_liked ? "red" : "none"} stroke={post.user_has_liked ? "red" : "currentColor"} />
                   <span>{post.likes}</span>
                 </button>
-                <div className="text-gray-600 flex items-center gap-1">
+                <div className="cursor-pointer text-gray-600 flex items-center gap-1">
                   <MessageCircle size={24} />
                   <span className="text-sm font-medium">{commentsList.length}</span>
                 </div>
@@ -245,7 +245,7 @@ function PostDetalhes() {
               <button
                 type="submit"
                 disabled={enviandoComentario}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#FD7702] transition disabled:opacity-50"
+                className="cursor-pointer absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#FD7702] transition disabled:opacity-50"
               >
                 {novoComentario.trim() ? <Send size={24} /> : <Smile size={24} />}
               </button>
@@ -283,7 +283,7 @@ function PostDetalhes() {
                         </p>
                     </div>
 
-                    <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-1">
+                    <button className="cursor-pointer absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-1">
                         <MoreVertical size={18} />
                     </button>
                     </div>

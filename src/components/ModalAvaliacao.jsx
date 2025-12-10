@@ -114,7 +114,7 @@ export default function ModalAvaliacao({ productName, produtoId, onClose, onSucc
       >
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 text-gray-500 hover:text-gray-800"
+          className="cursor-pointer absolute right-4 top-4 text-gray-500 hover:text-gray-800"
         >
           <X size={24} />
         </button>
@@ -164,7 +164,7 @@ export default function ModalAvaliacao({ productName, produtoId, onClose, onSucc
                   <button
                     type="button"
                     onClick={() => handleRemoveImage(index)}
-                    className="absolute -right-2 -top-2 rounded-full bg-red-600 p-1 text-white shadow-md hover:bg-red-700"
+                    className="cursor-pointer absolute -right-2 -top-2 rounded-full bg-red-600 p-1 text-white shadow-md hover:bg-red-700"
                   >
                     <X size={14} />
                   </button>
@@ -175,7 +175,7 @@ export default function ModalAvaliacao({ productName, produtoId, onClose, onSucc
                 <button
                   type="button"
                   onClick={() => fileInputRef.current.click()}
-                  className="flex h-24 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 text-gray-500 hover:bg-gray-50 transition-colors"
+                  className="cursor-pointer flex h-24 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 text-gray-500 hover:bg-gray-50 transition-colors"
                 >
                   <Plus size={24} />
                   <span className="mt-1 text-xs">Adicionar</span>
@@ -200,7 +200,7 @@ export default function ModalAvaliacao({ productName, produtoId, onClose, onSucc
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-lg bg-[#FD7702] py-3 text-lg font-bold text-white transition-colors hover:bg-[#e66a00] disabled:bg-orange-300 disabled:cursor-not-allowed"
+            className="cursor-pointer w-full rounded-lg bg-[#FD7702] py-3 text-lg font-bold text-white transition-colors hover:bg-[#e66a00] disabled:bg-orange-300 disabled:cursor-not-allowed"
           >
             {isLoading ? 'Enviando...' : 'Postar'}
           </button>

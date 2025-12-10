@@ -11,6 +11,18 @@ function Notificacoes() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Recupera o tipo de usuário salvo no login
+  const userRole = localStorage.getItem("userRole");
+
+  // Função para voltar para o feed correto
+  const handleVoltar = () => {
+    if (userRole === "cliente") {
+      navigate("/FeedCliente/" + localStorage.getItem('userId'));
+    } else {
+      navigate("/FeedEmpresa/" + localStorage.getItem('userId'));
+    }
+  };
+
   // --- 1. BUSCAR NOTIFICAÇÕES DA API ---
   useEffect(() => {
     const fetchNotificacoes = async () => {
@@ -100,10 +112,10 @@ function Notificacoes() {
           {/* Cabeçalho */}
           <div className="flex items-center gap-3 mb-8 border-b border-gray-200 pb-4">
             <button 
-              onClick={() => navigate(-1)} 
-              className="hover:bg-gray-100 p-1 rounded-full transition"
+              onClick={handleVoltar} 
+              className="cursor-pointer p-1 rounded-full transition"
             >
-              <ChevronLeft size={32} className="text-black" />
+              <ChevronLeft size={32} className="cursor-pointer mr-3 text-gray-900 hover:text-[#FD7702] transition-colors" />
             </button>
             <h1 className="text-2xl font-bold text-black">Notificações</h1>
           </div>

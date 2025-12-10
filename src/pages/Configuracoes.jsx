@@ -32,7 +32,7 @@ function ConfiguracoesPage() {
           <div className="flex items-center justify-start mb-6">
             <button
               onClick={handleVoltar}
-              className="hover:cursor-pointer text-black p-2 pr-4 transition hover:opacity-80"
+              className="cursor-pointer mr-3 text-gray-900 hover:text-[#FD7702] transition-colors"
             >
               <ChevronLeft size={28} />
             </button>

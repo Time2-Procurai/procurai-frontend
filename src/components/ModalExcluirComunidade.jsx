@@ -10,7 +10,7 @@ export default function ModalExcluirComunidade({ isOpen, onClose, onConfirm }) {
         
         <button 
           onClick={onClose} 
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
+          className="cursor-pointer absolute top-4 right-4 text-gray-500 hover:text-gray-800"
         >
           <X size={24} />
         </button>
@@ -23,13 +23,13 @@ export default function ModalExcluirComunidade({ isOpen, onClose, onConfirm }) {
         <div className="flex items-center justify-end gap-4">
           <button 
             onClick={onClose} 
-            className="text-sm font-bold text-gray-900 hover:underline"
+            className="cursor-pointer text-sm font-bold text-gray-900 hover:underline"
           >
             Cancelar
           </button>
           <button 
             onClick={onConfirm} 
-            className="bg-[#FD7702] text-white text-sm font-bold py-2 px-6 rounded-full hover:bg-orange-600 transition-colors"
+            className="cursor-pointer bg-[#FD7702] text-white text-sm font-bold py-2 px-6 rounded-full hover:bg-orange-600 transition-colors"
           >
             Confirmar
           </button>

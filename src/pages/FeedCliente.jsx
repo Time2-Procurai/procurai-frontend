@@ -115,7 +115,7 @@ function FeedPageCliente() {
                     {/* Botão discreto para deixar de seguir (aparece no hover) */}
                     <button 
                         onClick={(e) => handleUnfollow(e, loja.id)}
-                        className="absolute top-2 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="cursor-pointer absolute top-2 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                         title="Deixar de seguir"
                     >
                         <UserCheck size={18} />

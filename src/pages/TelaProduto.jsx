@@ -329,12 +329,12 @@ export default function TelaProduto() {
 
           <main className="flex-1 overflow-y-auto bg-white p-6 md:p-8">
             <header className="flex justify-between items-center mb-4">
-              <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-gray-100 text-gray-700">
-                <ChevronLeft size={24} />
+              <button onClick={() => navigate(-1)} className="cursor-pointer p-2 rounded-full text-gray-700">
+                <ChevronLeft size={24} className="cursor-pointer mr-3 text-gray-900 hover:text-[#FD7702] transition-colors"/>
               </button>
 
               {isOwner && (
-                <button onClick={handleOpenOptions} className="p-2 rounded-full hover:bg-gray-100 text-gray-700">
+                <button onClick={handleOpenOptions} className="cursor-pointer p-2 rounded-full hover:bg-gray-100 text-gray-700">
                   <MoreVertical size={24} />
                 </button>
               )}
@@ -409,7 +409,7 @@ export default function TelaProduto() {
                       {/* BOTÃO COMPRAR (WHATSAPP) */}
                       <button
                         onClick={handleBuy}
-                        className="bg-[#FD7702] text-white font-bold py-2 px-24 rounded-xl hover:bg-[#e66a00] transition-colors"
+                        className="cursor-pointer bg-[#FD7702] text-white font-bold py-2 px-24 rounded-xl hover:bg-[#e66a00] transition-colors"
                       >
                         Comprar
                       </button>
@@ -417,7 +417,7 @@ export default function TelaProduto() {
 
                     <button
                       onClick={handleToggleFavorite}
-                      className={`flex items-center gap-2 text-xs font-semibold p-2 -ml-2 rounded-md transition-all ${isFavorited ? 'text-[#FD7702] bg-[#FD7702]/10' : 'text-[#FD7702] hover:underline hover:bg-gray-50'
+                      className={`cursor-pointer flex items-center gap-2 text-xs font-semibold p-2 -ml-2 rounded-md transition-all ${isFavorited ? 'text-[#FD7702] bg-[#FD7702]/10' : 'text-[#FD7702] hover:underline hover:bg-gray-50'
                         }`}
                     >
                       {isFavorited ? <Bookmark size={18} fill="#FD7702" /> : <Bookmark size={18} />}
@@ -468,7 +468,7 @@ export default function TelaProduto() {
                 {isCliente && (
                   <button 
                     onClick={() => navigate(`/perfil/empresa/${seller.id}`, { state: { initialTab: 'Comunidade' } })} 
-                    className="px-4 py-2 bg-[#FD7702] text-white rounded-lg text-sm font-semibold hover:bg-[#e66a00] transition-colors flex items-center gap-2 cursor-pointer"
+                    className="cursor-pointer px-4 py-2 bg-[#FD7702] text-white rounded-lg text-sm font-semibold hover:bg-[#e66a00] transition-colors flex items-center gap-2 cursor-pointer"
                   >
                     <MessageCircle size={16} />
                     Entrar na comunidade
@@ -487,7 +487,7 @@ export default function TelaProduto() {
                 {isCliente && (
                   <button
                     onClick={() => setIsModalOpen(true)}
-                    className="text-sm font-semibold text-[#FD7702] hover:underline"
+                    className="cursor-pointer text-sm font-semibold text-[#FD7702] hover:underline"
                   >
                     Avalie este produto
                   </button>

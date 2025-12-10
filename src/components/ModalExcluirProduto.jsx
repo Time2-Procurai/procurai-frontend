@@ -12,7 +12,7 @@ export default function ModalExcluirProduto({ onClose, onConfirm }) {
       >
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 text-gray-400 hover:text-gray-700"
+          className="cursor-pointer absolute right-4 top-4 text-gray-400 hover:text-gray-700"
         >
           <X size={24} />
         </button>
@@ -29,13 +29,13 @@ export default function ModalExcluirProduto({ onClose, onConfirm }) {
           <div className="mt-8 flex justify-center gap-4">
             <button
               onClick={onClose}
-              className="rounded-lg px-8 py-2 text-base font-semibold text-gray-700 hover:bg-gray-100"
+              className="cursor-pointer rounded-lg px-8 py-2 text-base font-semibold text-gray-700 hover:bg-gray-100"
             >
               Cancelar
             </button>
             <button
               onClick={onConfirm}
-              className="rounded-lg bg-[#FD7702] px-8 py-2 text-base font-semibold text-white hover:bg-[#e66a00]"
+              className="cursor-pointer rounded-lg bg-[#FD7702] px-8 py-2 text-base font-semibold text-white hover:bg-[#e66a00]"
             >
               Confirmar
             </button>

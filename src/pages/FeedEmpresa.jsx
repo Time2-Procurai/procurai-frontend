@@ -149,7 +149,7 @@ function FeedPageEmpresa() {
                     <p>Nenhum produto em promoção encontrado.</p>
                     <button 
                         onClick={() => navigate('/adicionarProduto')}
-                        className="mt-4 text-[#FD7702] font-semibold hover:underline"
+                      className="cursor-pointer mt-4 text-[#FD7702] font-semibold hover:underline"
                     >
                         Criar promoção agora
                     </button>

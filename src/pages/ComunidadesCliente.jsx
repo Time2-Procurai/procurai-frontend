@@ -86,6 +86,18 @@ export default function CommunidadesCliente() {
     }
   };
 
+  // Recupera o tipo de usuário salvo no login
+  const userRole = localStorage.getItem("userRole");
+
+  // Função para voltar para o feed correto
+  const handleVoltar = () => {
+    if (userRole === "cliente") {
+      navigate("/FeedCliente/" + localStorage.getItem('userId'));
+    } else {
+      navigate("/FeedEmpresa/" + localStorage.getItem('userId'));
+    }
+  };
+
   return (
     <div className="h-screen text-gray-800 flex flex-col min-w-[1024px] bg-white">
       <BarraPesquisa />
@@ -97,15 +109,15 @@ export default function CommunidadesCliente() {
           <div className="max-w-5xl mx-auto">
             
             <div className="flex items-center gap-2 mb-6">
-              <button onClick={() => navigate(-1)} className="p-1 rounded-full hover:bg-gray-100 transition-colors">
-                <ChevronLeft size={24} className="text-gray-700" />
+              <button onClick={handleVoltar} className="cursor-pointer p-1 rounded-full transition-colors">
+                <ChevronLeft size={24} className="cursor-pointer mr-3 text-gray-900 hover:text-[#FD7702] transition-colors" />
               </button>
               <h1 className="text-2xl font-bold text-gray-900">Minhas comunidades</h1>
             </div>
 
             <button
               onClick={() => navigate('/criarComunidade/cliente')} // Certifique-se que essa rota leva ao componente CriarComunidadeCliente
-              className="mb-8 px-6 py-2 border-2 border-[#FD7702] text-[#FD7702] font-bold rounded-full hover:bg-orange-50 transition-colors"
+              className="cursor-pointer mb-8 px-6 py-2 border-2 border-[#FD7702] text-[#FD7702] font-bold rounded-full hover:bg-orange-50 transition-colors"
             >
               Crie uma nova comunidade
             </button>
@@ -156,7 +168,7 @@ export default function CommunidadesCliente() {
                       
                       <button 
                         onClick={(e) => abrirOpcoes(e, item)} 
-                        className="p-1 hover:bg-gray-200 rounded-full transition-colors text-gray-600 flex-shrink-0"
+                        className="cursor-pointer p-1 hover:bg-gray-200 rounded-full transition-colors text-gray-600 flex-shrink-0"
                       >
                         <MoreVertical size={20} />
                       </button>

@@ -191,6 +191,18 @@ function PerfilEmpresa() {
     fetchDadosLoja();
   }, [profileIdFromUrl, visitanteTipo]);
 
+  // Recupera o tipo de usuário salvo no login
+  const userRole = localStorage.getItem("userRole");
+
+  // Função para voltar para o feed correto
+  const handleVoltar = () => {
+    if (userRole === "cliente") {
+      navigate("/FeedCliente/" + localStorage.getItem('userId'));
+    } else {
+      navigate("/FeedEmpresa/" + localStorage.getItem('userId'));
+    }
+  };
+
   // --- AÇÃO DE SEGUIR/DESSEGUIR ---
   const handleToggleFollow = async () => {
     if (!profileIdFromUrl) return;
@@ -446,10 +458,10 @@ function PerfilEmpresa() {
 
               {/* Botão de voltar */}
               <button
-                onClick={() => navigate(-1)}
-                className="hover:cursor-pointer absolute top-4 left-4 text-black p-2 transition hover:opacity-80 bg-white/50 rounded-full"
+                onClick={handleVoltar}
+                className="hover:cursor-pointer absolute top-4 left-4 text-black p-2 transition hover:opacity-80 rounded-full"
               >
-                <ChevronLeft size={28} />
+                <ChevronLeft size={28} className="cursor-pointer mr-3 text-gray-900 hover:text-[#FD7702] transition-colors" />
               </button>
 
               {/* Botões Editar/Avaliar */}

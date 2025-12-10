@@ -124,7 +124,7 @@ function ResultadosBusca() {
                                 </p>
                             )}
 
-                            <button className="w-full mt-auto border border-[#FD7702] text-[#FD7702] text-sm font-bold py-2 rounded-lg hover:bg-[#FD7702] hover:text-white transition-colors">
+                          <button className="cursor-pointer w-full mt-auto border border-[#FD7702] text-[#FD7702] text-sm font-bold py-2 rounded-lg hover:bg-[#FD7702] hover:text-white transition-colors">
                               Ver comunidade
                             </button>
                         </div>
@@ -161,7 +161,7 @@ function ResultadosBusca() {
                         )}
                         <h3 className="font-semibold text-gray-800 truncate">{empresa.company_name}</h3>
                         <p className="text-sm text-gray-500 mb-4 truncate">{empresa.company_category || "Loja"}</p>
-                        <button className="w-full border border-[#FD7702] text-[#FD7702] text-sm font-medium py-1.5 rounded-full hover:bg-[#FD7702] hover:text-white transition-colors">
+                        <button className="cursor-pointer w-full border border-[#FD7702] text-[#FD7702] text-sm font-medium py-1.5 rounded-full hover:bg-[#FD7702] hover:text-white transition-colors">
                           Visitar
                         </button>
                       </div>

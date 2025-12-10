@@ -89,7 +89,7 @@ function RedefinirSenhaConfirmacao() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-[#FD7702] text-white font-bold py-3 rounded-lg hover:opacity-90 disabled:opacity-50"
+                  className="cursor-pointer w-full bg-[#FD7702] text-white font-bold py-3 rounded-lg hover:opacity-90 disabled:opacity-50"
                 >
                   {loading ? "Alterando..." : "Alterar Senha"}
                 </button>

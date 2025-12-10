@@ -10,7 +10,7 @@ import api from '../api/api';
 const FilterButton = ({ label, isActive, onClick }) => (
   <button
     onClick={onClick}
-    className={`rounded-md border px-4 py-1.5 text-sm font-semibold transition-colors ${isActive
+    className={`cursor-pointer rounded-md border px-4 py-1.5 text-sm font-semibold transition-colors ${isActive
         ? 'border-[#FD7702] bg-[#FD7702] text-white'
         : 'border-orange-200 bg-white text-gray-600 hover:border-[#FD7702] hover:text-[#FD7702]'
       }`}
@@ -186,9 +186,9 @@ export default function TelaAvaliacoes() {
           <header className="flex items-center mb-6 border-b border-gray-100 pb-4">
             <button
               onClick={() => navigate(-1)}
-              className="mr-4 rounded-full p-2 text-gray-700 hover:bg-gray-100 transition-colors"
+              className="cursor-pointer mr-4 rounded-full p-2 text-gray-700 transition-colors"
             >
-              <ChevronLeft size={24} />
+              <ChevronLeft size={24} className="cursor-pointer mr-3 text-gray-900 hover:text-[#FD7702] transition-colors"/>
             </button>
             <h1 className="text-xl font-bold text-gray-900">Avaliações</h1>
           </header>

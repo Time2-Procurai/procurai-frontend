@@ -131,8 +131,8 @@ function TelaAdicionarPromocao() {
 
         <main className="flex-1 overflow-y-auto p-8 relative">
           <div className="flex items-center gap-2 mb-6">
-            <button onClick={() => navigate(-1)} className="cursor-pointer p-2 rounded-full hover:bg-gray-200 text-gray-700 transition">
-              <ChevronLeft size={28} />
+            <button onClick={() => navigate(-1)} className="cursor-pointer p-2 rounded-full text-gray-700 transition">
+              <ChevronLeft size={28} className="cursor-pointer mr-3 text-gray-900 hover:text-[#FD7702] transition-colors"/>
             </button>
             <h1 className="text-2xl font-bold text-gray-900">Selecione um produto para promover</h1>
           </div>
