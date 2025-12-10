@@ -78,9 +78,12 @@ export default function TelaProduto() {
   const [product, setProduct] = useState(null);
   const [seller, setSeller] = useState(null);
   
-  // Estado para Avaliações Reais
+  // Estado para Avaliações Reais do Produto
   const [reviews, setReviews] = useState([]); 
   
+  // --- NOVO: Estado para a nota da LOJA (dono do produto) ---
+  const [storeRating, setStoreRating] = useState("Novo"); 
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [quantidade, setQuantidade] = useState(1);
@@ -120,6 +123,23 @@ export default function TelaProduto() {
         // 2. Busca Vendedor
         const sellerResponse = await api.get(`/user/listar/usuarios/${ownerId}/`);
         setSeller(sellerResponse.data);
+
+        // --- NOVO: Busca Média da LOJA (Correção aqui) ---
+        try {
+            const storeEvaluationsRes = await api.get(`/evaluations/stores/${ownerId}/`);
+            const storeEvaluations = storeEvaluationsRes.data || [];
+            
+            if (storeEvaluations.length > 0) {
+                const total = storeEvaluations.reduce((acc, curr) => acc + Number(curr.rating), 0);
+                const avg = (total / storeEvaluations.length).toFixed(1);
+                setStoreRating(avg);
+            } else {
+                setStoreRating("Novo");
+            }
+        } catch (err) {
+            console.warn("Erro ao buscar nota da loja", err);
+            setStoreRating("Novo");
+        }
 
         // 3. Busca Avaliações do Produto
         try {
@@ -422,7 +442,8 @@ export default function TelaProduto() {
                   <p className="text-sm text-gray-500">{seller.company_category || 'Loja'}</p>
 
                   <div className="flex items-center gap-1 text-sm">
-                    <span className="font-bold text-gray-800">4.9</span>
+                    {/* AQUI ESTÁ A CORREÇÃO FINAL: Usando storeRating */}
+                    <span className="font-bold text-gray-800">{storeRating}</span>
                     <Star size={14} className="text-[#FD7702] fill-[#FD7702]" />
                   </div>
                 </div>
@@ -478,7 +499,7 @@ export default function TelaProduto() {
                 <div className="border-t border-gray-200 pt-4">
                     <div className="flex items-center gap-2 mb-2">
                     {latestReview.user.profile_picture ? (
-                         <img src={latestReview.user.profile_picture} alt="User" className="w-8 h-8 rounded-full object-cover" />
+                          <img src={latestReview.user.profile_picture} alt="User" className="w-8 h-8 rounded-full object-cover" />
                     ) : (
                         <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                             <User size={14} className="text-gray-500"/>
