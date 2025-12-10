@@ -8,7 +8,7 @@ function LadoLogoPage() {
         <img className="rounded-lg" src={Logo} alt="Logo" />
 
         <h2 className="font-bold text-7xl mb-10 relative mt-10">
-          PROCUR<span className="text-[#FD7702]">AÍ</span>
+          PROCUR<span className="text-transparent bg-clip-text bg-gradient-to-l from-[#FD7702] to-orange-300">AÍ</span>
         </h2>
 
         <h3 className="text-2xl text-[#FD7702] font-bold mb-8">

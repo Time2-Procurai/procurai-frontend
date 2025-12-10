@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import BarraPesquisa from '../components/BarraPesquisa';
 import BarraLateral from '../components/BarraLateral';
+
 import api from '../api/api';
 import {
   ChevronLeft, Store, Heart, MessageCircle, Share2,
@@ -247,7 +248,7 @@ function PostDetalhes() {
                 disabled={enviandoComentario}
                 className="cursor-pointer absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#FD7702] transition disabled:opacity-50"
               >
-                {novoComentario.trim() ? <Send size={24} /> : <Smile size={24} />}
+                {novoComentario.trim() ? <Send size={24} /> : <Send size={24} />}
               </button>
             </form>
 

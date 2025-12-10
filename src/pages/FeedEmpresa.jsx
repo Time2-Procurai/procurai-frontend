@@ -89,7 +89,7 @@ function FeedPageEmpresa() {
           <div className="flex items-center gap-1 text-gray-500 bg-gray-50 px-2 py-1 rounded-md">
             <Eye size={14} />
             {/* Aqui mostra o contador vindo do banco */}
-            <span className="text-xs font-semibold">{product.view_count/2 || 0}</span>
+            <span className="text-xs font-semibold">{product.view_count || 0}</span>
           </div>
         </div>
       </div>

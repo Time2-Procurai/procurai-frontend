@@ -34,6 +34,7 @@ import CriarComunidadeCliente from './pages/CriarComunidadeCliente.jsx';
 import CommunidadesCliente from './pages/ComunidadesCliente.jsx';
 import FeedComunidadeCliente from './pages/FeedComunidadeCliente.jsx';
 import EditarComunidade from './pages/EditarComunidade.jsx';
+import LandingPage from './pages/LandingPage.jsx';
 
 
 
@@ -54,7 +55,7 @@ function App() {
   return (
     <AuthProvider>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/feedcliente/:userId" element={<FeedPageCliente />} />
         <Route path="/feedempresa/:userId" element={<FeedPageEmpresa />} />
