@@ -3,7 +3,7 @@ import api from '../api/api';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import BarraPesquisa from '../components/BarraPesquisa';
 import BarraLateral from '../components/BarraLateral';
-import { ChevronLeft, MoreVertical, Star, Bookmark, MessageCircle, ShoppingBag, Store, User,Eye } from 'lucide-react';
+import { ChevronLeft, MoreVertical, Star, Bookmark, MessageCircle, ShoppingBag, Store, User } from 'lucide-react';
 
 // Import dos Modais e Componentes
 import ModalAvaliacao from '../components/ModalAvaliacao';
@@ -81,7 +81,7 @@ export default function TelaProduto() {
   // Estado para Avaliações Reais do Produto
   const [reviews, setReviews] = useState([]); 
   
-  // --- NOVO: Estado para a nota da LOJA (dono do produto) ---
+  // Estado para a nota da LOJA (dono do produto)
   const [storeRating, setStoreRating] = useState("Novo"); 
 
   const [isLoading, setIsLoading] = useState(true);
@@ -102,6 +102,14 @@ export default function TelaProduto() {
   const visitanteTipo = localStorage.getItem('userRole');
   const visitanteId = localStorage.getItem('userId');
   const isCliente = visitanteTipo === 'cliente';
+
+  // Função auxiliar para formatar preço (R$ 1.000,00)
+  const formatPrice = (value) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(parseFloat(value));
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -124,7 +132,7 @@ export default function TelaProduto() {
         const sellerResponse = await api.get(`/user/listar/usuarios/${ownerId}/`);
         setSeller(sellerResponse.data);
 
-        // --- NOVO: Busca Média da LOJA (Correção aqui) ---
+        // --- Busca Média da LOJA ---
         try {
             const storeEvaluationsRes = await api.get(`/evaluations/stores/${ownerId}/`);
             const storeEvaluations = storeEvaluationsRes.data || [];
@@ -356,11 +364,11 @@ export default function TelaProduto() {
                   <p className="text-xs text-gray-500 mb-1">
                     Categoria: {getCategoryLabel(product.category_name)}
                   </p>
-                  {/* -------------------------------- */}
-
+                  
+                  {/* --- CORREÇÃO DE FORMATAÇÃO DE PREÇO AQUI --- */}
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-extrabold text-[#FD7702]">
-                      R$ {parseFloat(product.price).toFixed(2).replace('.', ',')}
+                      {formatPrice(product.price)}
                     </span>
                   </div>
                   {product.is_negotiable && <p className="text-sm font-semibold text-green-600 mt-1">Preço negociável</p>}
@@ -442,7 +450,7 @@ export default function TelaProduto() {
                   <p className="text-sm text-gray-500">{seller.company_category || 'Loja'}</p>
 
                   <div className="flex items-center gap-1 text-sm">
-                    {/* AQUI ESTÁ A CORREÇÃO FINAL: Usando storeRating */}
+                    {/* Exibe a nota real da loja (storeRating) */}
                     <span className="font-bold text-gray-800">{storeRating}</span>
                     <Star size={14} className="text-[#FD7702] fill-[#FD7702]" />
                   </div>
