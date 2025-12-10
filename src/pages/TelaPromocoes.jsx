@@ -113,7 +113,7 @@ function TelaPromocoes() {
                 <button
                   onClick={() => {
                     if (isOwner) {
-                       navigate(`/FeedEmpresa`);
+                       navigate(`/feedempresa/${paramId}`); // Lojista volta para seu feed
                     } else if (isCliente) {
                        navigate(`/feedcliente/${paramId}`); // Cliente volta para o seu feed
                     } else {

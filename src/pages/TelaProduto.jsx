@@ -3,7 +3,7 @@ import api from '../api/api';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import BarraPesquisa from '../components/BarraPesquisa';
 import BarraLateral from '../components/BarraLateral';
-import { ChevronLeft, MoreVertical, Star, Bookmark, MessageCircle, ShoppingBag, Store, User } from 'lucide-react';
+import { ChevronLeft, MoreVertical, Star, Bookmark, MessageCircle, ShoppingBag, Store, User,Eye } from 'lucide-react';
 
 // Import dos Modais e Componentes
 import ModalAvaliacao from '../components/ModalAvaliacao';
